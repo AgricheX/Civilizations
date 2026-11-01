@@ -1,0 +1,270 @@
+{
+  "Civilizations": [
+    {
+      "Id": "civ_pace",
+      "Type": "SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/pace",
+      "FloatVal": 1.0,
+      "MinFloatVal": 0.1,
+      "MaxFloatVal": 20.0
+    },
+    {
+      "Id": "civ_apply_rules",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/apply_rules",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_lock_ages",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/lock_ages",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_internet",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/internet",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_vehicles",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/vehicles",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_ammo",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/ammo",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_soldiers",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/soldiers",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_soldiers_city",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/soldiers_city",
+      "IntVal": 20,
+      "MinIntVal": 20,
+      "MaxIntVal": 120
+    },
+    {
+      "Id": "civ_pollution",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/pollution",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_energy",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/energy",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_companies",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/companies",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_real_names",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/real_names",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_nukes",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/nukes",
+      "BoolVal": false
+    },
+    {
+      "Id": "civ_debug",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/debug",
+      "BoolVal": false
+    },
+    {
+      "Id": "civ_perf",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/perf",
+      "BoolVal": false
+    },
+    {
+      "Id": "civ_profiler",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/profiler",
+      "BoolVal": false
+    }
+  ],
+  "CivVisual": [
+    {
+      "Id": "civ_daynight",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/daynight",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_waters",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/waters",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_era_skins",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/era_skins",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_hud",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/lock_ages",
+      "BoolVal": false
+    },
+    {
+      "Id": "civ_night_lights",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/night_lights",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_day_minutes",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/day_minutes",
+      "IntVal": 24,
+      "MinIntVal": 2,
+      "MaxIntVal": 120
+    },
+    {
+      "Id": "civ_band_tiles",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/band_tiles",
+      "IntVal": 100,
+      "MinIntVal": 25,
+      "MaxIntVal": 400
+    },
+    {
+      "Id": "civ_night_strength",
+      "Type": "SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/night_strength",
+      "FloatVal": 0.55,
+      "MinFloatVal": 0.0,
+      "MaxFloatVal": 1.0
+    },
+    {
+      "Id": "civ_posts_year",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/posts_year",
+      "IntVal": 6,
+      "MinIntVal": 0,
+      "MaxIntVal": 30
+    },
+    {
+      "Id": "civ_transit_visuals",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/transit_visuals",
+      "BoolVal": true
+    }
+  ],
+  "CivWorld": [
+    {
+      "Id": "civ_globe",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/globe",
+      "IntVal": 2,
+      "MinIntVal": 0,
+      "MaxIntVal": 2
+    },
+    {
+      "Id": "civ_custom_size",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/custom_size",
+      "BoolVal": false
+    },
+    {
+      "Id": "civ_size_x",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/size_x",
+      "IntVal": 8,
+      "MinIntVal": 1,
+      "MaxIntVal": 40
+    },
+    {
+      "Id": "civ_size_y",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/size_y",
+      "IntVal": 5,
+      "MinIntVal": 1,
+      "MaxIntVal": 40
+    }
+  ],
+  "CivCities": [
+    {
+      "Id": "civ_tiny",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/tiny",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_zone_range",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/zone_range",
+      "IntVal": 3,
+      "MinIntVal": 1,
+      "MaxIntVal": 13
+    },
+    {
+      "Id": "civ_spacing",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/spacing",
+      "IntVal": 1,
+      "MinIntVal": 0,
+      "MaxIntVal": 3
+    },
+    {
+      "Id": "civ_min_adults",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/min_adults",
+      "IntVal": 10,
+      "MinIntVal": 1,
+      "MaxIntVal": 30
+    },
+    {
+      "Id": "civ_min_cities",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/min_cities",
+      "IntVal": 2,
+      "MinIntVal": 1,
+      "MaxIntVal": 10
+    },
+    {
+      "Id": "civ_max_cities",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/max_cities",
+      "IntVal": 5,
+      "MinIntVal": 1,
+      "MaxIntVal": 20
+    },
+    {
+      "Id": "civ_min_ground",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/min_ground",
+      "IntVal": 20,
+      "MinIntVal": 1,
+      "MaxIntVal": 64
+    },
+    {
+      "Id": "civ_min_island",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/min_island",
+      "IntVal": 100,
+      "MinIntVal": 10,
+      "MaxIntVal": 300
+    }
+  ]
+}

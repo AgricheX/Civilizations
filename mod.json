@@ -1,0 +1,43 @@
+{
+  "name": "Civilizations",
+  "GUID": "AGRICHE_CIVILIZATIONS",
+  "author": "Agriche",
+  "version": "0.0.4",
+  "description": "Kingdoms evolve from the Paleolithic to the Information Age over 15,000–20,000 years: featuring hundreds of technologies across various development paths (real-world, steam, Tesla-inspired, diesel, atomic, and biological), customizable governments and ideologies, elections, xenophobia/xenophilia, corporations, currencies, energy systems, trains, airplanes, rockets, a spherical world, and an internet for NPCs.",
+  "RepoUrl": null,
+  "Dependencies": [],
+  "OptionalDependencies": [],
+  "IncompatibleWith": [],
+  "FolderPath": "D:\\SteamLibrary\\steamapps\\common\\worldbox\\Mods\\Civilizations",
+  "targetGameBuild": 719,
+  "iconPath": "icon.png",
+  "ModType": 0,
+  "UsePublicizedAssembly": true,
+  "IsNCMSMod": false,
+  "FailReason": {
+    "m_MaxCapacity": 2147483647,
+    "Capacity": 16,
+    "m_StringValue": "",
+    "m_currentThread": 0
+  },
+  "IsWorkshopLoaded": false,
+  "ai_attribution": "ai_assisted",
+  "ai_badge_corner": "bottom_right",
+  "ai_badge_style": "standard",
+  "ai_check_code": true,
+  "ai_check_art": true,
+  "ai_check_translation": true,
+  "ai_check_audio": true,
+  "steam_id": 3824063532,
+  "tags": [
+    "Gameplay",
+    "Civilizations",
+    "Visuals",
+    "Creatures",
+    "Traits",
+    "Items",
+    "Buildings",
+    "Worldgen",
+    "UI & QoL"
+  ]
+}
