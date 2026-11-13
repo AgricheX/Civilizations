@@ -582,7 +582,7 @@ namespace Civilizations
             if (def == null) return;
             string fuel = Rails.TrainFuel(def);
             if (fuel.Length > 0 && !Economy.Take(from, fuel, 1)) return;
-            float speed = VehicleRoster.Track(l.Kind) == "rail" && l.Kind != "bullet" ? Math.Min(1.4f, def.Speed) : def.Speed;
+            float speed = VehicleRoster.Track(l.Kind) == "rail" && l.Kind != "bullet" && def.Speed < 4f ? Math.Min(1.4f, def.Speed) : def.Speed;
             var run = new TrainRun { Link = l, Forward = forward, From = from, To = to, Speed = 2.2f * speed };
             int cars = 3 + (int)(def.Speed);
             for (int i = 0; i < cars; i++) run.Parts.Add(Make(def.Art + (i == 0 ? "_loco" : "_car"), -20, 0.25f));

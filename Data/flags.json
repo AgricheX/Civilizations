@@ -1,0 +1,1805 @@
+{
+ "emblems": [
+  {
+   "id": "totem",
+   "tags": [
+    "eg:0",
+    "fam:tribal"
+   ]
+  },
+  {
+   "id": "feather",
+   "tags": [
+    "eg:0"
+   ]
+  },
+  {
+   "id": "bones",
+   "tags": [
+    "eg:0",
+    "sp:orc"
+   ]
+  },
+  {
+   "id": "skull_horns",
+   "tags": [
+    "eg:0",
+    "eg:1",
+    "sp:orc",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "hand",
+   "tags": [
+    "eg:0"
+   ]
+  },
+  {
+   "id": "spiral",
+   "tags": [
+    "eg:0",
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "antlers",
+   "tags": [
+    "eg:0",
+    "sp:elf"
+   ]
+  },
+  {
+   "id": "mammoth",
+   "tags": [
+    "eg:0"
+   ]
+  },
+  {
+   "id": "spears",
+   "tags": [
+    "eg:0",
+    "eg:1",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "tribal_sun",
+   "tags": [
+    "eg:0",
+    "eg:1"
+   ]
+  },
+  {
+   "id": "eye_paint",
+   "tags": [
+    "eg:0",
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "fish_tribe",
+   "tags": [
+    "eg:0",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "serpent",
+   "tags": [
+    "eg:0",
+    "eg:1"
+   ]
+  },
+  {
+   "id": "moon_tribe",
+   "tags": [
+    "eg:0",
+    "sp:elf"
+   ]
+  },
+  {
+   "id": "paw",
+   "tags": [
+    "eg:0",
+    "sp:beast"
+   ]
+  },
+  {
+   "id": "sun_disk",
+   "tags": [
+    "eg:1",
+    "fam:theocratic",
+    "fam:monarchy"
+   ]
+  },
+  {
+   "id": "bull",
+   "tags": [
+    "eg:1"
+   ]
+  },
+  {
+   "id": "falcon",
+   "tags": [
+    "eg:1",
+    "fam:monarchy"
+   ]
+  },
+  {
+   "id": "lion_walk",
+   "tags": [
+    "eg:1",
+    "eg:3",
+    "fam:monarchy"
+   ]
+  },
+  {
+   "id": "winged_disk",
+   "tags": [
+    "eg:1",
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "ringed_world",
+   "tags": [
+    "eg:8",
+    "fam:federal",
+    "fam:republic"
+   ]
+  },
+  {
+   "id": "spiral_galaxy",
+   "tags": [
+    "eg:8",
+    "fam:imperial"
+   ]
+  },
+  {
+   "id": "star_burst",
+   "tags": [
+    "eg:8",
+    "fam:monarchy",
+    "fam:authoritarian"
+   ]
+  },
+  {
+   "id": "orbit_rings",
+   "tags": [
+    "eg:8",
+    "fam:technocratic",
+    "fam:machine"
+   ]
+  },
+  {
+   "id": "constellation",
+   "tags": [
+    "eg:8",
+    "fam:democratic",
+    "fam:liberal"
+   ]
+  },
+  {
+   "id": "hive_crown",
+   "tags": [
+    "eg:8",
+    "fam:collective"
+   ]
+  },
+  {
+   "id": "cosmic_eye",
+   "tags": [
+    "eg:8",
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "comet_banner",
+   "tags": [
+    "eg:8",
+    "fam:corporate",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "horse",
+   "tags": [
+    "eg:1",
+    "eg:2"
+   ]
+  },
+  {
+   "id": "scorpion",
+   "tags": [
+    "eg:1",
+    "sp:beast"
+   ]
+  },
+  {
+   "id": "ziggurat",
+   "tags": [
+    "eg:1",
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "chariot_wheel",
+   "tags": [
+    "eg:1",
+    "eg:2"
+   ]
+  },
+  {
+   "id": "labrys",
+   "tags": [
+    "eg:1",
+    "eg:2",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "boar",
+   "tags": [
+    "eg:1",
+    "eg:3"
+   ]
+  },
+  {
+   "id": "wolf",
+   "tags": [
+    "eg:1",
+    "eg:3",
+    "sp:beast"
+   ]
+  },
+  {
+   "id": "lotus",
+   "tags": [
+    "eg:1",
+    "fam:theocratic",
+    "fam:green"
+   ]
+  },
+  {
+   "id": "laurel_wreath",
+   "tags": [
+    "eg:2",
+    "fam:republic"
+   ]
+  },
+  {
+   "id": "eagle_standard",
+   "tags": [
+    "eg:2",
+    "fam:imperial",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "owl",
+   "tags": [
+    "eg:2",
+    "fam:technocratic"
+   ]
+  },
+  {
+   "id": "helmet",
+   "tags": [
+    "eg:2",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "trident",
+   "tags": [
+    "eg:2",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "column",
+   "tags": [
+    "eg:2",
+    "fam:republic"
+   ]
+  },
+  {
+   "id": "amphora",
+   "tags": [
+    "eg:2",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "lyre",
+   "tags": [
+    "eg:2"
+   ]
+  },
+  {
+   "id": "olive",
+   "tags": [
+    "eg:2",
+    "fam:green",
+    "fam:liberal"
+   ]
+  },
+  {
+   "id": "galley",
+   "tags": [
+    "eg:2",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "lion_rampant",
+   "tags": [
+    "eg:3",
+    "fam:monarchy",
+    "fam:feudal"
+   ]
+  },
+  {
+   "id": "griffin",
+   "tags": [
+    "eg:3",
+    "fam:feudal"
+   ]
+  },
+  {
+   "id": "dragon",
+   "tags": [
+    "eg:3",
+    "eg:4",
+    "fam:imperial"
+   ]
+  },
+  {
+   "id": "tower",
+   "tags": [
+    "eg:3",
+    "fam:feudal"
+   ]
+  },
+  {
+   "id": "key",
+   "tags": [
+    "eg:3",
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "crown",
+   "tags": [
+    "eg:3",
+    "eg:4",
+    "fam:monarchy",
+    "royal"
+   ]
+  },
+  {
+   "id": "sword",
+   "tags": [
+    "eg:3",
+    "fam:military",
+    "fam:feudal"
+   ]
+  },
+  {
+   "id": "castle",
+   "tags": [
+    "eg:3",
+    "fam:feudal",
+    "fam:monarchy"
+   ]
+  },
+  {
+   "id": "fleur",
+   "tags": [
+    "eg:3",
+    "eg:4",
+    "fam:monarchy",
+    "royal"
+   ]
+  },
+  {
+   "id": "double_eagle",
+   "tags": [
+    "eg:3",
+    "eg:4",
+    "fam:imperial",
+    "fam:monarchy"
+   ]
+  },
+  {
+   "id": "stag",
+   "tags": [
+    "eg:3",
+    "sp:elf"
+   ]
+  },
+  {
+   "id": "bear",
+   "tags": [
+    "eg:3",
+    "sp:dwarf"
+   ]
+  },
+  {
+   "id": "unicorn",
+   "tags": [
+    "eg:3",
+    "sp:elf",
+    "royal"
+   ]
+  },
+  {
+   "id": "rose",
+   "tags": [
+    "eg:3",
+    "eg:4",
+    "fam:monarchy"
+   ]
+  },
+  {
+   "id": "crossed_axes",
+   "tags": [
+    "eg:3",
+    "sp:dwarf",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "cog_ship",
+   "tags": [
+    "eg:3",
+    "eg:4",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "coat_of_arms",
+   "tags": [
+    "eg:4",
+    "fam:monarchy",
+    "royal"
+   ]
+  },
+  {
+   "id": "compass_rose",
+   "tags": [
+    "eg:4",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "galleon",
+   "tags": [
+    "eg:4",
+    "fam:mercantile",
+    "fam:imperial"
+   ]
+  },
+  {
+   "id": "quill",
+   "tags": [
+    "eg:4",
+    "fam:liberal",
+    "fam:republic"
+   ]
+  },
+  {
+   "id": "globe",
+   "tags": [
+    "eg:4",
+    "eg:6",
+    "fam:liberal"
+   ]
+  },
+  {
+   "id": "lion_crowned",
+   "tags": [
+    "eg:4",
+    "fam:monarchy",
+    "royal"
+   ]
+  },
+  {
+   "id": "anchor",
+   "tags": [
+    "eg:4",
+    "eg:5",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "crossed_keys",
+   "tags": [
+    "eg:4",
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "sun_face",
+   "tags": [
+    "eg:4",
+    "fam:monarchy",
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "pelican",
+   "tags": [
+    "eg:4",
+    "fam:theocratic",
+    "fam:leftist"
+   ]
+  },
+  {
+   "id": "open_book",
+   "tags": [
+    "eg:4",
+    "eg:5",
+    "fam:liberal",
+    "fam:technocratic"
+   ]
+  },
+  {
+   "id": "scales",
+   "tags": [
+    "eg:4",
+    "eg:5",
+    "fam:republic",
+    "fam:democratic"
+   ]
+  },
+  {
+   "id": "star",
+   "tags": [
+    "eg:5",
+    "eg:6",
+    "fam:republic",
+    "fam:revolutionary",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "gear",
+   "tags": [
+    "eg:5",
+    "fam:planned",
+    "fam:technocratic",
+    "industrial"
+   ]
+  },
+  {
+   "id": "hammer_anvil",
+   "tags": [
+    "eg:5",
+    "sp:dwarf",
+    "industrial"
+   ]
+  },
+  {
+   "id": "eagle_modern",
+   "tags": [
+    "eg:5",
+    "fam:nationalist",
+    "fam:republic"
+   ]
+  },
+  {
+   "id": "winged_wheel",
+   "tags": [
+    "eg:5",
+    "industrial"
+   ]
+  },
+  {
+   "id": "bolt",
+   "tags": [
+    "eg:5",
+    "eg:6",
+    "fam:technocratic",
+    "industrial"
+   ]
+  },
+  {
+   "id": "factory",
+   "tags": [
+    "eg:5",
+    "industrial"
+   ]
+  },
+  {
+   "id": "sheaf",
+   "tags": [
+    "eg:5",
+    "fam:green",
+    "agrarian"
+   ]
+  },
+  {
+   "id": "sunrise",
+   "tags": [
+    "eg:5",
+    "eg:6",
+    "fam:liberal",
+    "fam:revolutionary"
+   ]
+  },
+  {
+   "id": "train_wheel",
+   "tags": [
+    "eg:5",
+    "industrial"
+   ]
+  },
+  {
+   "id": "cog_wreath",
+   "tags": [
+    "eg:5",
+    "eg:6",
+    "fam:planned",
+    "fam:leftist"
+   ]
+  },
+  {
+   "id": "atom",
+   "tags": [
+    "eg:6",
+    "fam:technocratic"
+   ]
+  },
+  {
+   "id": "rocket",
+   "tags": [
+    "eg:6",
+    "fam:technocratic"
+   ]
+  },
+  {
+   "id": "star_circle",
+   "tags": [
+    "eg:6",
+    "fam:republic",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "ringed_planet",
+   "tags": [
+    "eg:6",
+    "eg:7"
+   ]
+  },
+  {
+   "id": "satellite",
+   "tags": [
+    "eg:6",
+    "fam:technocratic"
+   ]
+  },
+  {
+   "id": "orbit",
+   "tags": [
+    "eg:6",
+    "eg:7"
+   ]
+  },
+  {
+   "id": "dove",
+   "tags": [
+    "eg:6",
+    "fam:liberal",
+    "fam:green",
+    "pacifist"
+   ]
+  },
+  {
+   "id": "comet",
+   "tags": [
+    "eg:6",
+    "eg:7"
+   ]
+  },
+  {
+   "id": "chevrons",
+   "tags": [
+    "eg:6",
+    "eg:7",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "starburst",
+   "tags": [
+    "eg:6",
+    "eg:7"
+   ]
+  },
+  {
+   "id": "hexagon",
+   "tags": [
+    "eg:7",
+    "fam:technocratic",
+    "corporate"
+   ]
+  },
+  {
+   "id": "circuit",
+   "tags": [
+    "eg:7",
+    "fam:technocratic"
+   ]
+  },
+  {
+   "id": "triangle_min",
+   "tags": [
+    "eg:7"
+   ]
+  },
+  {
+   "id": "circle_dot",
+   "tags": [
+    "eg:7",
+    "eg:6"
+   ]
+  },
+  {
+   "id": "wave",
+   "tags": [
+    "eg:7",
+    "fam:green"
+   ]
+  },
+  {
+   "id": "pixel_heart",
+   "tags": [
+    "eg:7",
+    "fam:liberal"
+   ]
+  },
+  {
+   "id": "chevron_min",
+   "tags": [
+    "eg:7"
+   ]
+  },
+  {
+   "id": "diamond",
+   "tags": [
+    "eg:7",
+    "corporate"
+   ]
+  },
+  {
+   "id": "nodes",
+   "tags": [
+    "eg:7",
+    "fam:technocratic",
+    "corporate"
+   ]
+  },
+  {
+   "id": "ring_min",
+   "tags": [
+    "eg:7"
+   ]
+  },
+  {
+   "id": "scepter_orb",
+   "tags": [
+    "fam:monarchy",
+    "royal"
+   ]
+  },
+  {
+   "id": "crown_laurel",
+   "tags": [
+    "fam:monarchy",
+    "royal"
+   ]
+  },
+  {
+   "id": "sacred_eye",
+   "tags": [
+    "fam:theocratic",
+    "sacred"
+   ]
+  },
+  {
+   "id": "sacred_sun",
+   "tags": [
+    "fam:theocratic",
+    "sacred"
+   ]
+  },
+  {
+   "id": "sacred_star",
+   "tags": [
+    "fam:theocratic",
+    "sacred"
+   ]
+  },
+  {
+   "id": "sacred_flame",
+   "tags": [
+    "fam:theocratic",
+    "sacred"
+   ]
+  },
+  {
+   "id": "halo_hands",
+   "tags": [
+    "fam:theocratic",
+    "sacred"
+   ]
+  },
+  {
+   "id": "crossed_swords",
+   "tags": [
+    "fam:military"
+   ]
+  },
+  {
+   "id": "shield_sword",
+   "tags": [
+    "fam:military"
+   ]
+  },
+  {
+   "id": "winged_sword",
+   "tags": [
+    "fam:military"
+   ]
+  },
+  {
+   "id": "torch",
+   "tags": [
+    "fam:liberal",
+    "fam:revolutionary",
+    "fam:republic"
+   ]
+  },
+  {
+   "id": "gear_star",
+   "tags": [
+    "fam:revolutionary",
+    "fam:planned"
+   ]
+  },
+  {
+   "id": "fist",
+   "tags": [
+    "fam:revolutionary",
+    "fam:leftist",
+    "sp:orc"
+   ]
+  },
+  {
+   "id": "party_rays",
+   "tags": [
+    "fam:revolutionary",
+    "fam:nationalist"
+   ]
+  },
+  {
+   "id": "logo_swoosh",
+   "tags": [
+    "corporate"
+   ]
+  },
+  {
+   "id": "logo_ring",
+   "tags": [
+    "corporate"
+   ]
+  },
+  {
+   "id": "logo_cube",
+   "tags": [
+    "corporate",
+    "fam:technocratic"
+   ]
+  },
+  {
+   "id": "logo_arrow",
+   "tags": [
+    "corporate",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "coin",
+   "tags": [
+    "fam:mercantile",
+    "corporate"
+   ]
+  },
+  {
+   "id": "wheat",
+   "tags": [
+    "agrarian",
+    "fam:green",
+    "fam:planned"
+   ]
+  },
+  {
+   "id": "tree",
+   "tags": [
+    "fam:green",
+    "sp:elf"
+   ]
+  },
+  {
+   "id": "leaf",
+   "tags": [
+    "fam:green",
+    "sp:elf"
+   ]
+  },
+  {
+   "id": "mountain",
+   "tags": [
+    "sp:dwarf"
+   ]
+  },
+  {
+   "id": "anvil",
+   "tags": [
+    "sp:dwarf",
+    "industrial"
+   ]
+  },
+  {
+   "id": "dwarf_hammer",
+   "tags": [
+    "sp:dwarf"
+   ]
+  },
+  {
+   "id": "rune_stone",
+   "tags": [
+    "sp:dwarf",
+    "eg:1"
+   ]
+  },
+  {
+   "id": "elf_bow",
+   "tags": [
+    "sp:elf"
+   ]
+  },
+  {
+   "id": "elf_moon",
+   "tags": [
+    "sp:elf"
+   ]
+  },
+  {
+   "id": "tusks",
+   "tags": [
+    "sp:orc"
+   ]
+  },
+  {
+   "id": "orc_axe",
+   "tags": [
+    "sp:orc"
+   ]
+  },
+  {
+   "id": "orc_skull",
+   "tags": [
+    "sp:orc",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "claw",
+   "tags": [
+    "sp:beast"
+   ]
+  },
+  {
+   "id": "fang",
+   "tags": [
+    "sp:beast"
+   ]
+  },
+  {
+   "id": "cat_head",
+   "tags": [
+    "sp:beast"
+   ]
+  },
+  {
+   "id": "bee",
+   "tags": [
+    "sp:beast",
+    "industrial"
+   ]
+  },
+  {
+   "id": "mushroom",
+   "tags": [
+    "sp:beast",
+    "fam:green"
+   ]
+  },
+  {
+   "id": "crab",
+   "tags": [
+    "sp:beast",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "pyramid",
+   "tags": [
+    "eg:1",
+    "fam:theocratic",
+    "royal"
+   ]
+  },
+  {
+   "id": "obelisk",
+   "tags": [
+    "eg:1",
+    "eg:2"
+   ]
+  },
+  {
+   "id": "mask",
+   "tags": [
+    "eg:0",
+    "eg:1",
+    "fam:tribal"
+   ]
+  },
+  {
+   "id": "handprint_sun",
+   "tags": [
+    "eg:0",
+    "fam:tribal"
+   ]
+  },
+  {
+   "id": "star_wreath",
+   "tags": [
+    "fam:republic",
+    "fam:nationalist",
+    "eg:5"
+   ]
+  },
+  {
+   "id": "phoenix",
+   "tags": [
+    "eg:4",
+    "eg:6",
+    "fam:revolutionary",
+    "fam:nationalist"
+   ]
+  },
+  {
+   "id": "liberty_cap",
+   "tags": [
+    "fam:revolutionary",
+    "fam:republic",
+    "eg:4"
+   ]
+  },
+  {
+   "id": "handshake",
+   "tags": [
+    "fam:democratic",
+    "fam:liberal",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "torch_book",
+   "tags": [
+    "fam:technocratic",
+    "fam:liberal"
+   ]
+  },
+  {
+   "id": "arrows_bundle",
+   "tags": [
+    "eg:2",
+    "fam:nationalist",
+    "fam:republic"
+   ]
+  },
+  {
+   "id": "elephant",
+   "tags": [
+    "eg:1",
+    "eg:2",
+    "fam:imperial"
+   ]
+  },
+  {
+   "id": "mjolnir_spark",
+   "tags": [
+    "sp:dwarf",
+    "fam:technocratic"
+   ]
+  },
+  {
+   "id": "ship_wheel",
+   "tags": [
+    "eg:4",
+    "eg:5",
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "portcullis",
+   "tags": [
+    "eg:3",
+    "fam:feudal"
+   ]
+  },
+  {
+   "id": "bell",
+   "tags": [
+    "eg:3",
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "trefoil_knot",
+   "tags": [
+    "eg:2",
+    "eg:3",
+    "fam:traditional"
+   ]
+  },
+  {
+   "id": "griffin_head",
+   "tags": [
+    "eg:3",
+    "eg:4",
+    "fam:imperial"
+   ]
+  },
+  {
+   "id": "raven",
+   "tags": [
+    "eg:1",
+    "eg:3",
+    "sp:beast"
+   ]
+  },
+  {
+   "id": "sickle_wheat",
+   "tags": [
+    "fam:planned",
+    "agrarian"
+   ]
+  },
+  {
+   "id": "stars_three",
+   "tags": [
+    "eg:5",
+    "eg:6",
+    "fam:republic"
+   ]
+  },
+  {
+   "id": "heron",
+   "tags": [
+    "eg:1",
+    "eg:2",
+    "fam:green"
+   ]
+  }
+ ],
+ "charges": [
+  {
+   "id": "star5",
+   "tags": [
+    "any"
+   ]
+  },
+  {
+   "id": "star4",
+   "tags": [
+    "any"
+   ]
+  },
+  {
+   "id": "star6",
+   "tags": [
+    "any"
+   ]
+  },
+  {
+   "id": "star8",
+   "tags": [
+    "any"
+   ]
+  },
+  {
+   "id": "dot",
+   "tags": [
+    "eg:0",
+    "eg:1"
+   ]
+  },
+  {
+   "id": "ring",
+   "tags": [
+    "eg:7",
+    "eg:6"
+   ]
+  },
+  {
+   "id": "cross",
+   "tags": [
+    "eg:3"
+   ]
+  },
+  {
+   "id": "lozenge",
+   "tags": [
+    "eg:3",
+    "eg:4"
+   ]
+  },
+  {
+   "id": "crescent",
+   "tags": [
+    "eg:1",
+    "eg:3"
+   ]
+  },
+  {
+   "id": "laurel",
+   "tags": [
+    "eg:2",
+    "eg:5"
+   ]
+  },
+  {
+   "id": "sun",
+   "tags": [
+    "eg:1",
+    "eg:4"
+   ]
+  },
+  {
+   "id": "arrowhead",
+   "tags": [
+    "eg:0",
+    "eg:1"
+   ]
+  },
+  {
+   "id": "fleurette",
+   "tags": [
+    "eg:3",
+    "eg:4",
+    "royal"
+   ]
+  },
+  {
+   "id": "crownlet",
+   "tags": [
+    "royal"
+   ]
+  },
+  {
+   "id": "heart",
+   "tags": [
+    "eg:7",
+    "fam:liberal"
+   ]
+  },
+  {
+   "id": "triangle",
+   "tags": [
+    "eg:7",
+    "eg:6"
+   ]
+  },
+  {
+   "id": "square",
+   "tags": [
+    "eg:7"
+   ]
+  },
+  {
+   "id": "wheat",
+   "tags": [
+    "agrarian",
+    "eg:5"
+   ]
+  },
+  {
+   "id": "leaf",
+   "tags": [
+    "fam:green",
+    "sp:elf"
+   ]
+  },
+  {
+   "id": "bolt",
+   "tags": [
+    "eg:5",
+    "eg:6",
+    "fam:technocratic"
+   ]
+  },
+  {
+   "id": "chevron",
+   "tags": [
+    "eg:6",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "flame",
+   "tags": [
+    "fam:revolutionary",
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "mullet_pierced",
+   "tags": [
+    "eg:3",
+    "eg:4"
+   ]
+  },
+  {
+   "id": "anchor",
+   "tags": [
+    "fam:mercantile"
+   ]
+  },
+  {
+   "id": "coin",
+   "tags": [
+    "fam:mercantile",
+    "corporate"
+   ]
+  },
+  {
+   "id": "key",
+   "tags": [
+    "fam:theocratic"
+   ]
+  },
+  {
+   "id": "bone",
+   "tags": [
+    "eg:0",
+    "sp:orc"
+   ]
+  },
+  {
+   "id": "feather",
+   "tags": [
+    "eg:0",
+    "sp:elf"
+   ]
+  },
+  {
+   "id": "gearlet",
+   "tags": [
+    "industrial",
+    "fam:planned"
+   ]
+  },
+  {
+   "id": "cross_pattee",
+   "tags": [
+    "eg:3",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "eye",
+   "tags": [
+    "sacred"
+   ]
+  },
+  {
+   "id": "pellets",
+   "tags": [
+    "eg:2",
+    "eg:3"
+   ]
+  }
+ ],
+ "shapes": [
+  {
+   "id": "hide",
+   "groups": [
+    0
+   ],
+   "h": false,
+   "ax": 0,
+   "ay": 0
+  },
+  {
+   "id": "totem",
+   "groups": [
+    0,
+    1
+   ],
+   "h": false,
+   "ax": 0,
+   "ay": 2
+  },
+  {
+   "id": "pennant",
+   "groups": [
+    1
+   ],
+   "h": true,
+   "ax": -6,
+   "ay": 0
+  },
+  {
+   "id": "vexillum",
+   "groups": [
+    1,
+    2
+   ],
+   "h": false,
+   "ax": 0,
+   "ay": 0
+  },
+  {
+   "id": "standard_disk",
+   "groups": [
+    1,
+    2
+   ],
+   "h": false,
+   "ax": 0,
+   "ay": -3
+  },
+  {
+   "id": "gonfalon",
+   "groups": [
+    3
+   ],
+   "h": false,
+   "ax": 0,
+   "ay": -2
+  },
+  {
+   "id": "shield",
+   "groups": [
+    3,
+    4
+   ],
+   "h": false,
+   "ax": 0,
+   "ay": -1
+  },
+  {
+   "id": "heraldic",
+   "groups": [
+    3,
+    4
+   ],
+   "h": false,
+   "ax": 0,
+   "ay": 0
+  },
+  {
+   "id": "flag",
+   "groups": [
+    4,
+    5,
+    6
+   ],
+   "h": true,
+   "ax": -2,
+   "ay": 0
+  },
+  {
+   "id": "swallowtail",
+   "groups": [
+    4,
+    5
+   ],
+   "h": true,
+   "ax": -4,
+   "ay": 0
+  },
+  {
+   "id": "flag_wide",
+   "groups": [
+    6,
+    7
+   ],
+   "h": true,
+   "ax": 0,
+   "ay": 0
+  },
+  {
+   "id": "flag_square",
+   "groups": [
+    7
+   ],
+   "h": true,
+   "ax": 0,
+   "ay": 0
+  }
+ ],
+ "palettes": [
+  {
+   "id": "or_argent",
+   "c1": "#F2C231",
+   "c2": "#EEF0F2",
+   "metal": "#F2C231",
+   "tags": [
+    "eg:3",
+    "eg:4",
+    "fam:monarchy"
+   ]
+  },
+  {
+   "id": "argent_gules",
+   "c1": "#EEF0F2",
+   "c2": "#D84439",
+   "metal": "#EEF0F2",
+   "tags": [
+    "eg:3",
+    "eg:4",
+    "eg:5",
+    "fam:republic"
+   ]
+  },
+  {
+   "id": "or_sable",
+   "c1": "#F2C231",
+   "c2": "#3A3A44",
+   "metal": "#F2C231",
+   "tags": [
+    "eg:3",
+    "fam:imperial",
+    "fam:monarchy"
+   ]
+  },
+  {
+   "id": "argent_azure",
+   "c1": "#EEF0F2",
+   "c2": "#2A4A8A",
+   "metal": "#EEF0F2",
+   "tags": [
+    "eg:4",
+    "eg:5",
+    "fam:liberal",
+    "fam:democratic"
+   ]
+  },
+  {
+   "id": "or_vert",
+   "c1": "#F2C231",
+   "c2": "#4FB04A",
+   "metal": "#F2C231",
+   "tags": [
+    "eg:3",
+    "fam:green"
+   ]
+  },
+  {
+   "id": "argent_sable",
+   "c1": "#EEF0F2",
+   "c2": "#3A3A44",
+   "metal": "#EEF0F2",
+   "tags": [
+    "eg:3",
+    "eg:6",
+    "fam:military"
+   ]
+  },
+  {
+   "id": "or_purpure",
+   "c1": "#F2C231",
+   "c2": "#9949C8",
+   "metal": "#F2C231",
+   "tags": [
+    "fam:monarchy",
+    "fam:theocratic",
+    "royal"
+   ]
+  },
+  {
+   "id": "gules_or",
+   "c1": "#D84439",
+   "c2": "#F2C231",
+   "metal": "#F2C231",
+   "tags": [
+    "fam:revolutionary",
+    "fam:leftist",
+    "fam:planned"
+   ]
+  },
+  {
+   "id": "sable_gules",
+   "c1": "#3A3A44",
+   "c2": "#D84439",
+   "metal": "#EEF0F2",
+   "tags": [
+    "fam:military",
+    "fam:nationalist"
+   ]
+  },
+  {
+   "id": "vert_argent",
+   "c1": "#4FB04A",
+   "c2": "#EEF0F2",
+   "metal": "#EEF0F2",
+   "tags": [
+    "fam:green"
+   ]
+  },
+  {
+   "id": "azure_or",
+   "c1": "#3F7FD9",
+   "c2": "#F2C231",
+   "metal": "#F2C231",
+   "tags": [
+    "fam:liberal",
+    "fam:republic"
+   ]
+  },
+  {
+   "id": "azure_argent",
+   "c1": "#8AC8F8",
+   "c2": "#EEF0F2",
+   "metal": "#EEF0F2",
+   "tags": [
+    "fam:democratic",
+    "eg:6"
+   ]
+  },
+  {
+   "id": "ochre_bone",
+   "c1": "#D2963A",
+   "c2": "#E6DCC0",
+   "metal": "#E6DCC0",
+   "tags": [
+    "eg:0",
+    "fam:tribal"
+   ]
+  },
+  {
+   "id": "hide_brown",
+   "c1": "#8A5934",
+   "c2": "#E6DCC0",
+   "metal": "#E6DCC0",
+   "tags": [
+    "eg:0",
+    "eg:1",
+    "fam:tribal"
+   ]
+  },
+  {
+   "id": "terracotta_sand",
+   "c1": "#C86439",
+   "c2": "#E0C27A",
+   "metal": "#E0C27A",
+   "tags": [
+    "eg:1"
+   ]
+  },
+  {
+   "id": "bronze_lapis",
+   "c1": "#C88739",
+   "c2": "#2A4A8A",
+   "metal": "#C88739",
+   "tags": [
+    "eg:1",
+    "eg:2"
+   ]
+  },
+  {
+   "id": "crimson_gold",
+   "c1": "#D84439",
+   "c2": "#F2C231",
+   "metal": "#F2C231",
+   "tags": [
+    "eg:2",
+    "fam:imperial"
+   ]
+  },
+  {
+   "id": "olive_khaki",
+   "c1": "#6E7F3A",
+   "c2": "#E0C27A",
+   "metal": "#E0C27A",
+   "tags": [
+    "fam:military"
+   ]
+  },
+  {
+   "id": "steel_cyan",
+   "c1": "#A0A9B8",
+   "c2": "#3FCFE0",
+   "metal": "#EEF0F2",
+   "tags": [
+    "fam:technocratic",
+    "eg:7"
+   ]
+  },
+  {
+   "id": "grey_cyan",
+   "c1": "#8A8E96",
+   "c2": "#3FCFE0",
+   "metal": "#EEF0F2",
+   "tags": [
+    "corporate",
+    "eg:7"
+   ]
+  },
+  {
+   "id": "white_orange",
+   "c1": "#EEF0F2",
+   "c2": "#F08A29",
+   "metal": "#EEF0F2",
+   "tags": [
+    "corporate"
+   ]
+  },
+  {
+   "id": "black_gold",
+   "c1": "#3A3A44",
+   "c2": "#F2C231",
+   "metal": "#F2C231",
+   "tags": [
+    "fam:nationalist",
+    "fam:imperial"
+   ]
+  },
+  {
+   "id": "sky_white",
+   "c1": "#8AC8F8",
+   "c2": "#EEF0F2",
+   "metal": "#EEF0F2",
+   "tags": [
+    "fam:democratic",
+    "fam:green",
+    "eg:7"
+   ]
+  },
+  {
+   "id": "teal_white",
+   "c1": "#2AA8A0",
+   "c2": "#EEF0F2",
+   "metal": "#EEF0F2",
+   "tags": [
+    "eg:7"
+   ]
+  },
+  {
+   "id": "violet_white",
+   "c1": "#795AE0",
+   "c2": "#EEF0F2",
+   "metal": "#EEF0F2",
+   "tags": [
+    "eg:7",
+    "fam:liberal"
+   ]
+  }
+ ],
+ "cells": {
+  "emblem": 20,
+  "charge": 8,
+  "shape": 64,
+  "emblem_cols": 16,
+  "charge_cols": 16,
+  "shape_cols": 8
+ }
+}

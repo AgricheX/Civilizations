@@ -38,9 +38,20 @@ namespace Civilizations
             return sb.ToString();
         }
 
+        public static bool Hidden(Kingdom k)
+        {
+            Kingdom me = Player.K;
+            return G.Ok(me) && k != me && !Fog.Knows(me, k);
+        }
+
         public static void Meta(StatsRowsContainer box, Kingdom k)
         {
             if (!G.Ok(k) || !k.isCiv()) return;
+            if (Hidden(k))
+            {
+                Row(box, "civ_row_research", "?", "#9AA0A8", "civ/stat/research", Txt.T("civ_row_research"), Txt.T("civ_ctrl_unknown_d"));
+                return;
+            }
             foreach (string g in new[] { "gov", "ideo", "econ", "xeno", "transport" })
             {
                 PolicyDef p = Policies.Get(k, g);
@@ -72,7 +83,7 @@ namespace Civilizations
 
         public static void Stats(StatsWindow w, Kingdom k)
         {
-            if (!G.Ok(k) || !k.isCiv()) return;
+            if (!G.Ok(k) || !k.isCiv() || Hidden(k)) return;
             StatsRowsContainer box = w.stats_rows_container;
             float st = Politics.Stability(k);
             Row(box, "civ_row_stability", G.Pct(st), st > 0.6f ? "#8CF07A" : st > 0.35f ? "#FFD25C" : "#FF7A6A", "civ/stat/stability", Txt.T("civ_row_stability"), Txt.T("civ_row_stability_d"));
@@ -213,17 +224,25 @@ namespace Civilizations
             string iconPath = fav.transform == src.transform ? "" : PathTo(src.transform, fav.transform);
             GameObject tech = Clone(src, parent, iconPath, "ui/Icons/civ/btn/tech", "civ_tech Title", "civ_btn_tech_d", () => WinTech.Open(SelectedMetas.selected_kingdom));
             GameObject net = Clone(src, parent, iconPath, "ui/Icons/civ/btn/net", "civ_net Title", "civ_btn_net_d", WinNet.Open);
+            GameObject state = Clone(src, parent, iconPath, "ui/Icons/civ/btn/state", "civ_state Title", "civ_btn_state_d", () => WinState.Open(SelectedMetas.selected_kingdom));
+            GameObject ctrl = Clone(src, parent, iconPath, "ui/Icons/civ/btn/control", "civ_control Title", "civ_btn_control_d", () => WinControl.Open(SelectedMetas.selected_kingdom));
+            ctrl.name = "CivControl";
             tech.name = "CivTech";
             net.name = "CivNet";
+            state.name = "CivState";
             if (!layout)
             {
                 tech.transform.localPosition = srt.localPosition - new Vector3(0f, step, 0f);
                 net.transform.localPosition = srt.localPosition - new Vector3(0f, step * 2f, 0f);
+                state.transform.localPosition = srt.localPosition - new Vector3(0f, step * 3f, 0f);
+                ctrl.transform.localPosition = srt.localPosition - new Vector3(0f, step * 4f, 0f);
             }
             else
             {
                 tech.transform.SetAsLastSibling();
                 net.transform.SetAsLastSibling();
+                state.transform.SetAsLastSibling();
+                ctrl.transform.SetAsLastSibling();
             }
             _btn = tech;
             return true;
@@ -282,8 +301,11 @@ namespace Civilizations
                 float y = r.rect.height / 2f - 30f - 3f * 21f;
                 SimpleButton b = UiKit.IconBtn(bg, UiKit.Icon("ui/Icons/civ/btn/tech"), () => WinTech.Open(SelectedMetas.selected_kingdom), 18f, new Vector2(x, y), Txt.T("civ_tech Title"), Txt.T("civ_btn_tech_d"));
                 SimpleButton n = UiKit.IconBtn(bg, UiKit.Icon("ui/Icons/civ/btn/net"), WinNet.Open, 18f, new Vector2(x, y - 21f), Txt.T("civ_net Title"), Txt.T("civ_btn_net_d"));
+                SimpleButton st = UiKit.IconBtn(bg, UiKit.Icon("ui/Icons/civ/btn/state"), () => WinState.Open(SelectedMetas.selected_kingdom), 18f, new Vector2(x, y - 42f), Txt.T("civ_state Title"), Txt.T("civ_btn_state_d"));
+                UiKit.IconBtn(bg, UiKit.Icon("ui/Icons/civ/btn/control"), () => WinControl.Open(SelectedMetas.selected_kingdom), 18f, new Vector2(x, y - 63f), Txt.T("civ_control Title"), Txt.T("civ_btn_control_d"));
                 _btn = b.gameObject;
                 n.gameObject.name = "CivNet";
+                st.gameObject.name = "CivState";
             }
             catch (Exception)
             {

@@ -13,6 +13,7 @@ namespace Civilizations
         public string Color;
         public readonly List<TechDef> Techs = new List<TechDef>();
         public readonly List<TechDef> Core = new List<TechDef>();
+        public readonly List<string> Fund = new List<string>();
     }
 
     internal class TechDef
@@ -65,6 +66,9 @@ namespace Civilizations
         public string Tech;
         public int Era;
         public string Base;
+        public bool Space;
+        public string Fam = "";
+        public string Def = "";
     }
 
     internal class TrainDef
@@ -147,11 +151,46 @@ namespace Civilizations
 
         public static int LastEra { get { return Eras.Count - 1; } }
 
+        public static readonly Dictionary<int, string[]> History = new Dictionary<int, string[]>();
+
         public static void Init()
         {
             string dir = Path.Combine(CivMod.Folder, "Data");
             LoadTechs(JObject.Parse(File.ReadAllText(Path.Combine(dir, "techs.json"))));
             LoadCatalog(JObject.Parse(File.ReadAllText(Path.Combine(dir, "catalog.json"))));
+            History.Clear();
+            string hist = Path.Combine(dir, "tech_history.json");
+            if (File.Exists(hist))
+            {
+                foreach (JProperty p in JObject.Parse(File.ReadAllText(hist)).Properties())
+                {
+                    int n;
+                    if (int.TryParse(p.Name, out n)) History[n] = Arr(p.Value);
+                }
+            }
+        }
+
+        public static TechSet Remap(int oldCount, string bits)
+        {
+            string[] ids;
+            if (!History.TryGetValue(oldCount, out ids) || string.IsNullOrEmpty(bits)) return null;
+            byte[] bytes;
+            try
+            {
+                bytes = Convert.FromBase64String(bits);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            var set = new TechSet();
+            for (int i = 0; i < ids.Length && (i >> 3) < bytes.Length; i++)
+            {
+                if ((bytes[i >> 3] & (1 << (i & 7))) == 0) continue;
+                TechDef t = Tech(ids[i]);
+                if (t != null) set.Add(t.Index);
+            }
+            return set;
         }
 
         private static Dictionary<string, float> Map(JToken t)
@@ -220,6 +259,8 @@ namespace Civilizations
                 TechById[d.Id] = d;
                 Eras[d.Era].Techs.Add(d);
                 if (d.IsCore) Eras[d.Era].Core.Add(d);
+                JToken fund = t["fund"];
+                if (fund != null && fund.Type == JTokenType.Boolean && fund.Value<bool>()) Eras[d.Era].Fund.Add(d.Id);
                 foreach (string u in d.Unl)
                 {
                     List<TechDef> l;
@@ -254,6 +295,9 @@ namespace Civilizations
                 var d = new UnitDef { Id = S(u, "id"), Cls = S(u, "cls"), Role = S(u, "role"), Route = S(u, "route"), Fuel = S(u, "fuel"), Crew = u["crew"] != null ? u["crew"].Value<int>() : 0, Stats = Map(u["stats"]), Art = S(u, "art"), Tech = S(u, "tech"), Base = S(u, "base") };
                 if (string.IsNullOrEmpty(d.Base)) d.Base = d.Id;
                 d.Era = EraOf(d.Tech);
+                d.Space = d.Cls == "space";
+                d.Fam = S(u, "fam");
+                d.Def = S(u, "def");
                 Units.Add(d);
                 UnitById[d.Id] = d;
             }

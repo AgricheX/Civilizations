@@ -29,7 +29,19 @@ namespace Civilizations
             { "civ_addicted", -3 },
             { "civ_new_clothes", 4 },
             { "civ_train_trip", 5 },
-            { "civ_flight", 6 }
+            { "civ_flight", 6 },
+            { "civ_festival", 10 },
+            { "civ_victory", 8 },
+            { "civ_mourning", -6 },
+            { "civ_erasure_fear", -20 },
+            { "civ_civil_war", -12 },
+            { "civ_independence", 12 },
+            { "civ_dark_age", -8 },
+            { "civ_golden_age", 8 },
+            { "civ_plague", -12 },
+            { "civ_disaster", -10 },
+            { "civ_divine_wrath", -10 },
+            { "civ_divine_gift", 8 }
         };
 
         public static void InitAssets()

@@ -87,7 +87,7 @@ namespace Civilizations
             int slot = family * EraCount + era;
             if (Loaded[slot]) return Frames[slot];
             Loaded[slot] = true;
-            int count = family == 1 || family == 3 ? 2 : 1;
+            int count = 1;
             var sprites = new Sprite[count];
             string path = "buildings/civ/era_visuals/" + Families[family] + "/" + era + "/main_";
             for (int i = 0; i < count; i++)

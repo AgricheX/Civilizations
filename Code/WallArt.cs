@@ -37,6 +37,68 @@ namespace Civilizations
             return ts;
         }
 
+        private static Sprite[] _shield;
+
+        private static Sprite[] Sheet(string look)
+        {
+            if (look != "civ_shield") return SpriteTextureLoader.getSpriteList("walls/" + look + "/wall_sheet");
+            if (_shield != null) return _shield;
+            Sprite[] src = SpriteTextureLoader.getSpriteList("walls/wall_iron/wall_sheet");
+            if (src == null || src.Length == 0) return null;
+            _shield = Tint(src, new Color(0.35f, 0.84f, 1f), 0.78f) ?? src;
+            return _shield;
+        }
+
+        private static Sprite[] Tint(Sprite[] src, Color tint, float alpha)
+        {
+            try
+            {
+                Texture2D atlas = src[0].texture;
+                RenderTexture rt = RenderTexture.GetTemporary(atlas.width, atlas.height, 0, RenderTextureFormat.ARGB32);
+                Graphics.Blit(atlas, rt);
+                RenderTexture prev = RenderTexture.active;
+                RenderTexture.active = rt;
+                var outp = new Sprite[src.Length];
+                for (int i = 0; i < src.Length; i++)
+                {
+                    Sprite s = src[i];
+                    if (s.texture != atlas)
+                    {
+                        outp[i] = s;
+                        continue;
+                    }
+                    Rect r = s.textureRect;
+                    int w = Mathf.RoundToInt(r.width), h = Mathf.RoundToInt(r.height);
+                    var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+                    tex.filterMode = FilterMode.Point;
+                    tex.wrapMode = TextureWrapMode.Clamp;
+                    tex.ReadPixels(new Rect(r.x, r.y, w, h), 0, 0);
+                    Color[] px = tex.GetPixels();
+                    for (int p = 0; p < px.Length; p++)
+                    {
+                        Color c = px[p];
+                        if (c.a <= 0.01f) continue;
+                        float l = c.r * 0.3f + c.g * 0.59f + c.b * 0.11f;
+                        Color n = Color.Lerp(tint * 0.75f, Color.white, Mathf.Clamp01(l * 0.9f));
+                        n.a = c.a * alpha;
+                        px[p] = n;
+                    }
+                    tex.SetPixels(px);
+                    tex.Apply();
+                    Sprite ns = Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(s.pivot.x / w, s.pivot.y / h), s.pixelsPerUnit);
+                    ns.name = s.name;
+                    outp[i] = ns;
+                }
+                RenderTexture.active = prev;
+                RenderTexture.ReleaseTemporary(rt);
+                return outp;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         private static bool Prepare(TopTileType t)
         {
             try
@@ -49,7 +111,7 @@ namespace Civilizations
                 }
                 if (_frames == null || _frameType == null) return false;
                 if (_frames.Contains(t.index_id)) return true;
-                Sprite[] list = SpriteTextureLoader.getSpriteList("walls/" + Walls.Look(t) + "/wall_sheet");
+                Sprite[] list = Sheet(Walls.Look(t));
                 if (list == null || list.Length == 0) return false;
                 object box = Activator.CreateInstance(_frameType, true);
                 AccessTools.Field(_frameType, "sprites").SetValue(box, list);

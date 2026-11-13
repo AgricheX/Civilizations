@@ -193,6 +193,7 @@ namespace Civilizations
                 if (t.Id == "diesel") weight = freight ? 2f : 0.7f;
                 if (t.Id == "bullet") weight = freight ? 0.3f : 2f;
                 if (t.Id == "steam") weight = Research.Route(from.kingdom) == "steam" ? 1.5f : 0.5f;
+                if (t.Speed >= 4f) weight = 1f + t.Speed * 0.4f;
                 options.Add(t);
                 weights.Add(weight);
             }
@@ -297,6 +298,7 @@ namespace Civilizations
                 Version++;
                 City a = G.CityById(l.A), b = G.CityById(l.B);
                 Internet.OnRailOpened(a, b, l.Kind);
+                if (a != null && b != null && a.kingdom != null && a.kingdom.capital == a) Chronicle.Log("rail_opened", a.kingdom, G.Name(a), G.Name(b), null, b.kingdom, null, a, null, false);
             }
             World.world.resetRedrawTimer();
         }

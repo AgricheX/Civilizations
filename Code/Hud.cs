@@ -20,6 +20,7 @@ namespace Civilizations
 
         private static Kingdom Target()
         {
+            if (Player.Active) return Player.K;
             Kingdom k = SelectedMetas.selected_kingdom;
             if (G.Ok(k) && k.isCiv()) return k;
             return EraLock.Leader;

@@ -261,6 +261,9 @@ namespace Civilizations
         public static string Short(float v)
         {
             float a = Math.Abs(v);
+            if (float.IsNaN(v) || float.IsInfinity(v)) return "?";
+            if (a >= 1000000000000f) return (v / 1000000000000f).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + "T";
+            if (a >= 1000000000f) return (v / 1000000000f).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + "B";
             if (a >= 1000000f) return (v / 1000000f).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + "M";
             if (a >= 1000f) return (v / 1000f).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + "k";
             return Mathf.RoundToInt(v).ToString();

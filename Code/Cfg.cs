@@ -57,6 +57,45 @@ namespace Civilizations
         public bool DebugLog { get { return B("Civilizations", "civ_debug", false); } }
         public bool NightLights { get { return B("CivVisual", "civ_night_lights", true); } }
         public bool EraSkins { get { return B("CivVisual", "civ_era_skins", true); } }
+        public bool FogView { get { return B("CivVisual", "civ_fog_view", false); } }
+        public bool Regression { get { return B("Civilizations", "civ_regression", true); } }
+        public bool Apocalypse { get { return B("Civilizations", "civ_apocalypse", true); } }
+        public bool Festivals { get { return B("Civilizations", "civ_festivals", true); } }
+        public bool Events { get { return B("Civilizations", "civ_events", true); } }
+        public int LogLimit
+        {
+            get
+            {
+                ModConfigItem i = Item("Civilizations", "civ_log_limit");
+                long v;
+                if (i == null || i.TextVal == null || !long.TryParse(i.TextVal.Trim(), out v)) return 100000;
+                if (v < 100) v = 100;
+                if (v > int.MaxValue) v = int.MaxValue;
+                return (int)v;
+            }
+        }
+        public bool Sandbox { get { return B("Civilizations", "civ_sandbox", true); } }
+        public bool SandboxNotice { get { return B("Civilizations", "civ_sandbox_notice", true); } }
+        public float CtrlPlayer { get { return F("Civilizations", "civ_ctrl_player", 0f); } }
+        public float CtrlAi { get { return F("Civilizations", "civ_ctrl_ai", 0f); } }
+        public bool PauseEvents { get { return B("Civilizations", "civ_pause_events", true); } }
+        public bool CheckUpdates { get { return B("Civilizations", "civ_check_updates", true); } }
+        public bool CosShared { get { return B("CivCosmos", "civ_cos_shared", true); } }
+        public bool CosNear { get { return B("CivCosmos", "civ_cos_near", true); } }
+        public float CosmicTime { get { return Math.Max(0f, F("CivCosmos", "civ_cos_time", 1f)); } }
+        public int Fermi { get { return Math.Max(0, Math.Min(2, I("CivCosmos", "civ_cos_fermi", 1))); } }
+        public bool CosmicInvasions { get { return B("CivCosmos", "civ_cos_invasions", true); } }
+        public bool CosmicEnding { get { return B("CivCosmos", "civ_cos_ending", false); } }
+        public string CosSeed
+        {
+            get
+            {
+                ModConfigItem i = Item("CivCosmos", "civ_cos_seed");
+                return i == null || i.TextVal == null ? "" : i.TextVal.Trim();
+            }
+        }
+        public int MaxEra { get { return I("Civilizations", "civ_max_era", 99); } }
+        public int MaxScale { get { return I("Civilizations", "civ_max_scale", 99); } }
         public bool Hud { get { return B("CivVisual", "civ_hud", false); } }
         public bool Waters { get { return B("CivVisual", "civ_waters", true); } }
         public bool DayNight { get { return B("CivVisual", "civ_daynight", true); } }

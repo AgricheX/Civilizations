@@ -59,9 +59,24 @@ namespace Civilizations
         public string Snap = "";
         public string Geo = "";
         public int Candles;
+        public string Med = "";
+        public int Era;
+        public string Img = "";
+        public int Seed;
+        public string Topic = "";
+        public bool Verified;
+        public string Role = "";
+        public bool Rumor;
+        public bool Censored;
+        public bool Propaganda;
+        public string Sponsor = "";
+        public bool Flame;
+        public string Log = "";
+        public string About = "";
+        public string Flag = "";
     }
 
-    internal class Chronicle
+    internal class NetChronicle
     {
         public int Year;
         public string Kingdom = "";
@@ -82,7 +97,7 @@ namespace Civilizations
         public const string KLastPost = "civ_net_last";
 
         private static List<NetPost> _feed = new List<NetPost>();
-        private static List<Chronicle> _chron = new List<Chronicle>();
+        private static List<NetChronicle> _chron = new List<NetChronicle>();
         private static int _next = 1;
         private static float _tick;
         private static readonly Dictionary<string, int> _variants = new Dictionary<string, int>();
@@ -91,7 +106,7 @@ namespace Civilizations
         public static int Version;
 
         public static IList<NetPost> Feed { get { return _feed; } }
-        public static IList<Chronicle> Chronicles { get { return _chron; } }
+        public static IList<NetChronicle> Chronicles { get { return _chron; } }
 
         public static bool On
         {
@@ -110,10 +125,21 @@ namespace Civilizations
             return false;
         }
 
+        public static bool Reach(Kingdom k)
+        {
+            return On && k != null && k.isAlive() && k.isCiv();
+        }
+
+        public static bool ReachAnywhere()
+        {
+            if (!On || World.world == null) return false;
+            return G.Kingdoms().Count > 0;
+        }
+
         public static void Load()
         {
             _feed = new List<NetPost>();
-            _chron = new List<Chronicle>();
+            _chron = new List<NetChronicle>();
             _next = 1;
             SaveCustomData d = Store.World();
             if (d == null) return;
@@ -122,7 +148,7 @@ namespace Civilizations
                 string s = Store.Str(d, KFeed);
                 if (s.Length > 0) _feed = JsonConvert.DeserializeObject<List<NetPost>>(s) ?? new List<NetPost>();
                 string c = Store.Str(d, KChron);
-                if (c.Length > 0) _chron = JsonConvert.DeserializeObject<List<Chronicle>>(c) ?? new List<Chronicle>();
+                if (c.Length > 0) _chron = JsonConvert.DeserializeObject<List<NetChronicle>>(c) ?? new List<NetChronicle>();
             }
             catch (Exception)
             {
@@ -130,29 +156,42 @@ namespace Civilizations
             }
             foreach (NetPost p in _feed) _next = Math.Max(_next, p.Id + 1);
             Trend = Store.Str(d, KTrend);
+            NetHub.Load(d);
             Version++;
         }
 
+        public const int FeedCap = 700;
+        private const int FeedBatch = 100;
+
         public static void Trim()
         {
-            while (_feed.Count > 400)
+            if (_feed.Count > FeedCap)
             {
-                int idx = _feed.FindIndex(p => !p.Saved && !p.Important);
-                _feed.RemoveAt(idx < 0 ? 0 : idx);
+                int drop = _feed.Count - FeedCap + FeedBatch;
+                var gone = new HashSet<int>();
+                foreach (NetPost p in _feed)
+                {
+                    if (gone.Count >= drop) break;
+                    if (!p.Saved && !p.Important) gone.Add(p.Id);
+                }
+                foreach (NetPost p in _feed)
+                {
+                    if (gone.Count >= drop) break;
+                    if (!p.Saved) gone.Add(p.Id);
+                }
+                _feed.RemoveAll(p => gone.Contains(p.Id));
+                NetPhoto.Forget(gone);
+                Version++;
             }
-            while (_chron.Count > 400) _chron.RemoveAt(0);
+            if (_chron.Count > 400) _chron.RemoveRange(0, _chron.Count - 300);
         }
 
         public static void Save()
         {
             SaveCustomData d = Store.World();
             if (d == null) return;
-            while (_feed.Count > 400)
-            {
-                int idx = _feed.FindIndex(p => !p.Saved && !p.Important);
-                _feed.RemoveAt(idx < 0 ? 0 : idx);
-            }
-            while (_chron.Count > 400) _chron.RemoveAt(0);
+            Trim();
+            NetHub.Save(d);
             Store.Put(d, KFeed, JsonConvert.SerializeObject(_feed));
             Store.Put(d, KChron, JsonConvert.SerializeObject(_chron));
             Store.Put(d, KTrend, Trend ?? "");
@@ -168,11 +207,38 @@ namespace Civilizations
             return n;
         }
 
+        private static readonly Dictionary<string, List<int>> _recent = new Dictionary<string, List<int>>();
+
+        public static bool HasLine(string key)
+        {
+            return Variants(key) > 0 || Txt.Has(key);
+        }
+
         public static string Line(string key, params object[] args)
         {
             int n = Variants(key);
             if (n == 0) return Txt.F(key, args);
-            return Txt.F(key + "_" + UnityEngine.Random.Range(0, n), args);
+            if (n == 1) return Txt.F(key + "_0", args);
+            List<int> used;
+            if (!_recent.TryGetValue(key, out used))
+            {
+                used = new List<int>();
+                _recent[key] = used;
+                if (_recent.Count > 600) _recent.Clear();
+            }
+            int keep = Math.Min(n - 1, 6);
+            int pick = UnityEngine.Random.Range(0, n);
+            for (int i = 0; i < 8 && used.Contains(pick); i++) pick = UnityEngine.Random.Range(0, n);
+            if (used.Contains(pick)) for (int i = 0; i < n; i++) if (!used.Contains(i)) { pick = i; break; }
+            used.Add(pick);
+            while (used.Count > keep) used.RemoveAt(0);
+            return Txt.F(key + "_" + pick, args);
+        }
+
+        public static string Pick(params string[] keys)
+        {
+            foreach (string k in keys) if (HasLine(k)) return k;
+            return keys.Length > 0 ? keys[keys.Length - 1] : "";
         }
 
         public static float Reputation(Kingdom k)
@@ -214,11 +280,19 @@ namespace Civilizations
 
         private static void Chron(Kingdom k, string kind, string text)
         {
-            _chron.Add(new Chronicle { Year = G.Year, Kingdom = G.Id(k), Kind = kind, Text = text });
+            _chron.Add(new NetChronicle { Year = G.Year, Kingdom = G.Id(k), Kind = kind, Text = text });
             Version++;
         }
 
-        private static NetPost Make(string who, string authorId, string author, string handle, Kingdom k, string kind, string text)
+        public static NetPost Add(NetPost p)
+        {
+            if (p == null) return null;
+            _feed.Add(p);
+            Version++;
+            return p;
+        }
+
+        public static NetPost Make(string who, string authorId, string author, string handle, Kingdom k, string kind, string text)
         {
             var p = new NetPost
             {
@@ -232,7 +306,11 @@ namespace Civilizations
                 Handle = handle,
                 Kingdom = G.Id(k),
                 KingdomName = G.Name(k),
-                Text = text
+                Text = text,
+                Med = NetMedia.Of(k),
+                Era = k != null && k.isAlive() ? Research.Era(k) : 0,
+                Seed = UnityEngine.Random.Range(1, int.MaxValue),
+                Topic = NetMedia.TopicOf(kind)
             };
             if (k != null && k.language != null && k.language.data != null)
             {
@@ -244,17 +322,22 @@ namespace Civilizations
 
         public static NetPost Official(Kingdom k, string kind, string text, bool important)
         {
-            if (!Exists(k))
+            if (!Reach(k))
             {
-                Chron(k, kind, text);
+                if (k != null) Chron(k, kind, text);
                 return null;
             }
+            if (NetPress.Hush(k, kind)) return null;
             NetPost p = Make("kingdom", G.Id(k), G.Name(k), Names.Handle(k), k, kind, text);
             p.Important = important;
+            p.Verified = true;
+            p.Role = "state";
             p.Photo = k.hasKing() ? G.Id(k.king) : "";
             WorldTile cap = k.capital != null ? G.Tile(k.capital) : null;
             if (cap != null && important) p.Snap = cap.x + "," + cap.y;
+            if (important && p.Img.Length == 0) p.Img = NetMedia.DefaultImage(kind);
             Geotag(p, cap, k);
+            NetPress.Shape(p, k);
             _feed.Add(p);
             React(p, k, 1f + Population(k) * 0.02f);
             Version++;
@@ -265,15 +348,20 @@ namespace Civilizations
         {
             if (!G.Ok(a) || a.kingdom == null) return null;
             Kingdom k = a.kingdom;
-            if (!Exists(k)) return null;
+            if (!Reach(k)) return null;
+            bool online = Exists(k);
             if (Store.Str(a.data, KCancel) == "cancelled" && G.Chance(0.7f)) return null;
             NetPost p = Make("person", G.Id(a), a.getName(), Names.Handle(a), k, kind, text);
             p.Photo = G.Id(a);
             p.Place = a.city != null ? G.Name(a.city) : "";
-            p.Story = G.Chance(0.3f);
+            p.Story = online && G.Chance(0.3f);
+            p.Verified = NetHub.IsVerified(a);
+            p.Role = NetHub.RoleOf(a);
             if (!string.IsNullOrEmpty(Trend) && G.Chance(0.25f)) p.Tag = Trend;
             Geotag(p, a.current_tile, k);
-            if (a.current_tile != null && (G.Chance(0.45f) || kind.StartsWith("live"))) p.Snap = a.current_tile.x + "," + a.current_tile.y;
+            if (a.current_tile != null && (G.Chance(online ? 0.45f : 0.2f) || kind.StartsWith("live"))) p.Snap = a.current_tile.x + "," + a.current_tile.y;
+            if (p.Snap.Length > 0 && p.Img.Length == 0) p.Img = NetMedia.PersonImage(kind, online);
+            NetPress.Shape(p, k);
             _feed.Add(p);
             Store.Put(a.data, KLastPost, G.Year);
             React(p, k, boost * (1f + Followers(a) / 500f));
@@ -292,6 +380,8 @@ namespace Civilizations
             }
             NetPost p = Make("company", c.Id.ToString(), c.Name, Names.Handle(c), k, kind, text);
             p.Photo = c.Ceo;
+            p.Verified = true;
+            p.Role = "company";
             _feed.Add(p);
             React(p, k, 1f + Companies.Tier(c));
             Version++;
@@ -312,42 +402,24 @@ namespace Civilizations
             p.Dislikes += (int)(audience * (1f - appeal) * UnityEngine.Random.Range(0.02f, 0.3f));
             p.Shares += (int)(p.Likes * UnityEngine.Random.Range(0f, 0.15f));
             int comments = UnityEngine.Random.Range(0, 4) + (int)Math.Min(4f, reach * 0.5f);
+            if (p.Med != "social") comments = Math.Min(comments, p.Med == "broadcast" ? 3 : 2);
             for (int i = 0; i < comments; i++) AddComment(p, k);
+            if (p.Censored) p.Comments.Clear();
         }
 
-        private static Actor RandomUser(Kingdom k)
+        public static Actor RandomUser(Kingdom k)
         {
+            if (k == null) return null;
             for (int i = 0; i < 6; i++)
             {
                 City c = G.Pick(G.Cities(k));
                 if (c == null) return null;
-                Actor a = G.Pick(c.units.ToList());
+                int n = c.units.Count;
+                if (n == 0) continue;
+                Actor a = c.units[UnityEngine.Random.Range(0, n)];
                 if (G.Ok(a) && a.isAdult() && a.isSapient()) return a;
             }
             return null;
-        }
-
-        private static void AddComment(NetPost p, Kingdom k)
-        {
-            Kingdom src = k;
-            if (G.Chance(0.3f))
-            {
-                Kingdom other = G.Pick(G.Kingdoms().Where(Exists).ToList());
-                if (other != null) src = other;
-            }
-            if (RelatedComment(p)) return;
-            Actor a = RandomUser(src);
-            if (a == null) return;
-            Opinion o = Politics.Get(a);
-            string mood = "neutral";
-            if (p.Who == "kingdom" && o != null) mood = o.Sat > 0.6f ? "agree" : o.Sat < 0.35f ? "disagree" : "neutral";
-            else if (p.Kind == "scandal" || p.Kind == "apology") mood = G.Chance(0.6f) ? "disagree" : "agree";
-            else if (G.Chance(0.15f)) mood = "troll";
-            else if (G.Chance(0.4f)) mood = "agree";
-            else if (G.Chance(0.2f)) mood = "laugh";
-            if (a.kingdom != null && G.Id(a.kingdom) != p.Kingdom && Policies.Id(a.kingdom, "xeno") == "xenophobia" && a.kingdom.getSpecies() != (G.KingdomById(p.Kingdom) != null ? G.KingdomById(p.Kingdom).getSpecies() : "")) mood = "foreign";
-            p.Comments.Add(new NetComment { Author = a.getName(), Handle = Names.Handle(a), AuthorId = G.Id(a), Text = Line("net_c_" + mood, p.Author), Likes = UnityEngine.Random.Range(0, Math.Max(2, p.Likes / 10)) });
-            if (p.Comments.Count > 12) p.Comments.RemoveAt(0);
         }
 
         public static void Year()
@@ -368,6 +440,8 @@ namespace Civilizations
                 }
                 if (p.Poll != null && p.PollWinner < 0 && G.Year >= p.PollEnds) ClosePoll(p);
             }
+            CivMod.Safe("net-offline", () => NetLife.Offline(online));
+            CivMod.Safe("net-hub-year", NetHub.Year);
             if (online.Count == 0)
             {
                 Trim();
@@ -385,6 +459,7 @@ namespace Civilizations
                 if (G.Chance(0.25f)) Live(k);
                 if (G.Chance(0.15f)) Scandal(k);
                 Extras(k, online);
+                NetPress.Year(k);
                 Addiction(k);
                 Store.Put(k.data, KRep, Reputation(k) * 0.9f);
             }
@@ -647,7 +722,7 @@ namespace Civilizations
         {
             if (!On) return;
             _tick += dt;
-            if (_tick < 3f) return;
+            if (_tick < 20f) return;
             _tick = 0f;
             foreach (NetPost p in _feed)
             {
@@ -739,6 +814,7 @@ namespace Civilizations
                     return;
                 }
             }
+            if (!Exists(k) && !t.Rare && !G.Chance(0.25f)) return;
             Official(k, "tech", Line("net_tech", G.Name(k), name), t.Rare);
         }
 

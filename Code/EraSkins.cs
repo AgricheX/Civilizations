@@ -10,6 +10,7 @@ namespace Civilizations
         private static readonly Dictionary<string, bool> _exists = new Dictionary<string, bool>();
         private static readonly Dictionary<long, string> _sig = new Dictionary<long, string>();
         private static readonly HashSet<string> _alias = new HashSet<string>();
+        private static readonly Dictionary<string, string> _orig = new Dictionary<string, string>();
         private static Dictionary<string, Sprite[]> _lists;
 
         private static string Alias(string path, ActorAsset asset)
@@ -123,7 +124,57 @@ namespace Civilizations
                 try
                 {
                     string p = Pick(pActor);
-                    if (p != null) __result = p;
+                    if (p == null) return;
+                    if (!_orig.ContainsKey(p) && !string.IsNullOrEmpty(__result) && !__result.StartsWith(Root)) _orig[p] = __result;
+                    __result = p;
+                }
+                catch (System.Exception)
+                {
+                }
+            }
+        }
+
+        private static AnimationFrameData Twin(AnimationContainerUnit v, string id)
+        {
+            AnimationFrameData f;
+            if (v.dict_frame_data.TryGetValue(id, out f) && f.show_head) return f;
+            string kind = id.StartsWith("swim") ? "swim" : "walk";
+            foreach (KeyValuePair<string, AnimationFrameData> kv in v.dict_frame_data)
+            {
+                if (kv.Value != null && kv.Value.show_head && kv.Key.StartsWith(kind)) return kv.Value;
+            }
+            foreach (KeyValuePair<string, AnimationFrameData> kv in v.dict_frame_data)
+            {
+                if (kv.Value != null && kv.Value.show_head) return kv.Value;
+            }
+            return null;
+        }
+
+        [HarmonyPatch(typeof(ActorAnimationLoader), nameof(ActorAnimationLoader.createAnimationContainer))]
+        private static class Heads
+        {
+            private static void Postfix(string pTexturePath, ActorAsset pAsset, SubspeciesTrait pEggAsset, SubspeciesTrait pMutationSkinAsset, AnimationContainerUnit __result)
+            {
+                if (__result == null || pTexturePath == null || !pTexturePath.StartsWith(Root)) return;
+                try
+                {
+                    string orig;
+                    if (!_orig.TryGetValue(pTexturePath, out orig)) return;
+                    AnimationContainerUnit v = ActorAnimationLoader.getAnimationContainer(orig, pAsset, pEggAsset, pMutationSkinAsset);
+                    if (v == null || v == __result) return;
+                    foreach (KeyValuePair<string, AnimationFrameData> kv in __result.dict_frame_data)
+                    {
+                        AnimationFrameData f = kv.Value;
+                        if (f == null || !f.show_head) continue;
+                        AnimationFrameData t = Twin(v, kv.Key);
+                        if (t == null)
+                        {
+                            f.show_head = false;
+                            continue;
+                        }
+                        f.pos_head = t.pos_head;
+                        f.pos_head_new = t.pos_head_new;
+                    }
                 }
                 catch (System.Exception)
                 {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NeoModLoader.api;
+using NeoModLoader.General.UI.Prefabs;
 using UnityEngine;
 
 namespace Civilizations
@@ -9,8 +10,8 @@ namespace Civilizations
     internal class WinWorld : AbstractWindow<WinWorld>
     {
         public const string Id = "civ_world";
-        private static readonly string[] TabKeys = { "world_tab_nations", "world_tab_space", "world_tab_chronicle", "world_tab_world" };
-        private static readonly string[] TabIcons = { "ui/Icons/civ/world/nations", "ui/Icons/civ/world/space", "ui/Icons/civ/world/chronicle", "ui/Icons/civ/world/globe" };
+        private static readonly string[] TabKeys = { "world_tab_nations", "world_tab_space", "world_tab_chronicle", "world_tab_world", "world_tab_orgs" };
+        private static readonly string[] TabIcons = { "ui/Icons/civ/world/nations", "ui/Icons/civ/world/space", "ui/Icons/civ/world/chronicle", "ui/Icons/civ/world/globe", "ui/Icons/civ/state/orgs" };
         private static int _tab;
         private static int _page;
 
@@ -58,6 +59,9 @@ namespace Civilizations
                     break;
                 case 3:
                     WorldTab(c);
+                    break;
+                case 4:
+                    OrgsTab(c);
                     break;
             }
         }
@@ -129,7 +133,7 @@ namespace Civilizations
         {
             UiKit.Header(c, Txt.T("world_chronicle"), UiKit.Gold, "ui/Icons/civ/world/chronicle");
             var list = new List<KeyValuePair<int, string>>();
-            foreach (Chronicle ch in Internet.Chronicles) list.Add(new KeyValuePair<int, string>(ch.Year, ch.Text));
+            foreach (NetChronicle ch in Internet.Chronicles) list.Add(new KeyValuePair<int, string>(ch.Year, ch.Text));
             foreach (NetPost p in Internet.Feed) if (p.Important) list.Add(new KeyValuePair<int, string>(p.Year, p.Text));
             list = list.OrderByDescending(x => x.Key).ToList();
             if (list.Count == 0)
@@ -145,6 +149,91 @@ namespace Civilizations
                 _page = n;
                 Render();
             });
+        }
+
+        private void OrgsTab(Transform c)
+        {
+            UiKit.Header(c, Txt.T("world_orders"), UiKit.Gold, "ui/Icons/civ/orgcat/order");
+            var orders = WorldOrders.Active.ToList();
+            if (orders.Count == 0) UiKit.Label(c, Txt.T("world_no_orders"), 18f, 8, TextAnchor.MiddleCenter, UiKit.Dim);
+            foreach (WorldOrder o in orders)
+            {
+                Kingdom lead = World.world.kingdoms.get(o.Leader);
+                UiKit.Stat(c, "ui/Icons/civ/orgcat/order", Txt.T("civ_order_" + o.Type), (G.Ok(lead) ? G.Name(lead) : "") + " · " + (o.Members.Count + 1), UiKit.Gold);
+            }
+            UiKit.Header(c, Txt.T("world_orgs"), UiKit.Gold, "ui/Icons/civ/state/orgs");
+            List<Org> all = Orgs.All.OrderByDescending(o => o.Members.Count).ToList();
+            if (all.Count == 0) UiKit.Label(c, Txt.T("state_no_orgs"), 18f, 8, TextAnchor.MiddleCenter, UiKit.Dim);
+            int pages = Math.Max(1, (all.Count + 11) / 12);
+            _page = Math.Min(_page, pages - 1);
+            foreach (Org o in all.Skip(_page * 12).Take(12))
+            {
+                OrgType t = Orgs.TypeOf(o);
+                Kingdom lead = World.world.kingdoms.get(o.Leader);
+                UiKit.Stat(c, "ui/Icons/civ/orgcat/" + (t != null ? t.Cat : "political"), Orgs.Name(o), (G.Ok(lead) ? G.Name(lead) : "") + " · " + o.Members.Count, UiKit.Soft);
+            }
+            UiKit.Pager(c, _page, pages, n =>
+            {
+                _page = n;
+                Render();
+            });
+        }
+
+        private static bool _armUnlock;
+        private static bool _armBring;
+        private static int _target = -1;
+
+        private void EvolutionTools(Transform c)
+        {
+            UiKit.Header(c, Txt.T("world_evolution"), UiKit.Gold, "ui/Icons/civ/cfg/lock_ages");
+            int cap = Research.SettingsCap();
+            UiKit.Stat(c, "ui/Icons/civ/cfg/lock_ages", Txt.T("world_cap_settings"), cap >= 0 ? Db.EraName(cap) : Txt.T("world_cap_none"), cap >= 0 ? UiKit.Gold : UiKit.Soft);
+            int top = cap >= 0 ? cap : Db.LastEra;
+            if (_target < 0 || _target > top) _target = Math.Min(top, Math.Max(0, EraLock.LeaderEra));
+            RectTransform row = UiKit.Box(c, "Bring", 24f);
+            UiKit.Btn(row, "-", null, () =>
+            {
+                _target = Math.Max(0, _target - 1);
+                _armBring = false;
+                Render();
+            }, new Vector2(18f, 20f), new Vector2(-UiKit.W / 2f + 12f, 0f), Txt.T("world_bring"), Txt.T("world_bring_d"));
+            SimpleButton bring = UiKit.Btn(row, _armBring ? Txt.T("world_confirm") : Txt.F("world_bring_to", Db.EraName(_target)), EraLock.EraSprite(_target), () =>
+            {
+                if (!_armBring)
+                {
+                    _armBring = true;
+                    _armUnlock = false;
+                    Render();
+                    return;
+                }
+                _armBring = false;
+                Research.BringAllTo(_target);
+                Notify.Show(Txt.F("world_brought", Db.EraName(_target)));
+                Render();
+            }, new Vector2(UiKit.W - 50f, 20f), new Vector2(0f, 0f), Txt.T("world_bring"), Txt.T("world_bring_d"));
+            if (_armBring) bring.Background.color = new Color(1f, 0.55f, 0.4f);
+            UiKit.Btn(row, "+", null, () =>
+            {
+                _target = Math.Min(top, _target + 1);
+                _armBring = false;
+                Render();
+            }, new Vector2(18f, 20f), new Vector2(UiKit.W / 2f - 12f, 0f), Txt.T("world_bring"), Txt.T("world_bring_d"));
+            RectTransform row2 = UiKit.Box(c, "Unlock", 24f);
+            SimpleButton unlock = UiKit.Btn(row2, _armUnlock ? Txt.T("world_confirm") : Txt.T("world_unlock_all"), UiKit.Icon("ui/Icons/civ/world/nations"), () =>
+            {
+                if (!_armUnlock)
+                {
+                    _armUnlock = true;
+                    _armBring = false;
+                    Render();
+                    return;
+                }
+                _armUnlock = false;
+                Research.UnlockEverything();
+                Notify.Show(Txt.T("world_unlocked"));
+                Render();
+            }, new Vector2(UiKit.W - 10f, 20f), new Vector2(0f, 0f), Txt.T("world_unlock_all"), Txt.T("world_unlock_all_d"));
+            if (_armUnlock) unlock.Background.color = new Color(1f, 0.55f, 0.4f);
         }
 
         private void WorldTab(Transform c)
@@ -163,6 +252,7 @@ namespace Civilizations
             UiKit.Stat(c, "ui/Icons/civ/econ/companies", Txt.T("world_companies"), Companies.Active().Count.ToString());
             UiKit.Header(c, Txt.T("world_routes"), UiKit.Gold);
             foreach (var kv in WorldPrefs.Followers()) UiKit.Stat(c, WorldPrefs.Icon(kv.Key), Txt.T("civ_route_" + kv.Key), kv.Value.ToString(), kv.Key == WorldPrefs.Route ? UiKit.Gold : UiKit.Soft);
+            EvolutionTools(c);
             UiKit.Header(c, Txt.T("world_eras"), UiKit.Gold);
             var byEra = new int[Db.Eras.Count];
             foreach (Kingdom k in G.Kingdoms()) if (k.isCiv()) byEra[Math.Max(0, Research.Era(k))]++;

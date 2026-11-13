@@ -55,6 +55,7 @@ namespace Civilizations
             int n = Math.Max(20, CivMod.C != null ? CivMod.C.SoldiersPerCity : 20);
             City cap = k != null ? k.capital : null;
             if (cap != null && cap.isAlive()) n = Math.Max(n, cap.countWarriors());
+            if (Peace.Demilitarized(k)) n = Math.Max(4, n / 3);
             if (CivMod.C != null && CivMod.C.PerfMode) n = Math.Max(1, n / 3);
             return n;
         }

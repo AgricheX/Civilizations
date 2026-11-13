@@ -43,7 +43,7 @@ namespace Civilizations
             if (d != null)
             {
                 if (d.Cls == "soldier") return d.Role == "melee" ? 0 : d.Role == "heavy" ? 1 : 2;
-                if (d.Cls == "air" || d.Cls == "ship") return 9;
+                if (d.Cls == "air" || d.Cls == "space" || d.Cls == "ship") return 9;
                 if (d.Cls == "siege" || d.Cls == "aa") return 4;
                 if (d.Cls == "tank" && u.kingdom != null && Research.Era(u.kingdom) >= 11) return 5;
                 return 3;

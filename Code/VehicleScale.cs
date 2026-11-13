@@ -23,6 +23,7 @@ namespace Civilizations
                 }
             }
             if (unit.Cls == "air") return 1.5f;
+            if (unit.Cls == "space") return unit.Role == "capital" ? 3f : unit.Role == "line" ? 2.2f : unit.Role == "escort" ? 1.6f : 1.8f;
             if (unit.Cls == "aa") return 2.3f;
             if (unit.Cls == "siege") return unit.Art == "siege_tower" || unit.Art == "trebuchet" ? 2.3f : 2f;
             if (unit.Cls != "land") return 1f;

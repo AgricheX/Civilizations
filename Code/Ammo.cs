@@ -64,6 +64,7 @@ namespace Civilizations
             }
             if (d == null) return baseCap;
             if (d.Cls == "ship") return baseCap * 2;
+            if (d.Cls == "space") return baseCap * 3;
             if (d.Cls == "air") return kind == "bombs" ? 10 : baseCap * 2;
             if (d.Cls == "soldier") return baseCap + baseCap / 2;
             return baseCap + baseCap / 2;

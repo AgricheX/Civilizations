@@ -50,7 +50,7 @@ namespace Civilizations
 
         private static bool RelatedComment(NetPost p)
         {
-            if (p.Who != "person" || !G.Chance(0.35f)) return false;
+            if (p.Who != "person" || p.Med != "social" || !G.Chance(0.35f)) return false;
             Actor author = G.ActorById(p.AuthorId);
             if (!G.Ok(author)) return false;
             var options = new List<KeyValuePair<Actor, string>>();

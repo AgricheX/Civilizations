@@ -23,7 +23,9 @@ namespace Civilizations
         public static void Update()
         {
             CivMod.Safe("tab", Tab.Try);
+            CivMod.Safe("updates", Updates.Tick);
             CivMod.Safe("ocean-compat", OceanCompat.Try);
+            CivMod.Safe("planet", () => CosmosPlanet.Tick(Time.unscaledDeltaTime));
             if (!G.Loaded)
             {
                 if (_world.Length > 0)
@@ -66,6 +68,15 @@ namespace Civilizations
                     CivMod.Safe("era-skins", EraSkins.Year);
                     CivMod.Safe("war-year", War.Year);
                     CivMod.Safe("internet-year", Internet.Year);
+                    CivMod.Safe("diplomacy-year", Diplomacy.Year);
+                    CivMod.Safe("orgs-year", Orgs.Year);
+                    CivMod.Safe("orders-year", WorldOrders.Year);
+                    CivMod.Safe("events-year", Events.Year);
+                    CivMod.Safe("sagas-year", Sagas.Year);
+                    CivMod.Safe("regression-year", Regression.Year);
+                    CivMod.Safe("cosmos-year", Cosmos.Year);
+                    CivMod.Safe("player-year", Player.Year);
+                    CivMod.Safe("statecraft-year", Statecraft.Year);
                 }
             }
             int kb = 2;
@@ -89,6 +100,14 @@ namespace Civilizations
                 CivMod.Safe("names", () => RealNames.KingdomYear(k));
                 CivMod.Safe("culture-sync", () => CultureSync.Year(k));
                 CivMod.Safe("ships", () => Ships.Retire(k, yrs));
+                CivMod.Safe("fog", () => Fog.KingdomYear(k, yrs));
+                CivMod.Safe("legitimacy", () => Legitimacy.Year(k, yrs));
+                CivMod.Safe("diplomacy", () => Diplomacy.KingdomYear(k, yrs));
+                CivMod.Safe("statecraft", () => Statecraft.KingdomYear(k, yrs));
+                CivMod.Safe("regression", () => Regression.KingdomYear(k, yrs));
+                CivMod.Safe("festivals", () => Festivals.KingdomYear(k, yrs));
+                CivMod.Safe("flags", () => Flags.KingdomYear(k, yrs));
+                CivMod.Safe("rarities", () => Rarities.KingdomYear(k, yrs));
             }
             int cb = 6;
             while (cb-- > 0 && _cq.Count > 0)
@@ -127,7 +146,6 @@ namespace Civilizations
                 CivMod.Safe("waters", () => Waters.Tick(f));
                 CivMod.Safe("ship-names", () => ShipNames.Tick(f));
                 CivMod.Safe("war-tick", () => War.Tick(f));
-                CivMod.Safe("walls-tick", () => Walls.Tick(f));
             }
             Heavy(Time.unscaledDeltaTime);
             _slow += World.world.elapsed;
@@ -194,6 +212,7 @@ namespace Civilizations
             Research.ClearCache();
             Bonus.Clear();
             Buildings.Relink();
+            NetHub.Clear();
             Internet.Load();
             Companies.Load();
             Rails.Load();
@@ -201,6 +220,13 @@ namespace Civilizations
             Transit.Clear();
             Mirror.Reset();
             Walls.Clear();
+            Rarities.Clear();
+            CosmosSim.Clear();
+            Cosmos.Load();
+            Player.Load();
+            Sagas.Pending.Clear();
+            Statecraft.Clear();
+            CivMod.ResetErrors();
             Catchup.Clear();
             Formations.Clear();
             EraSkins.Clear();
@@ -208,6 +234,14 @@ namespace Civilizations
             Navy.Clear();
             Ammo.Clear();
             Energy.Clear();
+            Profile.Clear();
+            Diplomacy.Clear();
+            Orgs.Clear();
+            WorldOrders.Clear();
+            Firsts.Clear();
+            WarGoals.Clear();
+            Fog.Clear();
+            Flags.Clear();
             NetPhoto.Clear();
             Store.Reset();
             G.ResetCache();

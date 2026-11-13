@@ -99,8 +99,14 @@ namespace Civilizations
             if (_cache.TryGetValue(k.data.id, out s)) return s;
             s = new KState();
             int ver = Store.Int(k.data, KVer, 0);
-            s.Known = ver == Db.Techs.Count ? TechSet.Load(Store.Str(k.data, KBits)) : new TechSet();
-            s.Found = ver == Db.Techs.Count ? TechSet.Load(Store.Str(k.data, KFound)) : new TechSet();
+            TechSet remapped = null, remappedFound = null;
+            if (ver != 0 && ver != Db.Techs.Count)
+            {
+                remapped = Db.Remap(ver, Store.Str(k.data, KBits));
+                remappedFound = Db.Remap(ver, Store.Str(k.data, KFound));
+            }
+            s.Known = ver == Db.Techs.Count ? TechSet.Load(Store.Str(k.data, KBits)) : remapped ?? new TechSet();
+            s.Found = ver == Db.Techs.Count ? TechSet.Load(Store.Str(k.data, KFound)) : remappedFound ?? new TechSet();
             s.Route = Store.Str(k.data, KRoute);
             s.Aff = Store.Map(k.data, KAff);
             s.Floor = Store.Int(k.data, KFloor, 0);
@@ -108,7 +114,14 @@ namespace Civilizations
             if (ver != Db.Techs.Count)
             {
                 Store.Put(k.data, KVer, Db.Techs.Count);
-                if (ver != 0) Legacy.RebuildTechs(k);
+                if (remapped != null)
+                {
+                    Save(k, s);
+                    Store.Put(k.data, KFound, s.Found.Save());
+                    string cur = Store.Str(k.data, KCur);
+                    if (Db.Tech(cur) == null) Store.Put(k.data, KCur, "");
+                }
+                else if (ver != 0) Legacy.RebuildTechs(k);
             }
             return s;
         }
@@ -273,15 +286,22 @@ namespace Civilizations
             new string[0]
         };
 
+        public static string[] FundOf(int era)
+        {
+            if (era < 0 || era >= Db.Eras.Count) return new string[0];
+            if (era < Fundamentals.Length && Fundamentals[era].Length > 0) return Fundamentals[era];
+            return Db.Eras[era].Fund.ToArray();
+        }
+
         public static bool IsFundamental(TechDef t)
         {
-            return t != null && t.Era < Fundamentals.Length && Array.IndexOf(Fundamentals[t.Era], t.Id) >= 0;
+            return t != null && Array.IndexOf(FundOf(t.Era), t.Id) >= 0;
         }
 
         public static bool HasFundamentals(KState s, int era)
         {
-            if (era < 0 || era >= Fundamentals.Length) return true;
-            foreach (string id in Fundamentals[era])
+            if (era < 0 || era >= Db.Eras.Count) return true;
+            foreach (string id in FundOf(era))
             {
                 TechDef t = Db.Tech(id);
                 if (t != null && !s.Known.Has(t.Index)) return false;
@@ -293,8 +313,8 @@ namespace Civilizations
         {
             var l = new List<TechDef>();
             KState s = State(k);
-            if (s == null || era < 0 || era >= Fundamentals.Length) return l;
-            foreach (string id in Fundamentals[era])
+            if (s == null || era < 0 || era >= Db.Eras.Count) return l;
+            foreach (string id in FundOf(era))
             {
                 TechDef t = Db.Tech(id);
                 if (t != null && !s.Known.Has(t.Index)) l.Add(t);
@@ -333,25 +353,104 @@ namespace Civilizations
             return d == null ? -1 : Store.Int(d, KCap, -1);
         }
 
-        public static int Cap(Kingdom k)
+        public const string KSaveCap = "civ_save_cap";
+        public const int PlanetEras = 15;
+        public const int ErasPerScale = 3;
+
+        public static int ScaleOf(int era)
         {
-            int a = KingdomCap(k);
-            int b = WorldCap();
+            return era < PlanetEras ? 0 : 1 + (era - PlanetEras) / ErasPerScale;
+        }
+
+        public static int LastEraOfScale(int scale)
+        {
+            return Math.Min(Db.LastEra, PlanetEras - 1 + scale * ErasPerScale);
+        }
+
+        private static int Low(int a, int b)
+        {
             if (a < 0) return b;
             if (b < 0) return a;
             return Math.Min(a, b);
         }
 
+        public static int SettingsCap()
+        {
+            int cap = -1;
+            if (CivMod.C != null)
+            {
+                int e = CivMod.C.MaxEra;
+                if (e >= 0 && e < Db.Eras.Count) cap = e;
+                int s = CivMod.C.MaxScale;
+                if (s >= 0 && s <= 9) cap = Low(cap, LastEraOfScale(s));
+            }
+            SaveCustomData d = Store.World();
+            if (d != null) cap = Low(cap, Store.Int(d, KSaveCap, -1));
+            return cap;
+        }
+
+        public static int Cap(Kingdom k)
+        {
+            return Low(Low(KingdomCap(k), WorldCap()), SettingsCap());
+        }
+
+        public static bool AtCap(Kingdom k)
+        {
+            int cap = Cap(k);
+            return cap >= 0 && Era(k) >= cap;
+        }
+
         public static void SetKingdomCap(Kingdom k, int era)
         {
             if (k == null || k.data == null) return;
+            int s = SettingsCap();
+            if (era >= 0 && s >= 0) era = Math.Min(era, s);
             Store.Put(k.data, KCap, era);
         }
 
         public static void SetWorldCap(int era)
         {
             SaveCustomData d = Store.World();
+            int s = SettingsCap();
+            if (era >= 0 && s >= 0) era = Math.Min(era, s);
             if (d != null) Store.Put(d, KCap, era);
+        }
+
+        public static void UnlockEverything()
+        {
+            foreach (Kingdom k in G.Kingdoms())
+            {
+                if (!k.isCiv()) continue;
+                int cap = Cap(k);
+                var set = new TechSet(Known(k));
+                foreach (TechDef t in Db.Techs) if (cap < 0 || t.Era <= cap) set.Add(t.Index);
+                SetAll(k, set);
+                Rarities.Dirty(k);
+                Profile.Invalidate(k);
+                Hub.Raise(Hub.EraChanged, k, null, null, null, Era(k).ToString(), "", Era(k));
+            }
+            WinTech.Changed(null);
+        }
+
+        public static void BringAllTo(int era)
+        {
+            era = Math.Max(0, Math.Min(Db.LastEra, era));
+            int s = SettingsCap();
+            if (s >= 0) era = Math.Min(era, s);
+            foreach (Kingdom k in G.Kingdoms())
+            {
+                if (!k.isCiv() || Era(k) >= era) continue;
+                int before = Era(k);
+                SetupEra(k, era);
+                Profile.Invalidate(k);
+                int after = Era(k);
+                if (after != before)
+                {
+                    Hub.Raise(Hub.EraChanged, k, null, null, null, after.ToString(), before.ToString(), after);
+                    CivMod.Safe("era-kit", () => Catchup.Kit(k, after));
+                }
+            }
+            WinTech.Changed(null);
         }
 
         public static bool Capped(Kingdom k, TechDef t)
@@ -365,9 +464,11 @@ namespace Civilizations
             if (s.Known.Has(t.Index)) return false;
             if (Capped(k, t)) return false;
             int era = s.Era < 0 ? ComputeEra(s) : s.Era;
-            if (t.Era > era + 1) return false;
-            if (t.Era == era + 1 && EraFraction(s, era) < 0.45f) return false;
+            int lead = t.Era > era + 1 ? Rarities.Lead(k, t) : 0;
+            if (t.Era > era + 1 + lead) return false;
+            if (t.Era == era + 1 && EraFraction(s, era) < 0.45f && Rarities.Lead(k, t) == 0) return false;
             if (t.Rare && !s.Found.Has(t.Index)) return false;
+            if (t.Era >= PlanetEras && CosmosSim.CachedScale(k) < ScaleOf(t.Era) - 1) return false;
             if (!string.IsNullOrEmpty(t.Route) && !ignoreMix)
             {
                 if (string.IsNullOrEmpty(s.Route)) return false;
@@ -397,6 +498,7 @@ namespace Civilizations
             }
             Store.Map(k.data, KAff, s.Aff);
             Bonus.Dirty(k);
+            if (t.Rare) Rarities.Dirty(k);
             int after = Era(k);
             if (after >= RouteEra && string.IsNullOrEmpty(s.Route)) ChooseRoute(k, s, after);
             else if (after > before && after >= RouteEra) ReconsiderRoute(k, s, after);
@@ -407,6 +509,13 @@ namespace Civilizations
             }
             if (after > before) CivMod.Safe("era-kit", () => Catchup.Kit(k, after));
             Policies.OnTech(k, t);
+            Hub.Raise(Hub.TechLearned, k, null, null, null, t.Id, reason);
+            if (after != before)
+            {
+                Profile.Invalidate(k);
+                Hub.Raise(Hub.EraChanged, k, null, null, null, after.ToString(), before.ToString(), after);
+                Firsts.Era(k, after);
+            }
             CivMod.Log(G.Name(k) + " learned " + t.Id + " (" + reason + ") year " + G.Year);
         }
 
@@ -418,7 +527,9 @@ namespace Civilizations
         public static void Lose(Kingdom k, TechDef t, string reason)
         {
             if (!G.Ok(k) || t == null) return;
+            if (reason != "sandbox" && Megastructures.Has(k, "grand_archive") && G.Chance(0.7f)) return;
             KState s = State(k);
+            int eraBefore = Era(k);
             if (!s.Known.Remove(t.Index)) return;
             int raw = 0;
             while (raw < Db.LastEra && EraFraction(s, raw) >= 0.65f) raw++;
@@ -432,6 +543,10 @@ namespace Civilizations
             Bonus.Dirty(k);
             if (Store.Str(k.data, KCur) == t.Id) Store.Put(k.data, KProg, 0f);
             Internet.OnTechLost(k, t);
+            Hub.Raise(Hub.TechLost, k, null, null, null, t.Id, reason);
+            Profile.Invalidate(k);
+            int eraAfter = Era(k);
+            if (eraAfter < eraBefore) Hub.Raise(Hub.EraDropped, k, null, null, null, eraAfter.ToString(), eraBefore.ToString(), eraAfter);
         }
 
         public static void Discover(Kingdom k, TechDef t)
@@ -642,7 +757,7 @@ namespace Civilizations
         private static void CheckLoss(Kingdom k, int yrs)
         {
             KState s = State(k);
-            if (s.Known.Count == 0) return;
+            if (s.Known.Count == 0 || !Regression.On) return;
             int archives = 0;
             float power = 0f;
             foreach (City c in G.Cities(k))
@@ -656,7 +771,7 @@ namespace Civilizations
             {
                 float p = 0.25f * (last - archives) / Math.Max(1f, last);
                 if (archives == 0) p += 0.35f;
-                if (G.Chance(p)) DropLatest(k, "archives");
+                if (G.Chance(p)) Regression.ArchivesLost(k);
             }
             int dark = Store.Int(k.data, KDark, 0);
             if (power <= 0.01f && archives == 0 && Era(k) >= 3) dark += yrs;
@@ -665,22 +780,8 @@ namespace Civilizations
             if (dark >= 60)
             {
                 Store.Put(k.data, KDark, 20);
-                if (G.Chance(0.5f)) DropLatest(k, "dark_age");
+                if (G.Chance(0.5f)) Regression.DarkAge(k);
             }
-        }
-
-        private static void DropLatest(Kingdom k, string reason)
-        {
-            KState s = State(k);
-            var needed = new HashSet<string>();
-            foreach (TechDef t in s.Known.All()) foreach (string r in t.Req) needed.Add(r);
-            TechDef pick = null;
-            foreach (TechDef t in s.Known.All())
-            {
-                if (needed.Contains(t.Id)) continue;
-                if (pick == null || t.Era > pick.Era || (t.Era == pick.Era && t.Index > pick.Index)) pick = t;
-            }
-            if (pick != null) Lose(k, pick, reason);
         }
 
         private static void Discoveries(Kingdom k, int yrs)
@@ -720,7 +821,8 @@ namespace Civilizations
             float prog = Store.Flt(k.data, KProg, 0f) + rate * yrs * pace;
             float cost = Cost(k, t);
             int guard = 0;
-            while (prog >= cost && guard++ < 6)
+            int maxLearn = Math.Max(6, (int)(pace / 3f));
+            while (prog >= cost && guard++ < maxLearn)
             {
                 prog -= cost;
                 Store.Put(k.data, KCur, "");
@@ -739,7 +841,7 @@ namespace Civilizations
 
         public static float Cost(Kingdom k, TechDef t)
         {
-            float cost = t.Cost;
+            float cost = t.Cost * Regression.CostMult(k, t) * Rarities.CostMult(k, t);
             int era = Era(k);
             if (t.Era < era) cost *= Math.Max(0.3f, 1f - 0.2f * (era - t.Era));
             int contacts = ContactsKnowing(k, t);
@@ -790,12 +892,38 @@ namespace Civilizations
             {
                 foreach (Kingdom o in G.Kingdoms()) if (o != k && Internet.Exists(o)) set.Add(o);
             }
+            foreach (Kingdom o in Orgs.ResearchPartners(k))
+            {
+                if (G.Ok(o) && o != k && Fog.Knows(k, o)) set.Add(o);
+            }
             _contacts[k.data.id] = new KeyValuePair<int, HashSet<Kingdom>>(G.Year, set);
             return set;
         }
 
+        public static void Choose(Kingdom k, TechDef t)
+        {
+            if (t == null) return;
+            Store.Put(k.data, KCur, t.Id);
+            Store.Put(k.data, KProg, 0f);
+        }
+
+        public static List<TechDef> Candidates(Kingdom k)
+        {
+            KState s = State(k);
+            var avail = new List<TechDef>();
+            if (s == null) return avail;
+            int era = Era(k);
+            for (int e = 0; e <= Math.Min(Db.LastEra, era + 1); e++)
+            {
+                foreach (TechDef t in Db.Eras[e].Techs) if (Available(k, s, t)) avail.Add(t);
+            }
+            return avail;
+        }
+
         private static TechDef Pick(Kingdom k, KState s)
         {
+            TechDef chosen = Player.ResearchPick(k);
+            if (chosen != null) return chosen;
             var options = new List<TechDef>();
             var weights = new List<float>();
             Dictionary<string, float> focus = Roles.SpecialtyShare(k);
@@ -808,8 +936,7 @@ namespace Civilizations
             var needed = new HashSet<int>();
             for (int e = 0; e <= Math.Min(Db.LastEra, era); e++)
             {
-                if (e >= Fundamentals.Length) break;
-                foreach (string id in Fundamentals[e]) Needed(s, Db.Tech(id), needed, 0);
+                foreach (string id in FundOf(e)) Needed(s, Db.Tech(id), needed, 0);
             }
             var avail = new List<TechDef>();
             for (int e = 0; e <= Math.Min(Db.LastEra, era + 1); e++)
@@ -892,7 +1019,7 @@ namespace Civilizations
             float war = World.world.wars.hasWars(k) ? 0.85f : 1f;
             float hunger = cities > 0 ? 1f - 0.4f * (famine / cities) : 1f;
             float comp = 1f + Companies.ResearchBoost(k);
-            return G.Clamp(res * rb * kn * bonus * eraNorm * stab * clan * spec * war * hunger * comp, 0.02f, 5f);
+            return G.Clamp(res * rb * kn * bonus * eraNorm * stab * clan * spec * war * hunger * comp * Rarities.RateMult(k) * Spacecraft.ResearchMult(k), 0.02f, 5f);
         }
 
         public static void SetupEra(Kingdom k, int era)

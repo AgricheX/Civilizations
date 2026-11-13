@@ -169,10 +169,10 @@ namespace Civilizations
             _air.Clear();
             foreach (UnitDef d in Db.Units)
             {
-                if (d.Cls != "air") continue;
+                if (d.Cls != "air" && d.Cls != "space") continue;
                 ActorAsset asset = AssetManager.actor_library.get(d.Id);
                 if (asset == null || asset.units == null || asset.units.Count == 0) continue;
-                bool ops = d.Role != "scout" && d.Role != "transport";
+                bool ops = d.Role != "scout" && d.Role != "transport" && !Spacecraft.Civil(d);
                 foreach (Actor a in asset.units)
                 {
                     if (G.Ok(a) && a.kingdom != null && a.current_tile != null)
@@ -269,7 +269,7 @@ namespace Civilizations
             int n = 0;
             foreach (UnitDef d in Db.Units)
             {
-                if (d.Cls != "air") continue;
+                if (d.Cls != "air" && d.Cls != "space") continue;
                 ActorAsset a = AssetManager.actor_library.get(d.Id);
                 if (a == null || a.units == null) continue;
                 foreach (Actor v in a.units) if (v != null && v.kingdom == k) n++;
@@ -320,9 +320,9 @@ namespace Civilizations
             {
                 if (!__result || pTarget == null || !pTarget.isActor() || !__instance.isActor()) return;
                 UnitDef td = Vehicles.Def(pTarget.a);
-                if (td == null || td.Cls != "air") return;
+                if (td == null || td.Cls != "air" && td.Cls != "space") return;
                 UnitDef ad = Vehicles.Def(__instance.a);
-                if (ad != null && (ad.Cls == "air" || ad.Cls == "aa")) return;
+                if (ad != null && (ad.Cls == "air" || ad.Cls == "space" || ad.Cls == "aa")) return;
                 if (__instance.a.hasRangeAttack()) return;
                 __result = false;
             }

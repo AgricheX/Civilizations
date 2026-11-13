@@ -7,6 +7,8 @@ namespace Civilizations
     internal static class Policies
     {
         public const string Prefix = "civ_";
+        private const string KLast = "civ_pol_last_";
+        private const string KLock = "civ_pol_lock_";
         public static readonly string[] Groups = { "gov", "ideo", "econ", "xeno", "transport" };
         private static readonly Dictionary<string, string> GroupColors = new Dictionary<string, string>
         {
@@ -121,13 +123,58 @@ namespace Civilizations
         public static void Set(Kingdom k, string group, string id, string reason)
         {
             if (!G.Ok(k)) return;
+            bool own = reason == "player" || reason == "sandbox";
+            if (!own && reason != "init" && Player.Locks(k, "politics") && HasExplicit(k, group)) return;
+            if (!own && reason != "init" && Locked(k, group)) return;
             PolicyDef p = Db.Policy(id);
             if (p == null || p.Group != group) return;
             PolicyDef old = Get(k, group);
-            if (old != null && old.Id == id && HasExplicit(k, group)) return;
+            if (old != null && old.Id == id && HasExplicit(k, group))
+            {
+                Store.Put(k.data, KLast + group, id);
+                if (own) Store.Put(k.data, KLock + group, id);
+                return;
+            }
+            if (old != null && old.Id != id && !Statecraft.Vote(k, group, id, reason)) return;
             k.addTrait(TraitId(id), true);
+            Store.Put(k.data, KLast + group, Id(k, group));
+            if (own) Store.Put(k.data, KLock + group, Id(k, group));
             Bonus.Dirty(k);
-            if (old != null && old.Id != id && reason != "init") Internet.OnPolicy(k, group, old.Id, id, reason);
+            if (old != null && old.Id != id && reason != "init")
+            {
+                Internet.OnPolicy(k, group, old.Id, id, reason);
+                Profile.Invalidate(k);
+                Hub.Raise(Hub.PolicyChanged, k, null, null, null, id, old.Id + "|" + group + "|" + reason);
+            }
+        }
+
+        public static bool Locked(Kingdom k, string group)
+        {
+            Watch(k, group);
+            return k != null && k.data != null && Store.Str(k.data, KLock + group).Length > 0;
+        }
+
+        public static void Watch(Kingdom k, string group)
+        {
+            if (!G.Ok(k) || k.data == null) return;
+            if (!HasExplicit(k, group))
+            {
+                if (Store.Str(k.data, KLock + group).Length > 0) Store.Put(k.data, KLock + group, "");
+                return;
+            }
+            string cur = Id(k, group);
+            string last = Store.Str(k.data, KLast + group);
+            if (last == cur) return;
+            Store.Put(k.data, KLast + group, cur);
+            if (last.Length == 0) return;
+            Store.Put(k.data, KLock + group, cur);
+            Bonus.Dirty(k);
+            Profile.Invalidate(k);
+        }
+
+        public static void Unlock(Kingdom k, string group)
+        {
+            if (k != null && k.data != null) Store.Put(k.data, KLock + group, "");
         }
 
         public static bool Unlocked(Kingdom k, PolicyDef p)
@@ -188,7 +235,7 @@ namespace Civilizations
                     Politics.ConsiderNewPolicy(k, u.Substring(u.IndexOf(':') + 1));
                 }
             }
-            if (t.Id == "railways" && Id(k, "transport") == "balanced_transport") Politics.ChooseTransport(k);
+            if (t.Id == "railways" && !Locked(k, "transport") && Id(k, "transport") == "balanced_transport") Politics.ChooseTransport(k);
         }
 
         public static List<PolicyDef> Options(Kingdom k, string group)

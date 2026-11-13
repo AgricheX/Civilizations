@@ -1,0 +1,3123 @@
+{
+ "bands": [
+  {
+   "id": "pre",
+   "min": 0,
+   "max": 2
+  },
+  {
+   "id": "ancient",
+   "min": 3,
+   "max": 6
+  },
+  {
+   "id": "medieval",
+   "min": 7,
+   "max": 9
+  },
+  {
+   "id": "modern",
+   "min": 10,
+   "max": 14
+  },
+  {
+   "id": "solar",
+   "min": 15,
+   "max": 19
+  },
+  {
+   "id": "stellar",
+   "min": 20,
+   "max": 25
+  },
+  {
+   "id": "galactic",
+   "min": 26,
+   "max": 33
+  },
+  {
+   "id": "intergalactic",
+   "min": 34,
+   "max": 38
+  },
+  {
+   "id": "cosmic",
+   "min": 39,
+   "max": 41
+  }
+ ],
+ "lex": [
+  "ruler",
+  "council",
+  "healer",
+  "soldiers",
+  "scholars",
+  "merchants",
+  "priests",
+  "rebels",
+  "disease",
+  "disaster",
+  "wonder",
+  "settlement",
+  "frontier",
+  "craft",
+  "news",
+  "vehicle",
+  "criminal",
+  "artist"
+ ],
+ "sagas": [
+  {
+   "id": "outbreak",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 1.4,
+   "cd": 35,
+   "big": true,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": -0.03,
+      "kill": 0.03,
+      "bonus": {
+       "trade": -8
+      },
+      "years": 3
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    },
+    {
+     "fx": {
+      "gold": -120,
+      "kill": 0.01,
+      "bonus": {
+       "health": 10
+      },
+      "years": 6
+     },
+     "ai": {
+      "fam:technocratic": 2,
+      "fam:liberal": 1
+     }
+    },
+    {
+     "fx": {
+      "kill": 0.08,
+      "stability": 0.02
+     },
+     "ai": {
+      "fam:theocratic": 3
+     },
+     "need": [
+      "religious"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "officer_plot",
+   "cat": "politics",
+   "good": false,
+   "cond": [
+    "king"
+   ],
+   "w": 0.8,
+   "cd": 50,
+   "big": true,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": -0.05,
+      "legit": 0.05,
+      "bonus": {
+       "attack": -5
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:authoritarian": 3,
+      "fam:military": 1
+     }
+    },
+    {
+     "fx": {
+      "gold": -100,
+      "stability": 0.03
+     },
+     "ai": {
+      "fam:corporate": 2
+     }
+    },
+    {
+     "fx": {
+      "coup_chance": 0.35
+     }
+    }
+   ]
+  },
+  {
+   "id": "discovery",
+   "cat": "sci",
+   "good": true,
+   "cond": [],
+   "w": 1.3,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -80,
+      "progress": 0.6,
+      "moment": 1
+     },
+     "ai": {
+      "fam:technocratic": 3
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "research": 8
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "prestige": 10,
+       "culture": 6
+      },
+      "years": 15,
+      "moment": 1
+     },
+     "ai": {
+      "fam:liberal": 2,
+      "fam:democratic": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "calamity",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 1.2,
+   "cd": 30,
+   "big": true,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -120,
+      "stability": 0.03
+     },
+     "ai": {
+      "fam:democratic": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.05,
+      "bonus": {
+       "prod": -10
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:authoritarian": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "hunger",
+   "cat": "economy",
+   "good": false,
+   "cond": [],
+   "w": 1.1,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": -0.03,
+      "bonus": {
+       "growth": -5
+      },
+      "years": 3
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    },
+    {
+     "fx": {
+      "gold": -120
+     },
+     "ai": {
+      "fam:corporate": 2,
+      "fam:liberal": 1
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "trade": -10
+      },
+      "years": 5,
+      "stability": 0.02
+     },
+     "ai": {
+      "fam:socialist": 2,
+      "fam:authoritarian": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "uprising",
+   "cat": "politics",
+   "good": false,
+   "cond": [
+    "unstable"
+   ],
+   "w": 1.2,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "kill": 0.03,
+      "stability": 0.03,
+      "legit": -0.04
+     },
+     "ai": {
+      "fam:authoritarian": 3,
+      "fam:military": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.04,
+      "bonus": {
+       "gold": -5
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:democratic": 2,
+      "fam:liberal": 2
+     }
+    },
+    {
+     "fx": {
+      "legit": 0.04,
+      "bonus": {
+       "loyalty": 6
+      },
+      "years": 15
+     },
+     "ai": {
+      "fam:democratic": 3
+     },
+     "need": [
+      "fam:democratic"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "boom",
+   "cat": "economy",
+   "good": true,
+   "cond": [],
+   "w": 1.1,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": 150,
+      "stability": -0.02
+     },
+     "ai": {
+      "fam:authoritarian": 1,
+      "fam:socialist": 2
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "trade": 10,
+       "gold": 5
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:corporate": 3,
+      "fam:liberal": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "masterpiece",
+   "cat": "culture",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -50,
+      "bonus": {
+       "culture": 12,
+       "prestige": 6
+      },
+      "years": 15,
+      "moment": 1
+     },
+     "ai": {
+      "fam:monarchy": 2,
+      "fam:liberal": 1
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.02,
+      "bonus": {
+       "culture": -5
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:authoritarian": 2,
+      "fam:theocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "schism",
+   "cat": "culture",
+   "good": false,
+   "cond": [
+    "religious"
+   ],
+   "w": 0.9,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.03,
+      "bonus": {
+       "research": -4
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:theocratic": 3,
+      "fam:monarchy": 1
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.04,
+      "bonus": {
+       "research": 6,
+       "culture": 4
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:liberal": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "border_clash",
+   "cat": "war",
+   "good": false,
+   "cond": [
+    "rival"
+   ],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "war": 1,
+      "stability": 0.02
+     },
+     "ai": {
+      "fam:military": 3,
+      "fam:imperial": 2
+     }
+    },
+    {
+     "fx": {
+      "legit": -0.03
+     },
+     "ai": {
+      "fam:democratic": 2
+     }
+    },
+    {
+     "fx": {
+      "gold": -80,
+      "bonus": {
+       "defense": 10
+      },
+      "years": 10
+     }
+    }
+   ]
+  },
+  {
+   "id": "succession",
+   "cat": "politics",
+   "good": false,
+   "cond": [
+    "king"
+   ],
+   "w": 0.8,
+   "cd": 60,
+   "big": true,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.03
+     },
+     "ai": {
+      "fam:monarchy": 3
+     }
+    },
+    {
+     "fx": {
+      "legit": 0.05,
+      "stability": -0.02
+     },
+     "ai": {
+      "fam:democratic": 3
+     }
+    },
+    {
+     "fx": {
+      "crisis": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "wonder_plan",
+   "cat": "culture",
+   "good": true,
+   "cond": [],
+   "w": 0.7,
+   "cd": 60,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -200,
+      "bonus": {
+       "prestige": 20,
+       "culture": 8
+      },
+      "years": 30,
+      "moment": 2
+     },
+     "ai": {
+      "fam:imperial": 3,
+      "fam:monarchy": 2
+     }
+    },
+    {
+     "fx": {},
+     "ai": {
+      "fam:corporate": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "spy_caught",
+   "cat": "diplomacy",
+   "good": false,
+   "cond": [
+    "rival"
+   ],
+   "w": 0.8,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.02,
+      "bonus": {
+       "defense": 4
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    },
+    {
+     "fx": {
+      "gold": 60
+     },
+     "ai": {
+      "fam:corporate": 2
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "research": 5
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:technocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "refugees",
+   "cat": "society",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": -0.02,
+      "bonus": {
+       "growth": 8
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:liberal": 3,
+      "fam:democratic": 1
+     }
+    },
+    {
+     "fx": {
+      "legit": -0.02
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "corruption",
+   "cat": "politics",
+   "good": false,
+   "cond": [],
+   "w": 1.1,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": -0.03,
+      "legit": 0.04
+     },
+     "ai": {
+      "fam:democratic": 2,
+      "fam:authoritarian": 1
+     }
+    },
+    {
+     "fx": {
+      "legit": -0.05,
+      "gold": 80
+     },
+     "ai": {
+      "fam:corporate": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "commander",
+   "cat": "war",
+   "good": true,
+   "cond": [],
+   "w": 0.9,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "great": "general",
+      "bonus": {
+       "attack": 8
+      },
+      "years": 10,
+      "moment": 1
+     },
+     "ai": {
+      "fam:military": 3
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.02
+     },
+     "ai": {
+      "fam:democratic": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "omen",
+   "cat": "culture",
+   "good": false,
+   "cond": [],
+   "w": 0.9,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -40,
+      "stability": 0.03
+     },
+     "ai": {
+      "fam:theocratic": 3
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.02,
+      "bonus": {
+       "research": 3
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:technocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "crime_wave",
+   "cat": "society",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.02,
+      "bonus": {
+       "growth": -3
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:authoritarian": 3
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.02,
+      "bonus": {
+       "trade": 4
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:liberal": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "feast_request",
+   "cat": "culture",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -60,
+      "stability": 0.05,
+      "moment": 1
+     },
+     "ai": {
+      "fam:monarchy": 2,
+      "fam:democratic": 1
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.02
+     }
+    }
+   ]
+  },
+  {
+   "id": "defector",
+   "cat": "sci",
+   "good": true,
+   "cond": [
+    "rival"
+   ],
+   "w": 0.7,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "research": 8
+      },
+      "years": 15
+     },
+     "ai": {
+      "fam:technocratic": 3,
+      "fam:liberal": 1
+     }
+    },
+    {
+     "fx": {
+      "legit": 0.01
+     }
+    }
+   ]
+  },
+  {
+   "id": "cure",
+   "cat": "sci",
+   "good": true,
+   "cond": [],
+   "w": 0.8,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -80,
+      "bonus": {
+       "health": 12
+      },
+      "years": 20,
+      "moment": 1
+     },
+     "ai": {
+      "fam:technocratic": 2,
+      "fam:liberal": 1
+     }
+    },
+    {
+     "fx": {},
+     "ai": {
+      "fam:theocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "strike",
+   "cat": "economy",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -80,
+      "stability": 0.03
+     },
+     "ai": {
+      "fam:democratic": 2,
+      "fam:socialist": 3
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.04,
+      "bonus": {
+       "prod": 4
+      },
+      "years": 3
+     },
+     "ai": {
+      "fam:authoritarian": 2,
+      "fam:corporate": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "trade_pact",
+   "cat": "diplomacy",
+   "good": true,
+   "cond": [
+    "neighbor"
+   ],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "trade": 10
+      },
+      "years": 15
+     },
+     "ai": {
+      "fam:corporate": 3,
+      "fam:liberal": 2
+     }
+    },
+    {
+     "fx": {},
+     "ai": {
+      "fam:authoritarian": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "explorers",
+   "cat": "society",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "explore": 6,
+      "bonus": {
+       "growth": 5
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:imperial": 3
+     }
+    },
+    {
+     "fx": {
+      "explore": 3,
+      "progress": 0.3
+     },
+     "ai": {
+      "fam:technocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "marvel",
+   "cat": "nature",
+   "good": true,
+   "cond": [],
+   "w": 0.8,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "culture": 10
+      },
+      "years": 20
+     },
+     "ai": {
+      "fam:theocratic": 2
+     }
+    },
+    {
+     "fx": {
+      "gold": 120
+     },
+     "ai": {
+      "fam:corporate": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "ruler_ill",
+   "cat": "politics",
+   "good": false,
+   "cond": [
+    "king"
+   ],
+   "w": 0.8,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -60,
+      "kill_ruler_chance": 0.1
+     }
+    },
+    {
+     "fx": {
+      "legit": 0.03,
+      "kill_ruler_chance": 0.35
+     },
+     "ai": {
+      "fam:monarchy": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "scandal",
+   "cat": "politics",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "legit": -0.03,
+      "stability": 0.01
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.02,
+      "legit": 0.05
+     },
+     "ai": {
+      "fam:democratic": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "lost_vessel",
+   "cat": "society",
+   "good": false,
+   "cond": [],
+   "w": 0.8,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -40,
+      "bonus": {
+       "research": 3
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:technocratic": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.02
+     }
+    }
+   ]
+  },
+  {
+   "id": "youth",
+   "cat": "society",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": -0.02,
+      "bonus": {
+       "research": 5,
+       "growth": 3
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:liberal": 3,
+      "fam:democratic": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.02,
+      "bonus": {
+       "research": -3
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:monarchy": 2,
+      "fam:theocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "envoy_gifts",
+   "cat": "diplomacy",
+   "good": true,
+   "cond": [
+    "neighbor"
+   ],
+   "w": 0.9,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": 80
+     }
+    },
+    {
+     "fx": {
+      "gold": -40,
+      "bonus": {
+       "prestige": 5
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:monarchy": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "bumper",
+   "cat": "economy",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "food": 10
+      },
+      "years": 5
+     }
+    },
+    {
+     "fx": {
+      "gold": 100
+     },
+     "ai": {
+      "fam:corporate": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "comet",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 0.7,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.04
+     },
+     "ai": {
+      "fam:theocratic": 2,
+      "fam:monarchy": 1
+     }
+    },
+    {
+     "fx": {
+      "progress": 0.25
+     },
+     "ai": {
+      "fam:technocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "hero",
+   "cat": "war",
+   "good": true,
+   "cond": [],
+   "w": 0.9,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.03,
+      "moment": 1
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "attack": 5
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:military": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "lost_heir",
+   "cat": "politics",
+   "good": false,
+   "cond": [
+    "king"
+   ],
+   "w": 0.6,
+   "cd": 60,
+   "big": false,
+   "bands": [
+    "all"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.02,
+      "legit": -0.02
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    },
+    {
+     "fx": {
+      "legit": 0.03,
+      "stability": -0.03
+     },
+     "ai": {
+      "fam:democratic": 1
+     }
+    },
+    {
+     "fx": {
+      "secession_chance": 0.15
+     }
+    }
+   ]
+  },
+  {
+   "id": "herd_crossing",
+   "cat": "nature",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "pre"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "food": 15
+      },
+      "years": 3,
+      "moment": 1
+     }
+    },
+    {
+     "fx": {
+      "explore": 5,
+      "bonus": {
+       "growth": 4
+      },
+      "years": 5
+     }
+    }
+   ]
+  },
+  {
+   "id": "cave_painting",
+   "cat": "culture",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "pre"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "culture": 8
+      },
+      "years": 20,
+      "moment": 1
+     }
+    },
+    {
+     "fx": {
+      "progress": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "id": "fire_lost",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "pre"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": -0.02
+     }
+    },
+    {
+     "fx": {
+      "progress": 0.4,
+      "moment": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "shaman_vision",
+   "cat": "culture",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "pre"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "explore": 4,
+      "stability": -0.02
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.03,
+      "bonus": {
+       "food": -5
+      },
+      "years": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "first_burial",
+   "cat": "culture",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "pre"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.03,
+      "bonus": {
+       "culture": 5
+      },
+      "years": 20,
+      "moment": 1
+     }
+    },
+    {
+     "fx": {}
+    }
+   ]
+  },
+  {
+   "id": "mammoth_hunt",
+   "cat": "war",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "pre"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "kill": 0.01,
+      "bonus": {
+       "food": 12,
+       "attack": 4
+      },
+      "years": 5,
+      "moment": 1
+     }
+    },
+    {
+     "fx": {}
+    }
+   ]
+  },
+  {
+   "id": "comet_omen",
+   "cat": "culture",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "ancient"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -50,
+      "stability": 0.04
+     },
+     "ai": {
+      "fam:theocratic": 3
+     }
+    },
+    {
+     "fx": {
+      "legit": 0.03
+     },
+     "ai": {
+      "fam:monarchy": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "prophet",
+   "cat": "culture",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "ancient"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.02,
+      "legit": -0.03
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.03,
+      "bonus": {
+       "culture": 6
+      },
+      "years": 15
+     },
+     "ai": {
+      "fam:liberal": 1
+     }
+    },
+    {
+     "fx": {
+      "legit": 0.04
+     },
+     "ai": {
+      "fam:theocratic": 3
+     },
+     "need": [
+      "religious"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "river_flood",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "ancient"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -60,
+      "stability": 0.02
+     }
+    },
+    {
+     "fx": {
+      "gold": -100,
+      "bonus": {
+       "food": 10
+      },
+      "years": 20,
+      "moment": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "writing_reform",
+   "cat": "sci",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "ancient"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "progress": 0.5,
+      "bonus": {
+       "research": 5
+      },
+      "years": 20,
+      "moment": 1
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.02
+     },
+     "ai": {
+      "fam:theocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "slave_revolt",
+   "cat": "politics",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "ancient"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "kill": 0.04,
+      "stability": 0.02
+     },
+     "ai": {
+      "fam:authoritarian": 3
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.03,
+      "bonus": {
+       "growth": 6,
+       "prod": -4
+      },
+      "years": 15,
+      "moment": 1
+     },
+     "ai": {
+      "fam:liberal": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "royal_tomb",
+   "cat": "culture",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "ancient"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -150,
+      "bonus": {
+       "prestige": 15
+      },
+      "years": 40,
+      "moment": 1
+     },
+     "ai": {
+      "fam:monarchy": 3
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.01
+     }
+    }
+   ]
+  },
+  {
+   "id": "holy_call",
+   "cat": "war",
+   "good": false,
+   "cond": [
+    "infidel"
+   ],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "medieval"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "war": 1,
+      "stability": 0.03
+     },
+     "ai": {
+      "fam:theocratic": 3
+     }
+    },
+    {
+     "fx": {
+      "legit": -0.03
+     },
+     "ai": {
+      "fam:liberal": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "heretic",
+   "cat": "culture",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "medieval"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.02,
+      "bonus": {
+       "research": -3
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:theocratic": 3
+     }
+    },
+    {
+     "fx": {
+      "legit": -0.02,
+      "bonus": {
+       "research": 3
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:liberal": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "patron",
+   "cat": "culture",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "medieval"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -60,
+      "bonus": {
+       "culture": 10
+      },
+      "years": 15,
+      "moment": 1
+     },
+     "ai": {
+      "fam:monarchy": 2
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "trade": -3
+      },
+      "years": 5
+     }
+    }
+   ]
+  },
+  {
+   "id": "press",
+   "cat": "sci",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "medieval"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "progress": 0.6,
+      "bonus": {
+       "research": 6
+      },
+      "years": 20,
+      "moment": 1
+     },
+     "ai": {
+      "fam:liberal": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.03,
+      "bonus": {
+       "research": 2
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:authoritarian": 2,
+      "fam:theocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "flagellants",
+   "cat": "society",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "medieval"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": -0.03
+     },
+     "ai": {
+      "fam:theocratic": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.01,
+      "legit": -0.02
+     }
+    }
+   ]
+  },
+  {
+   "id": "navigator",
+   "cat": "society",
+   "good": true,
+   "cond": [
+    "coast"
+   ],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "medieval"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -100,
+      "explore": 10,
+      "moment": 2
+     },
+     "ai": {
+      "fam:imperial": 3,
+      "fam:monarchy": 1
+     }
+    },
+    {
+     "fx": {}
+    }
+   ]
+  },
+  {
+   "id": "general_strike",
+   "cat": "economy",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "modern"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "kill": 0.01,
+      "stability": -0.04,
+      "legit": -0.04
+     },
+     "ai": {
+      "fam:authoritarian": 3
+     }
+    },
+    {
+     "fx": {
+      "gold": -120,
+      "stability": 0.05,
+      "bonus": {
+       "prod": -3
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:democratic": 2,
+      "fam:socialist": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "crash",
+   "cat": "economy",
+   "good": false,
+   "cond": [
+    "companies"
+   ],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "modern"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -200,
+      "stability": 0.03
+     },
+     "ai": {
+      "fam:corporate": 3
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.05,
+      "bonus": {
+       "trade": -10
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:liberal": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "spy_scandal",
+   "cat": "diplomacy",
+   "good": false,
+   "cond": [
+    "rival"
+   ],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "modern"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.02
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "research": 4
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "computer_virus",
+   "cat": "sci",
+   "good": false,
+   "cond": [
+    "internet"
+   ],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "modern"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -100,
+      "bonus": {
+       "defense": 5,
+       "research": 3
+      },
+      "years": 15
+     },
+     "ai": {
+      "fam:technocratic": 3
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "prod": -5
+      },
+      "years": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "suffrage",
+   "cat": "politics",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "modern"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "legit": 0.06,
+      "stability": -0.02,
+      "moment": 1
+     },
+     "ai": {
+      "fam:democratic": 3,
+      "fam:liberal": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.04
+     },
+     "ai": {
+      "fam:authoritarian": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "standoff",
+   "cat": "war",
+   "good": false,
+   "cond": [
+    "rival"
+   ],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "modern"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.02,
+      "war_chance": 0.25
+     },
+     "ai": {
+      "fam:military": 3
+     }
+    },
+    {
+     "fx": {
+      "legit": 0.02,
+      "bonus": {
+       "prestige": 5
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:democratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "station_independence",
+   "cat": "politics",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "solar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "kill": 0.01,
+      "stability": -0.02
+     },
+     "ai": {
+      "fam:authoritarian": 3,
+      "fam:imperial": 2
+     }
+    },
+    {
+     "fx": {
+      "secession_chance": 0.1,
+      "stability": 0.03
+     },
+     "ai": {
+      "fam:democratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "habitat_leak",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "solar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -80
+     }
+    },
+    {
+     "fx": {
+      "kill": 0.03,
+      "stability": -0.02
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "miner_artifact",
+   "cat": "sci",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "solar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "progress": 0.7,
+      "moment": 2
+     },
+     "ai": {
+      "fam:technocratic": 3
+     }
+    },
+    {
+     "fx": {
+      "gold": 200
+     },
+     "ai": {
+      "fam:corporate": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "rogue_ai",
+   "cat": "sci",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "solar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "health": -5,
+       "research": -3
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "research": 6
+      },
+      "years": 15,
+      "stability": -0.02
+     },
+     "ai": {
+      "fam:liberal": 2,
+      "fam:technocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "homeworld_rift",
+   "cat": "politics",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "solar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "gold": -8,
+       "loyalty": 8
+      },
+      "years": 15
+     },
+     "ai": {
+      "fam:democratic": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.02,
+      "legit": 0.02
+     },
+     "ai": {
+      "fam:imperial": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "debris",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "solar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -100
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "trade": -6
+      },
+      "years": 5
+     }
+    }
+   ]
+  },
+  {
+   "id": "void_signal",
+   "cat": "sci",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "stellar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "explore": 8,
+      "moment": 2,
+      "war_chance": 0.05
+     },
+     "ai": {
+      "fam:liberal": 2
+     }
+    },
+    {
+     "fx": {
+      "progress": 0.5
+     },
+     "ai": {
+      "fam:authoritarian": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "lost_fleet",
+   "cat": "war",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "stellar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -120,
+      "explore": 4
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.02,
+      "bonus": {
+       "naval": -5
+      },
+      "years": 5
+     }
+    }
+   ]
+  },
+  {
+   "id": "refugee_armada",
+   "cat": "society",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "stellar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "growth": 10
+      },
+      "years": 15,
+      "stability": -0.03
+     },
+     "ai": {
+      "fam:liberal": 3
+     }
+    },
+    {
+     "fx": {
+      "legit": -0.03
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "lane_hijack",
+   "cat": "economy",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "stellar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -60,
+      "bonus": {
+       "trade": 5
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:military": 2
+     }
+    },
+    {
+     "fx": {
+      "gold": -100
+     },
+     "ai": {
+      "fam:corporate": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "gate_fault",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "stellar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "trade": -10
+      },
+      "years": 3
+     }
+    },
+    {
+     "fx": {
+      "kill": 0.02,
+      "bonus": {
+       "trade": 5
+      },
+      "years": 3
+     },
+     "ai": {
+      "fam:corporate": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "first_words",
+   "cat": "diplomacy",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "stellar"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "culture": 8,
+       "research": 4
+      },
+      "years": 15,
+      "moment": 2
+     },
+     "ai": {
+      "fam:liberal": 2
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "defense": 8
+      },
+      "years": 15
+     },
+     "ai": {
+      "fam:military": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "twin_rulers",
+   "cat": "politics",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "galactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "legit": 0.04,
+      "stability": -0.02
+     },
+     "ai": {
+      "fam:monarchy": 2
+     }
+    },
+    {
+     "fx": {
+      "legit": 0.02,
+      "stability": 0.02
+     },
+     "ai": {
+      "fam:democratic": 2,
+      "fam:technocratic": 2
+     }
+    },
+    {
+     "fx": {
+      "progress": 0.4,
+      "stability": -0.04
+     },
+     "ai": {
+      "fam:technocratic": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "brain_dreams",
+   "cat": "sci",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "galactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "culture": 10,
+       "research": 5
+      },
+      "years": 15
+     }
+    },
+    {
+     "fx": {
+      "progress": 0.5,
+      "stability": -0.02
+     },
+     "ai": {
+      "fam:technocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "void_cult",
+   "cat": "culture",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "galactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.02,
+      "legit": -0.02
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.03,
+      "bonus": {
+       "culture": 6
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:liberal": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "core_war",
+   "cat": "war",
+   "good": false,
+   "cond": [
+    "rival"
+   ],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "galactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "war": 1
+     },
+     "ai": {
+      "fam:military": 3,
+      "fam:imperial": 2
+     }
+    },
+    {
+     "fx": {
+      "gold": -120,
+      "bonus": {
+       "defense": 12
+      },
+      "years": 15
+     }
+    }
+   ]
+  },
+  {
+   "id": "upload_strike",
+   "cat": "society",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "galactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "legit": 0.04,
+      "bonus": {
+       "prod": -4
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:liberal": 3
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.04,
+      "bonus": {
+       "prod": 4
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "census",
+   "cat": "society",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "galactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "research": 4,
+       "growth": 4
+      },
+      "years": 15
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "defense": 5
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "merged_cultures",
+   "cat": "culture",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "intergalactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "culture": 12
+      },
+      "years": 20,
+      "moment": 1
+     },
+     "ai": {
+      "fam:liberal": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.03
+     },
+     "ai": {
+      "fam:theocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "lost_leviathan",
+   "cat": "war",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "intergalactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": 150,
+      "progress": 0.3
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.02
+     }
+    }
+   ]
+  },
+  {
+   "id": "foreign_message",
+   "cat": "sci",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "intergalactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "progress": 0.8,
+      "moment": 2
+     },
+     "ai": {
+      "fam:technocratic": 3
+     }
+    },
+    {
+     "fx": {}
+    }
+   ]
+  },
+  {
+   "id": "halo_exiles",
+   "cat": "politics",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "intergalactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": -0.02,
+      "bonus": {
+       "growth": 6
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:liberal": 2
+     }
+    },
+    {
+     "fx": {
+      "legit": -0.02
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "dark_storm",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "intergalactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -120
+     }
+    },
+    {
+     "fx": {
+      "kill": 0.02,
+      "bonus": {
+       "prod": 10
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:corporate": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "cluster_hunger",
+   "cat": "economy",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "intergalactic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "naval": -8
+      },
+      "years": 5
+     }
+    },
+    {
+     "fx": {
+      "kill": 0.02,
+      "bonus": {
+       "gold": 5
+      },
+      "years": 5
+     },
+     "ai": {
+      "fam:corporate": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "vacuum_bubble",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "cosmic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -300,
+      "stability": 0.04,
+      "moment": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.05,
+      "bonus": {
+       "culture": 10
+      },
+      "years": 20
+     },
+     "ai": {
+      "fam:theocratic": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "next_archive",
+   "cat": "culture",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "cosmic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -150,
+      "bonus": {
+       "culture": 15,
+       "prestige": 10
+      },
+      "years": 30,
+      "moment": 2
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "prestige": 10
+      },
+      "years": 20
+     },
+     "ai": {
+      "fam:imperial": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "last_star",
+   "cat": "nature",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "cosmic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "prod": 6
+      },
+      "years": 10
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.04,
+      "moment": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "hibernation",
+   "cat": "politics",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": true,
+   "bands": [
+    "cosmic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "bonus": {
+       "growth": -10,
+       "stability": 10
+      },
+      "years": 30
+     }
+    },
+    {
+     "fx": {
+      "stability": -0.02
+     }
+    }
+   ]
+  },
+  {
+   "id": "entropy_cult",
+   "cat": "culture",
+   "good": false,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "cosmic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "stability": 0.02,
+      "legit": -0.02
+     },
+     "ai": {
+      "fam:authoritarian": 2
+     }
+    },
+    {
+     "fx": {
+      "bonus": {
+       "culture": 6
+      },
+      "years": 10
+     },
+     "ai": {
+      "fam:liberal": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "legacy_beacon",
+   "cat": "sci",
+   "good": true,
+   "cond": [],
+   "w": 1.0,
+   "cd": 40,
+   "big": false,
+   "bands": [
+    "cosmic"
+   ],
+   "opts": [
+    {
+     "fx": {
+      "gold": -200,
+      "progress": 0.5,
+      "moment": 2
+     }
+    },
+    {
+     "fx": {
+      "stability": 0.04
+     }
+    }
+   ]
+  }
+ ]
+}

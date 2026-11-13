@@ -115,6 +115,8 @@ namespace Civilizations
             Store.Put(k.data, KPrestige, Prestige(k) + prestige);
             if (by != null) by.Value += prestige * 20f;
             Internet.OnLaunch(k, mission, first, by);
+            CivMod.Safe("cosmos-mission", () => Cosmos.OnMission(k, mission));
+            if (first) Chronicle.Log("launch", k, G.Name(k), Txt.T("world_mission_" + mission));
         }
 
         public static void Decay(Kingdom k)

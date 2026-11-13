@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
@@ -126,6 +127,7 @@ namespace Civilizations
             {
                 Store.Put(k.data, KStage, ns);
                 Internet.OnStage(k, ns);
+                if (ns == "empire" || ns == "nation") Chronicle.Log("stage", k, G.Name(k), Txt.T("civ_stage_" + ns));
             }
         }
 
@@ -157,19 +159,24 @@ namespace Civilizations
                 if (a.culture.hasTrait("xenophiles")) o.Xeno += 0.3f;
             }
             o.Xeno = G.Clamp(o.Xeno + UnityEngine.Random.Range(-0.25f, 0.25f), -1f, 1f);
-            if (G.Chance(0.25f)) o.Gov = PickAlt(k, "gov", a, o);
-            if (G.Chance(0.25f)) o.Ideo = PickAlt(k, "ideo", a, o);
-            if (G.Chance(0.2f)) o.Econ = PickAlt(k, "econ", a, o);
+            int era = Research.Era(k);
+            if (G.Chance(0.25f) || Coherence.IsObsolete(o.Gov, era)) o.Gov = PickAlt(k, "gov", a, o);
+            if (G.Chance(0.25f) || Coherence.IsObsolete(o.Ideo, era)) o.Ideo = PickAlt(k, "ideo", a, o);
+            if (G.Chance(0.2f) || Coherence.IsObsolete(o.Econ, era)) o.Econ = PickAlt(k, "econ", a, o);
             return o;
         }
 
         private static string PickAlt(Kingdom k, string axis, Actor a, Opinion o)
         {
-            List<PolicyDef> opts = Policies.Options(k, axis);
+            int era = Research.Era(k);
+            List<PolicyDef> all = Policies.Options(k, axis);
+            List<PolicyDef> opts = all.FindAll(p => !Coherence.IsObsolete(p.Id, era));
+            if (opts.Count == 0) opts = all;
             if (opts.Count == 0) return Policies.Id(k, axis);
             var w = new List<float>();
-            foreach (PolicyDef p in opts) w.Add(Appeal(a, o, p));
-            return opts[G.Weighted(w)].Id;
+            foreach (PolicyDef p in opts) w.Add(Appeal(a, o, p) * Coherence.EraFit(p, era));
+            int i = G.Weighted(w);
+            return i < 0 ? opts[0].Id : opts[i].Id;
         }
 
         private static bool T(Actor a, string trait)
@@ -262,6 +269,7 @@ namespace Civilizations
             float xeno = 0f;
             int n = 0;
             float sat = 0f;
+            int era = Research.Era(k);
             foreach (City c in G.Cities(k))
             {
                 int budget = 14;
@@ -289,10 +297,13 @@ namespace Civilizations
                     {
                         string cur = Policies.Id(k, ax);
                         string mine = ax == "gov" ? o.Gov : ax == "ideo" ? o.Ideo : o.Econ;
-                        if (o.Sat > 0.65f && G.Chance(0.12f * yrs)) mine = cur;
-                        else if (G.Chance((o.Sat < 0.4f ? 0.15f : 0.04f) * yrs)) mine = PickAlt(k, ax, a, o);
+                        bool curOld = Coherence.IsObsolete(cur, era);
+                        bool mineOld = Coherence.IsObsolete(mine, era);
+                        if (mineOld) mine = PickAlt(k, ax, a, o);
+                        else if (o.Sat > 0.65f && !curOld && G.Chance(0.12f * yrs)) mine = cur;
+                        else if (G.Chance((o.Sat < 0.4f || curOld ? 0.2f : 0.06f) * yrs)) mine = PickAlt(k, ax, a, o);
                         PolicyDef pd = Db.Policy(mine);
-                        if (pd == null || !Policies.Unlocked(k, pd)) mine = cur;
+                        if (pd == null || !Policies.Unlocked(k, pd) || Coherence.IsObsolete(mine, era) && !curOld) mine = cur;
                         if (ax == "gov") o.Gov = mine;
                         else if (ax == "ideo") o.Ideo = mine;
                         else o.Econ = mine;
@@ -393,6 +404,7 @@ namespace Civilizations
             for (int i = 1; i < votes.Length; i++) if (votes[i] > votes[win]) win = i;
             Actor winner = cands[win];
             Internet.OnElection(k, cands, votes, win, voters);
+            if (win >= 0 && win < cands.Count && G.Ok(cands[win])) Chronicle.Log("election", k, G.Name(k), cands[win].getName(), null, null, null, null, cands[win], false);
             if (!winner.isKing())
             {
                 Actor old = k.king;
@@ -439,6 +451,7 @@ namespace Civilizations
             float stab = Stability(k);
             foreach (string ax in Axes)
             {
+                if (Policies.Locked(k, ax)) continue;
                 PolicyDef cur = Policies.Get(k, ax);
                 if (!Policies.Unlocked(k, cur))
                 {
@@ -449,7 +462,14 @@ namespace Civilizations
                 float sup = Support(k, ax);
                 string alt = Alternative(k, ax);
                 PolicyDef altP = Db.Policy(alt);
-                if (altP == null || !Policies.Unlocked(k, altP)) continue;
+                int kEra = Research.Era(k);
+                if (Coherence.IsObsolete(cur.Id, kEra) && (altP == null || Coherence.IsObsolete(altP.Id, kEra)))
+                {
+                    PolicyDef fit = Policies.Options(k, ax).FindAll(p => !Coherence.IsObsolete(p.Id, kEra)).OrderByDescending(p => Coherence.EraFit(p, kEra)).FirstOrDefault();
+                    if (fit != null && G.Chance(0.15f * yrs)) Policies.Set(k, ax, fit.Id, "reform");
+                    continue;
+                }
+                if (altP == null || !Policies.Unlocked(k, altP) || Coherence.IsObsolete(altP.Id, kEra)) continue;
                 bool elected = ax == "gov" && cur.Elections;
                 if (sup < 0.3f && stab < 0.3f && G.Chance(0.12f * yrs))
                 {
@@ -478,7 +498,7 @@ namespace Civilizations
             if (o == null) return null;
             string id = axis == "gov" ? o.Gov : axis == "ideo" ? o.Ideo : o.Econ;
             PolicyDef p = Db.Policy(id);
-            return p != null && Policies.Unlocked(k, p) ? id : null;
+            return p != null && Policies.Unlocked(k, p) && !Coherence.IsObsolete(id, Research.Era(k)) ? id : null;
         }
 
         private static PolicyDef BestOption(Kingdom k, string axis)
@@ -522,6 +542,7 @@ namespace Civilizations
             }
             AddStability(k, -0.12f);
             Internet.OnRevolution(k, axis, from != null ? from.Id : "", to.Id);
+            Chronicle.Log("revolution", k, G.Name(k), Txt.T("civ_p_" + to.Id), from != null ? Txt.T("civ_p_" + from.Id) : "-");
         }
 
         public static void ConsiderNewPolicy(Kingdom k, string id)

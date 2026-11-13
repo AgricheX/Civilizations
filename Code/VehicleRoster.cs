@@ -7,8 +7,10 @@ namespace Civilizations
         public static string Duty(UnitDef d)
         {
             if (d == null) return "";
+            if (d.Role == "unique") return "unique";
             switch (d.Base ?? d.Id)
             {
+                case "civ_war_elephant": return "elephant";
                 case "civ_cart":
                 case "civ_truck":
                 case "civ_steam_truck":
@@ -32,6 +34,7 @@ namespace Civilizations
             }
             if (d.Cls == "soldier") return "sol_" + d.Role;
             if (d.Cls == "air") return "air_" + d.Role;
+            if (d.Cls == "space") return "space_" + d.Role;
             if (d.Cls == "ship") return d.Role == "trade" ? "ship_trade" : d.Role == "fish" ? "ship_fish" : "ship_surface";
             if (d.Cls == "land") return "passenger";
             return d.Cls;
@@ -40,8 +43,10 @@ namespace Civilizations
         public static int RetirementEra(UnitDef d)
         {
             if (d == null) return 0;
+            if (d.Role == "unique") return Rarities.Retire(d);
             switch (d.Base ?? d.Id)
             {
+                case "civ_war_elephant": return 8;
                 case "civ_chariot": return 7;
                 case "civ_cart":
                 case "civ_carriage": return 11;
@@ -78,7 +83,7 @@ namespace Civilizations
         {
             if (!InService(d, era)) return false;
             if (d.Cls == "soldier") return string.IsNullOrEmpty(d.Route) ? d.Era + 1 >= newestEra : true;
-            bool olderDesign = d.Cls == "siege" && d.Era < 9 || d.Cls == "ship";
+            bool olderDesign = d.Cls == "siege" && d.Era < 9 || d.Cls == "ship" || d.Cls == "space";
             return !olderDesign || !string.IsNullOrEmpty(d.Route) || d.Era + 1 >= newestEra;
         }
 

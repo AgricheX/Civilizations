@@ -218,14 +218,38 @@ namespace Civilizations
         public static void Year()
         {
             foreach (Kingdom k in G.Kingdoms()) Found(k);
+            _rivals.Clear();
+            foreach (Company c in _list)
+            {
+                if (c.Status == "bankrupt") continue;
+                Sane(c);
+                string key = c.Home + "|" + c.Sector;
+                float v;
+                _rivals.TryGetValue(key, out v);
+                _rivals[key] = v + Math.Max(1f, c.Value);
+            }
             foreach (Company c in _list.ToArray())
             {
                 if (c.Status == "bankrupt") continue;
                 Operate(c);
+                Sane(c);
             }
             Mergers();
             Reindex();
             if (_list.Count > 400) _list.RemoveAll(c => c.Status == "bankrupt" && G.Year - c.Founded > 50);
+        }
+
+        private static readonly Dictionary<string, float> _rivals = new Dictionary<string, float>();
+        public const float MaxValue = 1e9f;
+
+        private static void Sane(Company c)
+        {
+            if (float.IsNaN(c.Value) || float.IsInfinity(c.Value)) c.Value = MaxValue * 0.5f;
+            if (float.IsNaN(c.Cash) || float.IsInfinity(c.Cash)) c.Cash = 0f;
+            c.Value = Mathf.Clamp(c.Value, 0f, MaxValue);
+            c.Cash = Mathf.Clamp(c.Cash, -MaxValue, MaxValue);
+            if (float.IsNaN(c.Rd) || float.IsInfinity(c.Rd)) c.Rd = 0f;
+            c.Rd = Mathf.Clamp(c.Rd, 0f, MaxValue);
         }
 
         private static List<string> Sectors(Kingdom k)
@@ -302,6 +326,7 @@ namespace Civilizations
             founder.data.money = Math.Max(0, founder.money / 3);
             _list.Add(co);
             Internet.OnCompanyFounded(co, k, founder);
+            Chronicle.Log("company_founded", k, co.Name, G.Name(k), null, k, null, founder.city, null, false);
         }
 
         public static string SectorTech(string sector)
@@ -339,9 +364,23 @@ namespace Civilizations
             string econ = Policies.Id(k, "econ");
             if (econ == "laissez_faire" || econ == "corporatist") mult *= 1.2f;
             if (econ == "welfare") mult *= 0.9f;
-            float revenue = c.Value * 0.18f * mult * demand / (1f + era * 0.3f) + 6f + c.Branches.Count * 4f * demand;
-            float costs = c.Staff * 0.6f + c.Value * 0.05f;
+            float market = (G.Pop(k) * (2f + era * 0.8f) + k.countCities() * 60f) * mult;
+            float rivals;
+            if (!_rivals.TryGetValue(c.Home + "|" + c.Sector, out rivals) || rivals < 1f) rivals = Math.Max(1f, c.Value);
+            float share = Mathf.Clamp01(Math.Max(1f, c.Value) / rivals);
+            float organic = c.Value * 0.18f * mult * demand / (1f + era * 0.3f);
+            float revenue = Math.Min(organic, market * share) + 6f + Math.Min(12, c.Branches.Count) * 4f * demand;
+            float scale = 0.05f + 0.03f * Mathf.Log10(1f + c.Value / 1000f);
+            float costs = c.Staff * 0.6f + c.Value * scale;
             float profit = revenue - costs + UnityEngine.Random.Range(-0.15f, 0.15f) * revenue;
+            if (profit > 0f)
+            {
+                float tax = profit * (econ == "welfare" || econ == "planned" ? 0.35f : econ == "laissez_faire" ? 0.1f : 0.2f);
+                City home = k.capital;
+                if (home != null && tax >= 1f) Economy.Give(home, "gold", (int)Math.Min(500f, tax * 0.1f));
+                profit -= tax;
+            }
+            c.Value *= 0.97f;
             c.Cash += profit;
             float rd = 0f;
             if (c.Sector == "tech" || c.Sector == "space" || c.Sector == "biotech" || c.Sector == "pharma" || c.Sector == "aero" || c.Sector == "energy" || c.Sector == "auto" || c.Sector == "arms")
@@ -353,9 +392,11 @@ namespace Civilizations
             }
             if (profit > 0f)
             {
-                c.Value += profit * 0.8f + rd * 0.3f;
-                c.Staff = Math.Max(3, (int)(c.Value / 40f));
-                if (ceo != null) ceo.data.money += (int)Math.Min(400f, profit * 0.1f);
+                float dividend = profit * 0.3f;
+                c.Cash -= dividend;
+                c.Value += (profit - dividend) * 0.8f + rd * 0.3f;
+                c.Staff = Math.Max(3, Math.Min(5000, (int)(c.Value / 40f)));
+                if (ceo != null) ceo.data.money = (int)Math.Min(1000000f, ceo.data.money + Math.Min(400f, dividend * 0.3f));
                 c.Red = 0;
             }
             else
@@ -383,6 +424,7 @@ namespace Civilizations
             {
                 c.Status = "state";
                 Internet.OnNationalized(c, k);
+                Chronicle.Log("nationalized", k, c.Name, G.Name(k), null, k, null, null, null, false);
             }
             else if (c.Status == "state" && (econ == "laissez_faire" || econ == "mixed_economy") && G.Chance(0.1f))
             {
@@ -477,6 +519,7 @@ namespace Civilizations
                 foreach (string b in small.Branches) if (!big.Branches.Contains(b)) big.Branches.Add(b);
                 big.Patents.AddRange(small.Patents);
                 Internet.OnMerger(big, small);
+                Chronicle.Log("merger", G.KingdomById(big.Home), big.Name, small.Name, null, null, null, null, null, false);
             }
         }
 
@@ -485,6 +528,7 @@ namespace Civilizations
             c.Status = "bankrupt";
             c.Value = 0f;
             Internet.OnBankrupt(c, reason);
+            if (c.Value > 500f) Chronicle.Log("company_bankrupt", G.KingdomById(c.Home), c.Name, null, null, null, null, null, null, false);
         }
 
         public static void OnConquest(Kingdom winner, Kingdom loser)

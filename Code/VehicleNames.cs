@@ -14,7 +14,7 @@ namespace Civilizations
                 if (!Db.UnitById.TryGetValue(v.asset.id, out d)) return;
                 Kingdom k = v.kingdom;
                 if (k == null || k.data == null || !k.isCiv()) return;
-                if (d.Cls == "ship")
+                if (d.Cls == "ship" || d.Cls == "space")
                 {
                     ShipNames.Name(v, d);
                     return;

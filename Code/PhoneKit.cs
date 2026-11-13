@@ -74,7 +74,7 @@ namespace Civilizations
             return img;
         }
 
-        public static Image Screen(RectTransform box, Color screen, float inset, float vgap)
+        public static Image Screen(RectTransform box, Color screen, float inset, float vgap, Color? under = null)
         {
             Image bg = box.gameObject.GetComponent<Image>() ?? box.gameObject.AddComponent<Image>();
             bg.sprite = Square;
@@ -92,7 +92,7 @@ namespace Civilizations
                 brt.offsetMax = new Vector2(-inset, 0f);
                 Image bimg = basego.GetComponent<Image>();
                 bimg.sprite = Square;
-                bimg.color = new Color(0.9f, 0.91f, 0.95f);
+                bimg.color = under ?? new Color(0.9f, 0.91f, 0.95f);
                 bimg.raycastTarget = false;
                 inset += 3f;
             }
@@ -154,15 +154,17 @@ namespace Civilizations
             return p;
         }
 
-        public static void Pager(Transform parent, int page, int pages, Action<int> go, Color screen, float width = 176f)
+        public static void Pager(Transform parent, int page, int pages, Action<int> go, Color screen, float width = 176f, Color? accent = null, Color? ink = null)
         {
             if (pages <= 1) return;
+            Color ac = accent ?? new Color(0.2f, 0.45f, 0.85f);
+            Color ik = ink ?? new Color(0.35f, 0.38f, 0.46f);
             RectTransform box = UiKit.Box(parent, "Pager", 24f, width);
             Screen(box, screen, 0f, 0f);
-            Btn(box, "‹", null, () => go(Math.Max(0, page - 1)), new Vector2(30f, 18f), new Vector2(-50f, 0f), new Color(0.2f, 0.45f, 0.85f), Color.white);
-            Text t = UiKit.Text(box, (page + 1) + " / " + pages, Vector2.zero, new Vector2(60f, 16f), 9, TextAnchor.MiddleCenter, new Color(0.35f, 0.38f, 0.46f));
-            t.color = new Color(0.35f, 0.38f, 0.46f);
-            Btn(box, "›", null, () => go(Math.Min(pages - 1, page + 1)), new Vector2(30f, 18f), new Vector2(50f, 0f), new Color(0.2f, 0.45f, 0.85f), Color.white);
+            Btn(box, "‹", null, () => go(Math.Max(0, page - 1)), new Vector2(30f, 18f), new Vector2(-50f, 0f), ac, Color.white);
+            Text t = UiKit.Text(box, (page + 1) + " / " + pages, Vector2.zero, new Vector2(60f, 16f), 9, TextAnchor.MiddleCenter, ik);
+            t.color = ik;
+            Btn(box, "›", null, () => go(Math.Min(pages - 1, page + 1)), new Vector2(30f, 18f), new Vector2(50f, 0f), ac, Color.white);
         }
     }
 }

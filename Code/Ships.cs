@@ -91,15 +91,22 @@ namespace Civilizations
                 set.Add(d.Id);
             }
             int budget = 4;
+            int era = Research.Era(k);
             float chance = System.Math.Min(0.9f, 0.3f * yrs);
             foreach (Actor a in k.units.ToArray())
             {
                 if (budget <= 0) break;
                 if (!G.Ok(a) || a.asset == null || !a.asset.is_boat || a.isFavorite()) continue;
                 string duty = DutyOf(a);
-                if (duty == null) continue;
-                HashSet<string> set;
-                if (!current.TryGetValue(duty, out set) || set.Count == 0 || set.Contains(a.asset.id)) continue;
+                HashSet<string> set = null;
+                bool modern = duty != null && current.TryGetValue(duty, out set) && set.Count > 0;
+                if (modern && set.Contains(a.asset.id)) continue;
+                if (!modern)
+                {
+                    UnitDef od;
+                    int shipEra = Db.UnitById.TryGetValue(a.asset.id, out od) ? od.Era : 0;
+                    if (current.Count == 0 || era - shipEra < 4) continue;
+                }
                 Boat boat = a.getSimpleComponent<Boat>();
                 if (boat != null && boat.hasPassengers()) continue;
                 if (!G.Chance(chance)) continue;

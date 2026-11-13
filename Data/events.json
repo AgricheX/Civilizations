@@ -1,0 +1,1419 @@
+{
+ "events": [
+  {
+   "Id": "plague",
+   "Cat": "nature",
+   "Min": 4,
+   "Max": 14,
+   "W": 3,
+   "Cd": 30,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "big"
+   ],
+   "Fx": {
+    "kill": 0.12,
+    "mood": "civ_plague",
+    "share": 0.4,
+    "stability": -0.08
+   },
+   "Years": 0,
+   "Big": true
+  },
+  {
+   "Id": "famine",
+   "Cat": "nature",
+   "Min": 2,
+   "Max": 14,
+   "W": 2.5,
+   "Cd": 15,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "poor"
+   ],
+   "Fx": {
+    "mood": "civ_disaster",
+    "share": 0.3,
+    "stability": -0.06,
+    "bonus": {
+     "food": -15
+    }
+   },
+   "Years": 3,
+   "Big": false
+  },
+  {
+   "Id": "drought",
+   "Cat": "nature",
+   "Min": 2,
+   "Max": 14,
+   "W": 2,
+   "Cd": 20,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "food": -10,
+     "growth": -3
+    }
+   },
+   "Years": 4,
+   "Big": false
+  },
+  {
+   "Id": "volcanic_winter",
+   "Cat": "nature",
+   "Min": 0,
+   "Max": 14,
+   "W": 0.4,
+   "Cd": 150,
+   "Scope": "world",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "food": -12
+    },
+    "mood": "civ_disaster",
+    "share": 0.15
+   },
+   "Years": 3,
+   "Big": true
+  },
+  {
+   "Id": "great_flood",
+   "Cat": "nature",
+   "Min": 1,
+   "Max": 14,
+   "W": 1.5,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [
+    "coast"
+   ],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "kill": 0.03,
+    "mood": "civ_disaster",
+    "share": 0.3,
+    "bonus": {
+     "food": -6
+    }
+   },
+   "Years": 2,
+   "Big": false
+  },
+  {
+   "Id": "locusts",
+   "Cat": "nature",
+   "Min": 2,
+   "Max": 11,
+   "W": 1.5,
+   "Cd": 25,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "food": -15
+    }
+   },
+   "Years": 2,
+   "Big": false
+  },
+  {
+   "Id": "climate_change",
+   "Cat": "nature",
+   "Min": 11,
+   "Max": 14,
+   "W": 0.6,
+   "Cd": 60,
+   "Scope": "world",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "polluted_world"
+   ],
+   "Fx": {
+    "bonus": {
+     "food": -6,
+     "health": -3
+    },
+    "stability": -0.03
+   },
+   "Years": 10,
+   "Big": true
+  },
+  {
+   "Id": "gold_rush",
+   "Cat": "econ",
+   "Min": 5,
+   "Max": 11,
+   "W": 1.5,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "gold": 150,
+    "bonus": {
+     "gold": 8,
+     "growth": 3
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "oil_discovered",
+   "Cat": "econ",
+   "Min": 10,
+   "Max": 13,
+   "W": 1.2,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "res": "civ_oil",
+    "amount": 200,
+    "bonus": {
+     "prod": 5
+    }
+   },
+   "Years": 8,
+   "Big": false
+  },
+  {
+   "Id": "uranium_found",
+   "Cat": "econ",
+   "Min": 12,
+   "Max": 14,
+   "W": 0.8,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "res": "civ_uranium",
+    "amount": 80
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "bubble_crash",
+   "Cat": "econ",
+   "Min": 9,
+   "Max": 14,
+   "W": 1,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "companies"
+   ],
+   "Fx": {
+    "bonus": {
+     "gold": -10,
+     "trade": -8
+    },
+    "stability": -0.05
+   },
+   "Years": 4,
+   "Big": false
+  },
+  {
+   "Id": "great_depression",
+   "Cat": "econ",
+   "Min": 11,
+   "Max": 14,
+   "W": 0.35,
+   "Cd": 100,
+   "Scope": "world",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "trade": -12,
+     "prod": -6
+    },
+    "stability": -0.06
+   },
+   "Years": 6,
+   "Big": true
+  },
+  {
+   "Id": "economic_miracle",
+   "Cat": "econ",
+   "Min": 10,
+   "Max": 14,
+   "W": 0.8,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "peace"
+   ],
+   "Fx": {
+    "bonus": {
+     "prod": 8,
+     "gold": 6
+    }
+   },
+   "Years": 8,
+   "Big": false
+  },
+  {
+   "Id": "general_strike",
+   "Cat": "econ",
+   "Min": 10,
+   "Max": 14,
+   "W": 0.8,
+   "Cd": 30,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [
+    "fam:leftist",
+    "fam:liberal",
+    "fam:democratic"
+   ],
+   "Not": [],
+   "Cond": [
+    "companies"
+   ],
+   "Fx": {
+    "bonus": {
+     "prod": -15
+    },
+    "stability": -0.04
+   },
+   "Years": 1,
+   "Big": false
+  },
+  {
+   "Id": "trust_busting",
+   "Cat": "econ",
+   "Min": 11,
+   "Max": 14,
+   "W": 0.6,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [
+    "fam:democratic"
+   ],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "companies"
+   ],
+   "Fx": {
+    "bonus": {
+     "trade": 4
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "golden_age",
+   "Cat": "soc",
+   "Min": 4,
+   "Max": 14,
+   "W": 1,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "peace",
+    "stable"
+   ],
+   "Fx": {
+    "bonus": {
+     "culture": 10,
+     "research": 6
+    },
+    "stability": 0.08,
+    "mood": "civ_golden_age",
+    "share": 0.4
+   },
+   "Years": 10,
+   "Big": true
+  },
+  {
+   "Id": "great_migration",
+   "Cat": "soc",
+   "Min": 1,
+   "Max": 14,
+   "W": 1,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "growth": 6
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "peasant_revolt",
+   "Cat": "soc",
+   "Min": 5,
+   "Max": 10,
+   "W": 1,
+   "Cd": 30,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [
+    "fam:feudal",
+    "fam:monarchy"
+   ],
+   "Not": [],
+   "Cond": [
+    "unstable"
+   ],
+   "Fx": {
+    "stability": -0.1,
+    "legit": -0.08,
+    "crisis": 1
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "civil_rights",
+   "Cat": "soc",
+   "Min": 11,
+   "Max": 14,
+   "W": 0.7,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [
+    "fam:democratic"
+   ],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "stability": 0.05,
+    "bonus": {
+     "loyalty": 5
+    }
+   },
+   "Years": 10,
+   "Big": false
+  },
+  {
+   "Id": "independence_movement",
+   "Cat": "soc",
+   "Min": 10,
+   "Max": 14,
+   "W": 0.6,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "big",
+    "foreign"
+   ],
+   "Fx": {
+    "secession": 1
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "royal_scandal",
+   "Cat": "soc",
+   "Min": 4,
+   "Max": 14,
+   "W": 1,
+   "Cd": 30,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [
+    "fam:monarchy"
+   ],
+   "Not": [],
+   "Cond": [
+    "king"
+   ],
+   "Fx": {
+    "legit": -0.12
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "assassination",
+   "Cat": "soc",
+   "Min": 4,
+   "Max": 14,
+   "W": 0.5,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "king"
+   ],
+   "Fx": {
+    "kill_ruler": 1,
+    "legit": -0.1,
+    "stability": -0.06
+   },
+   "Years": 0,
+   "Big": true
+  },
+  {
+   "Id": "regency",
+   "Cat": "soc",
+   "Min": 4,
+   "Max": 12,
+   "W": 0.6,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [
+    "fam:monarchy"
+   ],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "stability": -0.04,
+    "legit": -0.05
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "succession_war",
+   "Cat": "soc",
+   "Min": 5,
+   "Max": 10,
+   "W": 0.5,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [
+    "fam:monarchy",
+    "fam:feudal"
+   ],
+   "Not": [],
+   "Cond": [
+    "big"
+   ],
+   "Fx": {
+    "civil_war": 1
+   },
+   "Years": 0,
+   "Big": true
+  },
+  {
+   "Id": "eureka",
+   "Cat": "sci",
+   "Min": 3,
+   "Max": 14,
+   "W": 2,
+   "Cd": 15,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "free_tech": 1
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "genius",
+   "Cat": "sci",
+   "Min": 5,
+   "Max": 14,
+   "W": 1,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "great": "scientist"
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "world_expo",
+   "Cat": "sci",
+   "Min": 10,
+   "Max": 14,
+   "W": 0.8,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "rich",
+    "tech:world_expositions"
+   ],
+   "Fx": {
+    "bonus": {
+     "trade": 6,
+     "culture": 8,
+     "prestige": 6
+    }
+   },
+   "Years": 3,
+   "Big": false
+  },
+  {
+   "Id": "great_games",
+   "Cat": "soc",
+   "Min": 5,
+   "Max": 14,
+   "W": 0.8,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:the_games"
+   ],
+   "Fx": {
+    "bonus": {
+     "culture": 6
+    },
+    "stability": 0.03,
+    "mood": "civ_festival",
+    "share": 0.3
+   },
+   "Years": 2,
+   "Big": false
+  },
+  {
+   "Id": "world_wonder",
+   "Cat": "sci",
+   "Min": 4,
+   "Max": 14,
+   "W": 0.3,
+   "Cd": 200,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "rich",
+    "big",
+    "unique"
+   ],
+   "Fx": {
+    "bonus": {
+     "prestige": 15,
+     "culture": 10
+    }
+   },
+   "Years": 9999,
+   "Big": true
+  },
+  {
+   "Id": "great_library",
+   "Cat": "sci",
+   "Min": 5,
+   "Max": 12,
+   "W": 0.6,
+   "Cd": 100,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:libraries"
+   ],
+   "Fx": {
+    "bonus": {
+     "research": 6
+    }
+   },
+   "Years": 30,
+   "Big": false
+  },
+  {
+   "Id": "renaissance",
+   "Cat": "sci",
+   "Min": 7,
+   "Max": 10,
+   "W": 2,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "dormant"
+   ],
+   "Fx": {
+    "bonus": {
+     "culture": 8,
+     "research": 5
+    }
+   },
+   "Years": 10,
+   "Big": true
+  },
+  {
+   "Id": "brain_drain",
+   "Cat": "sci",
+   "Min": 10,
+   "Max": 14,
+   "W": 0.8,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [
+    "unstable",
+    "illegitimate"
+   ],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "research": -6
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "legendary_general",
+   "Cat": "mil",
+   "Min": 3,
+   "Max": 14,
+   "W": 1,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "war"
+   ],
+   "Fx": {
+    "great": "general"
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "mutiny",
+   "Cat": "mil",
+   "Min": 8,
+   "Max": 14,
+   "W": 0.8,
+   "Cd": 30,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "war",
+    "unstable"
+   ],
+   "Fx": {
+    "bonus": {
+     "attack": -10
+    },
+    "stability": -0.05
+   },
+   "Years": 2,
+   "Big": false
+  },
+  {
+   "Id": "arms_race",
+   "Cat": "mil",
+   "Min": 11,
+   "Max": 14,
+   "W": 0.7,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "rival"
+   ],
+   "Fx": {
+    "bonus": {
+     "attack": 6,
+     "gold": -4
+    }
+   },
+   "Years": 10,
+   "Big": false
+  },
+  {
+   "Id": "last_stand",
+   "Cat": "mil",
+   "Min": 3,
+   "Max": 14,
+   "W": 0.6,
+   "Cd": 30,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "war"
+   ],
+   "Fx": {
+    "bonus": {
+     "defense": 15
+    }
+   },
+   "Years": 2,
+   "Big": false
+  },
+  {
+   "Id": "military_coup",
+   "Cat": "mil",
+   "Min": 9,
+   "Max": 14,
+   "W": 0.6,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [
+    "fam:authoritarian",
+    "fam:republic",
+    "fam:monarchy"
+   ],
+   "Not": [],
+   "Cond": [
+    "unstable"
+   ],
+   "Fx": {
+    "coup": 1
+   },
+   "Years": 0,
+   "Big": true
+  },
+  {
+   "Id": "schism",
+   "Cat": "rel",
+   "Min": 6,
+   "Max": 14,
+   "W": 0.6,
+   "Cd": 100,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [
+    "religious"
+   ],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "big"
+   ],
+   "Fx": {
+    "stability": -0.08,
+    "legit": -0.05
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "reformation",
+   "Cat": "rel",
+   "Min": 8,
+   "Max": 10,
+   "W": 0.6,
+   "Cd": 150,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [
+    "religious"
+   ],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:printing_press"
+   ],
+   "Fx": {
+    "bonus": {
+     "research": 5
+    },
+    "stability": -0.05
+   },
+   "Years": 20,
+   "Big": false
+  },
+  {
+   "Id": "holy_war",
+   "Cat": "rel",
+   "Min": 6,
+   "Max": 10,
+   "W": 0.5,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [
+    "fam:theocratic",
+    "ideo:religious_zeal"
+   ],
+   "Not": [],
+   "Cond": [
+    "infidel"
+   ],
+   "Fx": {
+    "holy_war": 1
+   },
+   "Years": 0,
+   "Big": true
+  },
+  {
+   "Id": "prophet",
+   "Cat": "rel",
+   "Min": 2,
+   "Max": 9,
+   "W": 0.6,
+   "Cd": 100,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "great": "prophet"
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "relic_found",
+   "Cat": "rel",
+   "Min": 4,
+   "Max": 11,
+   "W": 0.8,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [
+    "religious"
+   ],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "legit": 0.08,
+    "stability": 0.04
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "viral_trend",
+   "Cat": "info",
+   "Min": 14,
+   "Max": 14,
+   "W": 2,
+   "Cd": 5,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "internet"
+   ],
+   "Fx": {
+    "bonus": {
+     "culture": 4
+    }
+   },
+   "Years": 1,
+   "Big": false
+  },
+  {
+   "Id": "cyberattack",
+   "Cat": "info",
+   "Min": 14,
+   "Max": 14,
+   "W": 1,
+   "Cd": 20,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "internet"
+   ],
+   "Fx": {
+    "bonus": {
+     "research": -6,
+     "gold": -5
+    }
+   },
+   "Years": 2,
+   "Big": false
+  },
+  {
+   "Id": "data_leak",
+   "Cat": "info",
+   "Min": 14,
+   "Max": 14,
+   "W": 0.8,
+   "Cd": 30,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "internet"
+   ],
+   "Fx": {
+    "legit": -0.08
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "ai_breakthrough",
+   "Cat": "info",
+   "Min": 14,
+   "Max": 14,
+   "W": 0.6,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:artificial_intelligence"
+   ],
+   "Fx": {
+    "free_tech": 2,
+    "bonus": {
+     "research": 10
+    }
+   },
+   "Years": 5,
+   "Big": true
+  },
+  {
+   "Id": "solar_storm",
+   "Cat": "info",
+   "Min": 13,
+   "Max": 14,
+   "W": 0.25,
+   "Cd": 100,
+   "Scope": "world",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {},
+   "Years": 0,
+   "Big": true
+  },
+  {
+   "Id": "explorer",
+   "Cat": "soc",
+   "Min": 8,
+   "Max": 11,
+   "W": 1,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [
+    "coast"
+   ],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "great": "explorer"
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "tycoon",
+   "Cat": "econ",
+   "Min": 10,
+   "Max": 14,
+   "W": 0.8,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "companies"
+   ],
+   "Fx": {
+    "great": "tycoon"
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "artist",
+   "Cat": "soc",
+   "Min": 4,
+   "Max": 14,
+   "W": 1,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "great": "artist"
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "supernova_nearby",
+   "Cat": "nature",
+   "Min": 15,
+   "Max": 41,
+   "W": 0.5,
+   "Cd": 120,
+   "Scope": "world",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "research": 8,
+     "health": -4
+    },
+    "mood": "civ_disaster",
+    "share": 0.1
+   },
+   "Years": 4,
+   "Big": true
+  },
+  {
+   "Id": "gamma_ray_burst",
+   "Cat": "nature",
+   "Min": 16,
+   "Max": 41,
+   "W": 0.25,
+   "Cd": 200,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "kill": 0.05,
+    "bonus": {
+     "health": -8,
+     "food": -6
+    },
+    "mood": "civ_disaster",
+    "share": 0.4
+   },
+   "Years": 5,
+   "Big": true
+  },
+  {
+   "Id": "rogue_black_hole",
+   "Cat": "nature",
+   "Min": 18,
+   "Max": 41,
+   "W": 0.2,
+   "Cd": 250,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "prod": -10
+    },
+    "stability": -0.05
+   },
+   "Years": 6,
+   "Big": true
+  },
+  {
+   "Id": "great_filter",
+   "Cat": "soc",
+   "Min": 15,
+   "Max": 25,
+   "W": 0.3,
+   "Cd": 200,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "stability": -0.1,
+    "bonus": {
+     "research": -8
+    },
+    "mood": "civ_disaster",
+    "share": 0.3
+   },
+   "Years": 8,
+   "Big": true
+  },
+  {
+   "Id": "ai_singularity",
+   "Cat": "sci",
+   "Min": 15,
+   "Max": 30,
+   "W": 0.4,
+   "Cd": 150,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [
+    "fam:technocratic",
+    "fam:machine",
+    "fam:collective"
+   ],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "research": 20,
+     "stability": -4
+    }
+   },
+   "Years": 10,
+   "Big": true
+  },
+  {
+   "Id": "digital_plague",
+   "Cat": "sci",
+   "Min": 15,
+   "Max": 35,
+   "W": 0.6,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "research": -10,
+     "prod": -6
+    },
+    "stability": -0.04
+   },
+   "Years": 3,
+   "Big": false
+  },
+  {
+   "Id": "superflare",
+   "Cat": "nature",
+   "Min": 15,
+   "Max": 20,
+   "W": 0.6,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "prod": -12
+    }
+   },
+   "Years": 1,
+   "Big": false
+  },
+  {
+   "Id": "signal_from_stars",
+   "Cat": "sci",
+   "Min": 15,
+   "Max": 41,
+   "W": 0.5,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "research": 10,
+     "culture": 6
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "comet_impact",
+   "Cat": "nature",
+   "Min": 15,
+   "Max": 30,
+   "W": 0.3,
+   "Cd": 120,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "kill": 0.02,
+    "mood": "civ_disaster",
+    "share": 0.3
+   },
+   "Years": 1,
+   "Big": false
+  },
+  {
+   "Id": "precursor_beacon",
+   "Cat": "sci",
+   "Min": 18,
+   "Max": 41,
+   "W": 0.3,
+   "Cd": 150,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "research": 14
+    }
+   },
+   "Years": 6,
+   "Big": true
+  }
+ ],
+ "greats": {
+  "general": {
+   "attack": 8,
+   "defense": 4
+  },
+  "scientist": {
+   "research": 10
+  },
+  "prophet": {
+   "stability": 5,
+   "culture": 4
+  },
+  "artist": {
+   "culture": 8,
+   "prestige": 4
+  },
+  "explorer": {
+   "naval": 6,
+   "trade": 3
+  },
+  "tycoon": {
+   "gold": 8,
+   "trade": 5
+  }
+ }
+}

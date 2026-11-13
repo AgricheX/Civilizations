@@ -123,6 +123,7 @@ namespace Civilizations
             Weapon("civ_w_flak", "shotgun_bullet", 1f, 22f, 0.6f, 3, 1f);
             Weapon("civ_w_rocket", "cannonball", 1f, 14f, 0.4f, 1, 1.5f);
             Weapon("civ_w_air_missile", "civ_air_missile", 1f, 22f, 0.5f, 1, 1.5f);
+            Weapon("civ_w_flame", "fireball", 1f, 10f, 0.6f, 2, 1.5f);
             foreach (UnitDef d in Db.Units)
             {
                 if (d.Cls == "ship") Ship(d);
@@ -173,6 +174,22 @@ namespace Civilizations
                 }
                 return "civ_w_ram";
             }
+            if (a == "death_ray") return "civ_w_ray";
+            if (a == "davinci_flyer") return "civ_w_bomb";
+            if (a == "avrocar") return "civ_w_mg";
+            if (a == "davinci_tank") return "civ_w_cannon";
+            if (a == "war_elephant") return "civ_w_ram";
+            if (d.Cls == "space")
+            {
+                switch (d.Fam)
+                {
+                    case "energy": return "civ_w_ray";
+                    case "missile": return "civ_w_air_missile";
+                    case "kinetic": return "civ_w_cannon";
+                    case "fighter": return "civ_w_mg";
+                }
+                return "civ_w_ray";
+            }
             if (d.Cls == "air")
             {
                 if (d.Id == "civ_multirole_fighter") return "civ_w_air_missile";
@@ -196,7 +213,7 @@ namespace Civilizations
         private static void Land(UnitDef d)
         {
             if (AssetManager.actor_library.get(d.Id) != null) return;
-            bool air = d.Cls == "air";
+            bool air = d.Cls == "air" || d.Cls == "space";
             bool military = Vehicles.Military(d);
             ActorAsset a = AssetManager.actor_library.clone(d.Id, "$basic_unit$");
             a.is_humanoid = false;
@@ -339,10 +356,11 @@ namespace Civilizations
             if (shipScale > 0f) a.base_stats["scale"] = shipScale;
             if (d.Role != "fish")
             {
+                bool war = d.Role == "war" || d.Role == "unique";
                 a.base_stats["damage"] = Math.Max(5f, Store.Get(d.Stats, "damage"));
-                a.base_stats["attack_speed"] = d.Role == "war" ? 0.6f : 0.2f;
-                a.base_stats["range"] = d.Role == "war" ? 12f : 6f;
-                a.default_attack = d.Route == "bio" ? "civ_w_acid" : "boat_cannonball";
+                a.base_stats["attack_speed"] = war ? 0.6f : 0.2f;
+                a.base_stats["range"] = war ? 12f : 6f;
+                a.default_attack = d.Route == "bio" ? "civ_w_acid" : d.Art == "dromon" ? "civ_w_flame" : "boat_cannonball";
             }
             a.icon = "civ/unit/" + d.Id.Substring(4);
             a.has_override_sprite = true;

@@ -181,6 +181,7 @@ namespace Civilizations
 
         private static void BuildNukes(Kingdom k)
         {
+            if (Orgs.Banned(k, "atomic_bomb") && !G.Chance(0.1f)) return;
             int cap = Research.HasFeature(k, "icbm") ? 6 : 3;
             if (Nukes(k) >= cap || k.capital == null) return;
             City c = k.capital;
@@ -204,6 +205,7 @@ namespace Civilizations
             desperation += Math.Max(0f, Politics.Aggression(k)) * 0.1f;
             if (Politics.Stability(k) < 0.3f) desperation += 0.05f;
             if (Policies.Id(k, "ideo") == "environmentalism" || Policies.Id(k, "ideo") == "humanism") desperation *= 0.3f;
+            if (EnemyHasNukes(k)) desperation *= 0.35f;
             if (!G.Chance(Math.Min(0.25f, desperation))) return;
             City target = null;
             int best = 0;
@@ -221,6 +223,60 @@ namespace Civilizations
             }
             if (target == null) return;
             Launch(k, target);
+        }
+
+        private static bool CanStrike(Kingdom k)
+        {
+            return G.Ok(k) && k.isCiv() && NukesAllowed && Nukes(k) > 0 && Research.HasFeature(k, "nuke");
+        }
+
+        private static bool EnemyHasNukes(Kingdom k)
+        {
+            foreach (Kingdom e in World.world.wars.getEnemiesOf(k)) if (CanStrike(e)) return true;
+            return false;
+        }
+
+        private static City BiggestCity(Kingdom k)
+        {
+            City best = null;
+            int bp = -1;
+            foreach (City c in G.Cities(k))
+            {
+                int p = c.getPopulationPeople();
+                if (p > bp)
+                {
+                    bp = p;
+                    best = c;
+                }
+            }
+            return best;
+        }
+
+        private static void Retaliate(Kingdom attacker, Kingdom victim)
+        {
+            if (!G.Ok(attacker) || !G.Ok(victim)) return;
+            var responders = new List<Kingdom> { victim };
+            foreach (Kingdom pr in Diplomacy.Protectors(victim)) if (pr != attacker && !responders.Contains(pr)) responders.Add(pr);
+            Alliance al = victim.getAlliance();
+            if (al != null)
+            {
+                foreach (Kingdom a in al.kingdoms_list)
+                {
+                    if (a != null && a != victim && a != attacker && !responders.Contains(a)) responders.Add(a);
+                }
+            }
+            foreach (Kingdom r in responders)
+            {
+                if (!CanStrike(r)) continue;
+                if (r != victim && !World.world.wars.isInWarWith(r, attacker)) continue;
+                float chance = r == victim ? 0.9f : 0.6f;
+                string ideo = Policies.Id(r, "ideo");
+                if (ideo == "environmentalism" || ideo == "humanism") chance *= 0.5f;
+                if (!G.Chance(chance)) continue;
+                City target = BiggestCity(attacker);
+                if (target == null) return;
+                Launch(r, target, false);
+            }
         }
 
         public static City SiloCity(Kingdom k, City target)
@@ -242,8 +298,14 @@ namespace Civilizations
 
         public static void Launch(Kingdom k, City target)
         {
+            Launch(k, target, true);
+        }
+
+        public static void Launch(Kingdom k, City target, bool provoke)
+        {
             WorldTile t = G.Tile(target);
             if (t == null) return;
+            Kingdom victim = target.kingdom;
             Store.Put(k.data, KNukes, Math.Max(0, Nukes(k) - 1));
             Store.Put(k.data, KNuked, G.Year);
             City silo = Research.HasFeature(k, "icbm") ? SiloCity(k, target) : null;
@@ -257,6 +319,7 @@ namespace Civilizations
                 Transit.Flyover(G.Tile(k.capital) ?? t, t, "bomber", () => Detonate(k, target, t));
             }
             Internet.OnNukeLaunched(k, target, silo != null);
+            if (provoke && victim != null && victim != k) Retaliate(k, victim);
         }
 
         private static void Detonate(Kingdom k, City target, WorldTile t)
@@ -277,6 +340,7 @@ namespace Civilizations
             _sites.Add(new Site { X = t.x, Y = t.y, Year = G.Year, Radius = 30 });
             SaveSites();
             Internet.OnNuke(k, target);
+            Hub.Raise(Hub.NukeDetonated, k, target != null ? target.kingdom : null, target);
             foreach (Kingdom o in G.Kingdoms())
             {
                 if (o == k) continue;

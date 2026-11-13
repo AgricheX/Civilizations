@@ -1,0 +1,1544 @@
+{
+ "orgs": [
+  {
+   "Id": "war_band",
+   "Cat": "military",
+   "Rule": {
+    "MinEra": 1,
+    "MaxEra": 4,
+    "Need": [],
+    "Any": [
+     "fam:tribal"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "attack": 4
+   },
+   "Votes": [
+    "common_enemy"
+   ],
+   "Same": [],
+   "Defense": true,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "city_league",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 4,
+   "Icon": "military"
+  },
+  {
+   "Id": "city_league",
+   "Cat": "military",
+   "Rule": {
+    "MinEra": 5,
+    "MaxEra": 8,
+    "Need": [],
+    "Any": [],
+    "Not": [
+     "fam:tribal"
+    ],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "defense": 6
+   },
+   "Votes": [
+    "common_enemy",
+    "dues",
+    "admit",
+    "expel"
+   ],
+   "Same": [],
+   "Defense": true,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "defensive_alliance",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 8,
+   "Icon": "military"
+  },
+  {
+   "Id": "holy_coalition",
+   "Cat": "military",
+   "Rule": {
+    "MinEra": 6,
+    "MaxEra": 9,
+    "Need": [
+     "religious"
+    ],
+    "Any": [
+     "fam:theocratic",
+     "fam:monarchy",
+     "fam:traditional"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "attack": 6,
+    "loyalty": 3
+   },
+   "Votes": [
+    "common_enemy",
+    "expel"
+   ],
+   "Same": [
+    "religion"
+   ],
+   "Defense": true,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 10,
+   "Icon": "military"
+  },
+  {
+   "Id": "mercenary_company",
+   "Cat": "military",
+   "Rule": {
+    "MinEra": 7,
+    "MaxEra": 9,
+    "Need": [],
+    "Any": [
+     "fam:mercantile",
+     "fam:monarchy",
+     "fam:feudal"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "attack": 3,
+    "gold": -2
+   },
+   "Votes": [
+    "dues"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 6,
+   "Icon": "military"
+  },
+  {
+   "Id": "naval_league",
+   "Cat": "military",
+   "Rule": {
+    "MinEra": 8,
+    "MaxEra": 11,
+    "Need": [
+     "coast"
+    ],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "naval": 8,
+    "trade": 3
+   },
+   "Votes": [
+    "common_enemy",
+    "trade_standards"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": true,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 10,
+   "Icon": "military"
+  },
+  {
+   "Id": "defensive_alliance",
+   "Cat": "military",
+   "Rule": {
+    "MinEra": 9,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [
+     "fam:tribal"
+    ],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "defense": 8
+   },
+   "Votes": [
+    "admit",
+    "expel",
+    "common_enemy",
+    "arms_limits"
+   ],
+   "Same": [],
+   "Defense": true,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "defensive_alliance",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "military"
+  },
+  {
+   "Id": "security_bloc",
+   "Cat": "military",
+   "Rule": {
+    "MinEra": 12,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [
+     "fam:democratic",
+     "fam:revolutionary",
+     "fam:authoritarian"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "defense": 10,
+    "attack": 4
+   },
+   "Votes": [
+    "admit",
+    "expel",
+    "common_enemy",
+    "arms_limits",
+    "intervention"
+   ],
+   "Same": [
+    "bloc"
+   ],
+   "Defense": true,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "security_bloc",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "military"
+  },
+  {
+   "Id": "peacekeepers",
+   "Cat": "military",
+   "Rule": {
+    "MinEra": 12,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [
+     "fam:democratic",
+     "fam:liberal"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "stability": 4
+   },
+   "Votes": [
+    "peace_mission",
+    "intervention"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 30,
+   "Icon": "military"
+  },
+  {
+   "Id": "space_command",
+   "Cat": "military",
+   "Rule": {
+    "MinEra": 13,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": "satellites"
+   },
+   "Eff": {
+    "defense": 6,
+    "air": 6
+   },
+   "Votes": [
+    "space_treaty",
+    "arms_limits"
+   ],
+   "Same": [],
+   "Defense": true,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "military"
+  },
+  {
+   "Id": "merchant_league",
+   "Cat": "economic",
+   "Rule": {
+    "MinEra": 6,
+    "MaxEra": 9,
+    "Need": [
+     "coast"
+    ],
+    "Any": [
+     "fam:mercantile",
+     "fam:republic",
+     "fam:monarchy"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "trade": 10,
+    "gold": 4
+   },
+   "Votes": [
+    "trade_standards",
+    "dues",
+    "embargo"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": true,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 12,
+   "Icon": "economic"
+  },
+  {
+   "Id": "chartered_company",
+   "Cat": "economic",
+   "Rule": {
+    "MinEra": 8,
+    "MaxEra": 10,
+    "Need": [
+     "coast"
+    ],
+    "Any": [
+     "fam:mercantile",
+     "fam:monarchy",
+     "fam:imperial"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "trade": 12,
+    "naval": 4,
+    "gold": 5
+   },
+   "Votes": [
+    "trade_standards"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": true,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 6,
+   "Icon": "economic"
+  },
+  {
+   "Id": "customs_union",
+   "Cat": "economic",
+   "Rule": {
+    "MinEra": 10,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [
+     "fam:tribal"
+    ],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "trade": 8,
+    "prod": 3
+   },
+   "Votes": [
+    "trade_standards",
+    "admit",
+    "embargo"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": true,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "economic"
+  },
+  {
+   "Id": "currency_union",
+   "Cat": "economic",
+   "Rule": {
+    "MinEra": 11,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [
+     "fam:democratic",
+     "fam:corporate",
+     "fam:liberal"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "trade": 6,
+    "gold": 4
+   },
+   "Votes": [
+    "trade_standards",
+    "admit",
+    "dues"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": true,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "economic"
+  },
+  {
+   "Id": "resource_cartel",
+   "Cat": "economic",
+   "Rule": {
+    "MinEra": 11,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "gold": 8,
+    "trade": -2
+   },
+   "Votes": [
+    "embargo",
+    "trade_standards"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 10,
+   "Icon": "economic"
+  },
+  {
+   "Id": "development_bank",
+   "Cat": "economic",
+   "Rule": {
+    "MinEra": 11,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [
+     "fam:democratic",
+     "fam:corporate",
+     "fam:planned"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "build": 5,
+    "growth": 3
+   },
+   "Votes": [
+    "aid",
+    "dues"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "economic"
+  },
+  {
+   "Id": "free_trade_zone",
+   "Cat": "economic",
+   "Rule": {
+    "MinEra": 14,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [
+     "fam:planned"
+    ],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "trade": 12,
+    "prod": 4
+   },
+   "Votes": [
+    "trade_standards",
+    "admit",
+    "expel"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": true,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "economic"
+  },
+  {
+   "Id": "monastic_order",
+   "Cat": "religious",
+   "Rule": {
+    "MinEra": 6,
+    "MaxEra": 10,
+    "Need": [
+     "religious"
+    ],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "research": 4,
+    "health": 3,
+    "culture": 4
+   },
+   "Votes": [
+    "aid"
+   ],
+   "Same": [
+    "religion"
+   ],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 10,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "religious"
+  },
+  {
+   "Id": "missionary_network",
+   "Cat": "religious",
+   "Rule": {
+    "MinEra": 7,
+    "MaxEra": 12,
+    "Need": [
+     "religious"
+    ],
+    "Any": [
+     "fam:theocratic",
+     "fam:traditional"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "culture": 6,
+    "loyalty": 3
+   },
+   "Votes": [
+    "aid"
+   ],
+   "Same": [
+    "religion"
+   ],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "religious"
+  },
+  {
+   "Id": "religious_arbiter",
+   "Cat": "religious",
+   "Rule": {
+    "MinEra": 6,
+    "MaxEra": 10,
+    "Need": [
+     "religious"
+    ],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "stability": 6,
+    "loyalty": 4
+   },
+   "Votes": [
+    "arbitration",
+    "excommunication",
+    "common_enemy"
+   ],
+   "Same": [
+    "religion"
+   ],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": true,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "religious"
+  },
+  {
+   "Id": "purity_council",
+   "Cat": "religious",
+   "Rule": {
+    "MinEra": 7,
+    "MaxEra": 12,
+    "Need": [
+     "religious"
+    ],
+    "Any": [
+     "fam:theocratic"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "loyalty": 6,
+    "research": -4
+   },
+   "Votes": [
+    "tech_ban",
+    "excommunication"
+   ],
+   "Same": [
+    "religion"
+   ],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "religious"
+  },
+  {
+   "Id": "interfaith_council",
+   "Cat": "religious",
+   "Rule": {
+    "MinEra": 14,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [
+     "fam:liberal",
+     "fam:democratic"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "stability": 4
+   },
+   "Votes": [
+    "arbitration",
+    "aid"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "religious"
+  },
+  {
+   "Id": "family_compact",
+   "Cat": "political",
+   "Rule": {
+    "MinEra": 5,
+    "MaxEra": 11,
+    "Need": [
+     "fam:monarchy"
+    ],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "stability": 4,
+    "loyalty": 3
+   },
+   "Votes": [
+    "common_enemy"
+   ],
+   "Same": [],
+   "Defense": true,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 6,
+   "Icon": "political"
+  },
+  {
+   "Id": "league_of_crowns",
+   "Cat": "political",
+   "Rule": {
+    "MinEra": 9,
+    "MaxEra": 11,
+    "Need": [
+     "fam:monarchy"
+    ],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "stability": 6,
+    "loyalty": 4
+   },
+   "Votes": [
+    "intervention",
+    "common_enemy"
+   ],
+   "Same": [],
+   "Defense": true,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "revolutionary_international",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "political"
+  },
+  {
+   "Id": "revolutionary_international",
+   "Cat": "political",
+   "Rule": {
+    "MinEra": 10,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [
+     "fam:leftist",
+     "fam:revolutionary"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "loyalty": 4,
+    "prod": 3
+   },
+   "Votes": [
+    "intervention",
+    "common_enemy",
+    "aid"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "league_of_crowns",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "political"
+  },
+  {
+   "Id": "liberation_front",
+   "Cat": "political",
+   "Rule": {
+    "MinEra": 10,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "loyalty": 4,
+    "attack": 3
+   },
+   "Votes": [
+    "common_enemy",
+    "aid"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 12,
+   "Icon": "political"
+  },
+  {
+   "Id": "non_aligned",
+   "Cat": "political",
+   "Rule": {
+    "MinEra": 12,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "stability": 3,
+    "trade": 3
+   },
+   "Votes": [
+    "arbitration",
+    "aid"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "political"
+  },
+  {
+   "Id": "pan_species",
+   "Cat": "political",
+   "Rule": {
+    "MinEra": 7,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [
+     "xeno:xenophilia"
+    ],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "loyalty": 4,
+    "defense": 4
+   },
+   "Votes": [
+    "common_enemy",
+    "admit"
+   ],
+   "Same": [
+    "species"
+   ],
+   "Defense": true,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "political"
+  },
+  {
+   "Id": "academy",
+   "Cat": "scientific",
+   "Rule": {
+    "MinEra": 9,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [
+     "fam:tribal"
+    ],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "research": 6
+   },
+   "Votes": [
+    "aid"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.25,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "scientific"
+  },
+  {
+   "Id": "great_games",
+   "Cat": "cultural",
+   "Rule": {
+    "MinEra": 6,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": "the_games"
+   },
+   "Eff": {
+    "prestige": 6,
+    "stability": 2
+   },
+   "Votes": [
+    "host"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 8,
+   "Unique": true,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "cultural"
+  },
+  {
+   "Id": "world_expo",
+   "Cat": "cultural",
+   "Rule": {
+    "MinEra": 10,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "prestige": 5,
+    "research": 2
+   },
+   "Votes": [
+    "host"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 6,
+   "Unique": true,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "cultural"
+  },
+  {
+   "Id": "space_agency",
+   "Cat": "scientific",
+   "Rule": {
+    "MinEra": 13,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": "rocketry"
+   },
+   "Eff": {
+    "research": 6,
+    "prestige": 4
+   },
+   "Votes": [
+    "space_treaty",
+    "dues"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.2,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "scientific"
+  },
+  {
+   "Id": "heritage_council",
+   "Cat": "cultural",
+   "Rule": {
+    "MinEra": 12,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "culture": 6
+   },
+   "Votes": [
+    "aid"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 6,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "cultural"
+  },
+  {
+   "Id": "internet_authority",
+   "Cat": "scientific",
+   "Rule": {
+    "MinEra": 14,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": "internet"
+   },
+   "Eff": {
+    "research": 4,
+    "trade": 4
+   },
+   "Votes": [
+    "trade_standards",
+    "tech_ban"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": true,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "scientific"
+  },
+  {
+   "Id": "relief_society",
+   "Cat": "humanitarian",
+   "Rule": {
+    "MinEra": 10,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [
+     "fam:tribal"
+    ],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "health": 6
+   },
+   "Votes": [
+    "aid",
+    "peace_mission"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 10,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "humanitarian"
+  },
+  {
+   "Id": "health_organization",
+   "Cat": "humanitarian",
+   "Rule": {
+    "MinEra": 12,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "health": 8,
+    "growth": 2
+   },
+   "Votes": [
+    "aid"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": true,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "humanitarian"
+  },
+  {
+   "Id": "climate_accord",
+   "Cat": "humanitarian",
+   "Rule": {
+    "MinEra": 13,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {
+     "fam:green": 3.0
+    },
+    "Tech": ""
+   },
+   "Eff": {
+    "pollution": -10,
+    "prod": -2
+   },
+   "Votes": [
+    "climate_quotas",
+    "embargo"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "humanitarian"
+  },
+  {
+   "Id": "non_proliferation",
+   "Cat": "humanitarian",
+   "Rule": {
+    "MinEra": 12,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": "nuclear_fission"
+   },
+   "Eff": {
+    "stability": 3
+   },
+   "Votes": [
+    "tech_ban",
+    "arms_limits",
+    "embargo"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": true,
+   "Rival": "",
+   "Next": "",
+   "Hidden": false,
+   "MinMembers": 2,
+   "MaxMembers": 40,
+   "Icon": "humanitarian"
+  },
+  {
+   "Id": "pirate_confederation",
+   "Cat": "shadow",
+   "Rule": {
+    "MinEra": 7,
+    "MaxEra": 11,
+    "Need": [
+     "coast"
+    ],
+    "Any": [
+     "unstable",
+     "fam:mercantile"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "naval": 6,
+    "gold": 4,
+    "stability": -3
+   },
+   "Votes": [
+    "common_enemy"
+   ],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 12,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": true,
+   "MinMembers": 2,
+   "MaxMembers": 5,
+   "Icon": "shadow"
+  },
+  {
+   "Id": "smuggling_ring",
+   "Cat": "shadow",
+   "Rule": {
+    "MinEra": 9,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [
+     "unstable",
+     "fam:corporate",
+     "fam:mercantile"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "gold": 5,
+    "stability": -2
+   },
+   "Votes": [],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": true,
+   "MinMembers": 2,
+   "MaxMembers": 6,
+   "Icon": "shadow"
+  },
+  {
+   "Id": "secret_society",
+   "Cat": "shadow",
+   "Rule": {
+    "MinEra": 7,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "loyalty": 3,
+    "research": 2
+   },
+   "Votes": [],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": true,
+   "MinMembers": 2,
+   "MaxMembers": 8,
+   "Icon": "shadow"
+  },
+  {
+   "Id": "spy_network",
+   "Cat": "shadow",
+   "Rule": {
+    "MinEra": 9,
+    "MaxEra": 99,
+    "Need": [],
+    "Any": [
+     "fam:authoritarian",
+     "fam:military",
+     "fam:revolutionary"
+    ],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "research": 3,
+    "defense": 2
+   },
+   "Votes": [],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": true,
+   "MinMembers": 2,
+   "MaxMembers": 4,
+   "Icon": "shadow"
+  },
+  {
+   "Id": "separatists",
+   "Cat": "shadow",
+   "Rule": {
+    "MinEra": 8,
+    "MaxEra": 99,
+    "Need": [
+     "unstable"
+    ],
+    "Any": [],
+    "Not": [],
+    "Favor": {},
+    "Tech": ""
+   },
+   "Eff": {
+    "stability": -4
+   },
+   "Votes": [],
+   "Same": [],
+   "Defense": false,
+   "Trade": false,
+   "Share": 0.0,
+   "Opinion": 15,
+   "Unique": false,
+   "Rival": "",
+   "Next": "",
+   "Hidden": true,
+   "MinMembers": 2,
+   "MaxMembers": 3,
+   "Icon": "shadow"
+  }
+ ],
+ "orders": [
+  {
+   "Id": "universal_empire",
+   "MinEra": 4,
+   "MaxEra": 7
+  },
+  {
+   "Id": "tributary_order",
+   "MinEra": 5,
+   "MaxEra": 8
+  },
+  {
+   "Id": "religious_arbitration",
+   "MinEra": 6,
+   "MaxEra": 9
+  },
+  {
+   "Id": "concert_of_powers",
+   "MinEra": 9,
+   "MaxEra": 10
+  },
+  {
+   "Id": "league_of_kingdoms",
+   "MinEra": 10,
+   "MaxEra": 11
+  },
+  {
+   "Id": "united_council",
+   "MinEra": 12,
+   "MaxEra": 14
+  },
+  {
+   "Id": "world_federation",
+   "MinEra": 13,
+   "MaxEra": 14
+  },
+  {
+   "Id": "technocratic_directorate",
+   "MinEra": 13,
+   "MaxEra": 14
+  },
+  {
+   "Id": "corporate_consortium",
+   "MinEra": 14,
+   "MaxEra": 14
+  },
+  {
+   "Id": "hegemonic_peace",
+   "MinEra": 12,
+   "MaxEra": 14
+  },
+  {
+   "Id": "bipolar_blocs",
+   "MinEra": 12,
+   "MaxEra": 13
+  },
+  {
+   "Id": "revolutionary_commune",
+   "MinEra": 11,
+   "MaxEra": 14
+  }
+ ]
+}

@@ -187,6 +187,7 @@ namespace Civilizations
                 Store.Map(c.kingdom.data, KDepot, depot);
             }
             if (local > 0) c.takeResource(res, local);
+            if (res == "gold") Ledger.Gold(c, -amount);
             return true;
         }
 
@@ -205,6 +206,7 @@ namespace Civilizations
         public static void Give(City c, string res, int amount)
         {
             if (c == null || amount <= 0) return;
+            if (res == "gold") Ledger.Gold(c, amount);
             int rest = amount - StoreLocal(c, res, amount);
             if (rest > 0 && c.kingdom != null && c.kingdom.data != null)
             {
@@ -406,10 +408,38 @@ namespace Civilizations
                     }
                 }
             }
+            float cap = 3000f + 800f * cities.Count;
+            foreach (string id in depot.Keys.ToList())
+            {
+                float v = depot[id];
+                if (float.IsNaN(v) || float.IsInfinity(v) || v < 0f) depot[id] = 0f;
+                else if (v > cap) depot[id] = cap + (v - cap) * (float)Math.Pow(0.5, yrs);
+            }
+            Treasury(k, cities, yrs);
             var trade = Store.Map(k.data, KTrade);
             foreach (string key in trade.Keys.ToList()) trade[key] *= (float)Math.Pow(0.85, yrs);
             Store.Map(k.data, KTrade, trade);
             Store.Map(k.data, KDepot, depot);
+        }
+
+        public const int GoldHardCap = 10000000;
+
+        private static void Treasury(Kingdom k, List<City> cities, int yrs)
+        {
+            if (cities.Count == 0) return;
+            int era = Research.Era(k);
+            int upkeep = (int)(cities.Count * (1f + era * 0.6f) * yrs);
+            foreach (City c in cities)
+            {
+                int gold = c.getResourcesAmount("gold");
+                if (gold <= 0) continue;
+                int soft = 4000 + era * 1500;
+                int loss = 0;
+                if (gold > GoldHardCap) loss = gold - GoldHardCap;
+                else if (gold > soft) loss = (int)((gold - soft) * Math.Min(0.6f, 0.08f * yrs));
+                int pay = Math.Min(gold - loss, upkeep / cities.Count);
+                if (loss + pay > 0) c.takeResource("gold", Math.Min(gold, loss + pay));
+            }
         }
 
         public static Dictionary<string, float> Depot(Kingdom k)
@@ -498,6 +528,7 @@ namespace Civilizations
 
         public static bool Route(City a, City b)
         {
+            if (a != null && b != null && a.kingdom != b.kingdom && (Orgs.Embargoed(a.kingdom, b.kingdom) || !Fog.Knows(a.kingdom, b.kingdom))) return false;
             WorldTile ta = G.Tile(a);
             WorldTile tb = G.Tile(b);
             if (ta == null || tb == null) return false;
@@ -523,11 +554,7 @@ namespace Civilizations
                 dest.takeResource("gold", profit);
                 if (home != null) Give(home, "gold", profit);
             }
-            else if (home != null)
-            {
-                Give(home, "gold", Math.Max(1, profit / 3));
-            }
-            merchant.data.money += Math.Max(1, profit / 5);
+            merchant.data.money = Math.Min(100000, merchant.data.money + Math.Max(1, profit / 5));
             if (hk != null && dest.kingdom != null && dest.kingdom != hk) RecordTrade(hk, dest.kingdom, amount / 5f);
             Infrastructure.AddDemand(home, dest, amount);
         }
@@ -593,6 +620,7 @@ namespace Civilizations
                     Store.Map(old.data, KDepot, depot);
                     Store.Map(pNewKingdom.data, KDepot, mine);
                     Internet.OnSack(__instance, old, pNewKingdom);
+                    Chronicle.Log("sack", pNewKingdom, G.Name(pNewKingdom), G.Name(__instance), null, null, null, __instance, null, false);
                     Buildings.OnSacked(__instance);
                     if (old.countCities() <= 1) Companies.OnConquest(pNewKingdom, old);
                 }

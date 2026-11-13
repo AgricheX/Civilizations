@@ -1,12 +1,34 @@
 {
   "Civilizations": [
     {
+      "Id": "civ_check_updates",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/update",
+      "BoolVal": true
+    },
+    {
       "Id": "civ_pace",
       "Type": "SLIDER",
       "IconPath": "ui/Icons/civ/cfg/pace",
       "FloatVal": 1.0,
       "MinFloatVal": 0.1,
-      "MaxFloatVal": 20.0
+      "MaxFloatVal": 50.0
+    },
+    {
+      "Id": "civ_max_era",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/lock_ages",
+      "IntVal": 42,
+      "MinIntVal": 0,
+      "MaxIntVal": 42
+    },
+    {
+      "Id": "civ_max_scale",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/globe",
+      "IntVal": 10,
+      "MinIntVal": 0,
+      "MaxIntVal": 10
     },
     {
       "Id": "civ_apply_rules",
@@ -99,6 +121,70 @@
       "Type": "SWITCH",
       "IconPath": "ui/Icons/civ/cfg/profiler",
       "BoolVal": false
+    },
+    {
+      "Id": "civ_regression",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/regression",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_apocalypse",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/apocalypse",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_events",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/events",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_sandbox",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/sandbox",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_sandbox_notice",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/sandbox_notice",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_pause_events",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/pause_events",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_ctrl_player",
+      "Type": "SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/ctrl_player",
+      "FloatVal": 0.0,
+      "MinFloatVal": -30.0,
+      "MaxFloatVal": 50.0
+    },
+    {
+      "Id": "civ_ctrl_ai",
+      "Type": "SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/ctrl_ai",
+      "FloatVal": 0.0,
+      "MinFloatVal": -30.0,
+      "MaxFloatVal": 50.0
+    },
+    {
+      "Id": "civ_festivals",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/festivals",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_log_limit",
+      "Type": "TEXT",
+      "IconPath": "ui/Icons/civ/cfg/log_limit",
+      "TextVal": "100000"
     }
   ],
   "CivVisual": [
@@ -169,6 +255,12 @@
       "Type": "SWITCH",
       "IconPath": "ui/Icons/civ/cfg/transit_visuals",
       "BoolVal": true
+    },
+    {
+      "Id": "civ_fog_view",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/fog_view",
+      "BoolVal": false
     }
   ],
   "CivWorld": [
@@ -201,6 +293,54 @@
       "IntVal": 5,
       "MinIntVal": 1,
       "MaxIntVal": 40
+    }
+  ],
+  "CivCosmos": [
+    {
+      "Id": "civ_cos_shared",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/shared",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_cos_near",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/near",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_cos_seed",
+      "Type": "TEXT",
+      "IconPath": "ui/Icons/civ/cfg/seed",
+      "TextVal": ""
+    },
+    {
+      "Id": "civ_cos_time",
+      "Type": "SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/cosmic_time",
+      "FloatVal": 1.0,
+      "MinFloatVal": 0.0,
+      "MaxFloatVal": 5.0
+    },
+    {
+      "Id": "civ_cos_fermi",
+      "Type": "INT_SLIDER",
+      "IconPath": "ui/Icons/civ/cfg/fermi",
+      "IntVal": 1,
+      "MinIntVal": 0,
+      "MaxIntVal": 2
+    },
+    {
+      "Id": "civ_cos_invasions",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/invasions",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_cos_ending",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/ending",
+      "BoolVal": false
     }
   ],
   "CivCities": [

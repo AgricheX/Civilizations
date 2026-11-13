@@ -115,8 +115,8 @@ namespace Civilizations
                 if (b == null || !b.isUsable() || b.isUnderConstruction()) continue;
                 PlantDef p = PlantOf(b);
                 if (p == null) continue;
-                float output = p.Output;
-                if (!string.IsNullOrEmpty(p.Fuel))
+                float output = p.Output * (k != null ? Rarities.PlantMult(k) : 1f);
+                if (!string.IsNullOrEmpty(p.Fuel) && (k == null || !Rarities.NoFuel(k)))
                 {
                     int need = FuelUse(p) * yrs;
                     int take = Economy.TakeUpTo(c, p.Fuel, need, true);
@@ -201,6 +201,7 @@ namespace Civilizations
                 Store.Put(c.data, KRatio, ratio);
                 bool now = Blackout(c);
                 if (now && !before) Internet.OnBlackout(c);
+                if (now && !before && c.kingdom != null && c == c.kingdom.capital) Chronicle.Log("blackout", c.kingdom, G.Name(c.kingdom), G.Name(c), null, null, null, c, null, false);
             }
             Store.Map(k.data, KMix, mix);
             _deficit.Remove(k.data.id);

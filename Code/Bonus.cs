@@ -41,6 +41,12 @@ namespace Civilizations
                 foreach (var kv in p.Eff) Store.Add(m, kv.Key, kv.Value);
             }
             foreach (var kv in Companies.Effects(k)) Store.Add(m, kv.Key, kv.Value);
+            foreach (var kv in Orgs.Effects(k)) Store.Add(m, kv.Key, kv.Value);
+            foreach (var kv in Events.Effects(k)) Store.Add(m, kv.Key, kv.Value);
+            foreach (var kv in Festivals.Effects(k)) Store.Add(m, kv.Key, kv.Value);
+            foreach (var kv in CosmosSim.Effects(k)) Store.Add(m, kv.Key, kv.Value);
+            foreach (var kv in Player.Effects(k)) Store.Add(m, kv.Key, kv.Value);
+            foreach (var kv in Statecraft.Effects(k)) Store.Add(m, kv.Key, kv.Value);
             _cache[k.data.id] = m;
             return m;
         }

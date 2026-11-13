@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using HarmonyLib;
 using UnityEngine;
 
 namespace Civilizations
@@ -9,25 +11,40 @@ namespace Civilizations
     {
         public const string KLastWar = "civ_last_war";
         public const string KBorder = "civ_border_walls";
+        public const int ShieldEra = 15;
         private const string KTower = "civ_wall_tower";
-        private static readonly string[] TierLook = { "wall_wild", "wall_order", "wall_order", "wall_ancient", "wall_iron" };
-        private static readonly int[] TierStrength = { 1, 2, 3, 3, 4 };
+        private const string KSig = "civ_wsig";
+        private const string KPlanYear = "civ_wplan_y";
+        private const string KPlan = "civ_wplan";
+        private const string KFoes = "civ_wfoes";
+        private const string KReg = "civ_wall_reg";
+        private const int ReplanYears = 5;
+        private static readonly string[] TierLook = { "wall_wild", "wall_order", "wall_ancient", "wall_iron" };
+        private static readonly int[] TierStrength = { 1, 2, 3, 4 };
         private static TopTileType[] _tiers;
         private static TopTileType _border;
+        private static TopTileType _shield;
         private static TopTileType _damaged;
         private static TopTileType _trench;
         private static readonly HashSet<TopTileType> _ours = new HashSet<TopTileType>();
-        private static readonly Dictionary<City, List<WorldTile>> _cache = new Dictionary<City, List<WorldTile>>();
-        private static readonly Dictionary<WorldTile, int> _hp = new Dictionary<WorldTile, int>();
-        private static float _tick;
+        private static readonly Dictionary<TopTileType, string> _look = new Dictionary<TopTileType, string>();
+        private static readonly Dictionary<int, long> _reg = new Dictionary<int, long>();
+        private static readonly Dictionary<long, List<int>> _byOwner = new Dictionary<long, List<int>>();
+        private static readonly Dictionary<long, HashSet<int>> _plans = new Dictionary<long, HashSet<int>>();
+        private static readonly Dictionary<int, int> _hp = new Dictionary<int, int>();
+        private static bool _loaded;
+        private static bool _ownersDirty = true;
 
         public static void InitAssets()
         {
             if (AssetManager.top_tiles.get("wall_order") == null) return;
-            _tiers = new TopTileType[5];
-            for (int i = 0; i < 5; i++) _tiers[i] = Tile("civ_wallt_" + i, TierLook[i], null, TierStrength[i], i == 0);
+            _tiers = new TopTileType[4];
+            for (int i = 0; i < 4; i++) _tiers[i] = Tile("civ_wallt_" + i, TierLook[i], null, TierStrength[i], i == 0);
             _border = Tile("civ_wallt_border", "wall_iron", null, 4, false);
+            _shield = Tile("civ_wallt_shield", "wall_iron", "#5AD6FF", 5, false);
+            _look[_shield] = "civ_shield";
             _damaged = Tile("civ_wallt_damaged", "wall_order", "#7A6F64", 1, false);
+            Tile("civ_wallt_4", "wall_iron", null, 4, false);
             TopTileType road = TopTileLibrary.road ?? AssetManager.top_tiles.get("road");
             if (road != null)
             {
@@ -45,8 +62,6 @@ namespace Civilizations
                 _ours.Add(_trench);
             }
         }
-
-        private static readonly Dictionary<TopTileType, string> _look = new Dictionary<TopTileType, string>();
 
         private static TopTileType Tile(string id, string look, string color, int strength, bool wood)
         {
@@ -77,7 +92,10 @@ namespace Civilizations
             var list = new List<TopTileType>();
             if (_tiers != null) list.AddRange(_tiers);
             if (_border != null) list.Add(_border);
+            if (_shield != null) list.Add(_shield);
             if (_damaged != null) list.Add(_damaged);
+            TopTileType old = AssetManager.top_tiles.get("civ_wallt_4");
+            if (old != null) list.Add(old);
             return list.ToArray();
         }
 
@@ -85,6 +103,11 @@ namespace Civilizations
         {
             string l;
             return t != null && _look.TryGetValue(t, out l) ? l : "wall_order";
+        }
+
+        public static bool IsShield(TopTileType t)
+        {
+            return t != null && t == _shield;
         }
 
         public static bool IsWall(WorldTile t)
@@ -138,28 +161,416 @@ namespace Civilizations
             return Math.Min(1f, t);
         }
 
-        public static void KingdomYear(Kingdom k, int yrs)
+        public static void Clear()
         {
-            if (World.world.wars.hasWars(k)) Store.Put(k.data, KLastWar, G.Year);
-            BorderWalls(k, yrs);
+            _reg.Clear();
+            _byOwner.Clear();
+            _plans.Clear();
+            _hp.Clear();
+            _loaded = false;
+            _ownersDirty = true;
         }
 
-        private static int MaxHp(WorldTile t)
+        private static void Ensure()
         {
-            if (t.top_type == _border) return 60;
-            if (t.top_type == _damaged) return 8;
-            for (int i = 0; i < 5; i++) if (_tiers != null && t.top_type == _tiers[i]) return 14 + i * 8;
-            return 10;
+            if (_loaded || !G.Loaded) return;
+            _loaded = true;
+            _reg.Clear();
+            SaveCustomData d = Store.World();
+            string s = Store.Str(d, KReg);
+            if (s.Length > 0)
+            {
+                foreach (string p in s.Split(';'))
+                {
+                    int i = p.IndexOf(':');
+                    if (i <= 0) continue;
+                    int id;
+                    long owner;
+                    if (int.TryParse(p.Substring(0, i), out id) && long.TryParse(p.Substring(i + 1), out owner)) _reg[id] = owner;
+                }
+            }
+            foreach (TopTileType t in _ours)
+            {
+                if (t == null) continue;
+                foreach (WorldTile w in t.getCurrentTiles().ToList())
+                {
+                    if (w == null || _reg.ContainsKey(w.tile_id)) continue;
+                    Kingdom k = Owner(w);
+                    _reg[w.tile_id] = k != null ? k.data.id : 0L;
+                }
+            }
+            _ownersDirty = true;
         }
 
-        private static string[][] Costs =
+        public static void Save()
         {
-            new[] { "wood:1" }, new[] { "stone:1", "wood:2" }, new[] { "stone:2" }, new[] { "civ_bricks:1", "stone:3" }, new[] { "civ_concrete:1", "civ_steel:1", "stone:4" }
-        };
+            if (!_loaded) return;
+            var sb = new StringBuilder();
+            foreach (var kv in _reg)
+            {
+                if (sb.Length > 0) sb.Append(';');
+                sb.Append(kv.Key).Append(':').Append(kv.Value);
+            }
+            Store.Put(Store.World(), KReg, sb.ToString());
+        }
 
-        private static bool Pay(City c, int tier)
+        private static WorldTile At(int id)
         {
-            foreach (string opt in Costs[Math.Max(0, Math.Min(4, tier))])
+            WorldTile[] all = World.world.tiles_list;
+            return all != null && id >= 0 && id < all.Length ? all[id] : null;
+        }
+
+        private static Kingdom Owner(WorldTile t)
+        {
+            City c = t != null && t.zone != null ? t.zone.city : null;
+            return c != null && G.Ok(c) && c.kingdom != null && c.kingdom.isCiv() ? c.kingdom : null;
+        }
+
+        private static void Owners()
+        {
+            if (!_ownersDirty) return;
+            _ownersDirty = false;
+            _byOwner.Clear();
+            foreach (var kv in _reg)
+            {
+                List<int> l;
+                if (!_byOwner.TryGetValue(kv.Value, out l)) _byOwner[kv.Value] = l = new List<int>();
+                l.Add(kv.Key);
+            }
+        }
+
+        private static void Register(WorldTile t, Kingdom k)
+        {
+            _reg[t.tile_id] = k.data.id;
+            _ownersDirty = true;
+        }
+
+        private static void Unregister(int id)
+        {
+            if (_reg.Remove(id)) _ownersDirty = true;
+            _hp.Remove(id);
+        }
+
+        public static void Register()
+        {
+            Hub.On(Hub.WarStarted, e =>
+            {
+                if (!G.Ok(e.K) || !G.Ok(e.O)) return;
+                Foe(e.K, e.O);
+                Foe(e.O, e.K);
+            });
+            Hub.On(Hub.CityCaptured, e =>
+            {
+                if (e.Arg != "captured" || !G.Ok(e.K) || !G.Ok(e.O)) return;
+                Foe(e.O, e.K);
+            });
+        }
+
+        private static void Foe(Kingdom k, Kingdom o)
+        {
+            Dictionary<string, float> m = Store.Map(k.data, KFoes);
+            m[o.data.id.ToString()] = G.Year;
+            if (m.Count > 24)
+            {
+                foreach (string key in m.OrderBy(x => x.Value).Take(m.Count - 24).Select(x => x.Key).ToList()) m.Remove(key);
+            }
+            Store.Map(k.data, KFoes, m);
+        }
+
+        private static bool RecentFoe(Kingdom k, Kingdom o, int years)
+        {
+            float y = Store.Get(Store.Map(k.data, KFoes), o.data.id.ToString());
+            return y != 0f && G.Year - (int)y <= years;
+        }
+
+        private static bool Partner(Kingdom k, Kingdom o)
+        {
+            if (Diplomacy.Overlord(k) == o || Diplomacy.Overlord(o) == k) return true;
+            foreach (Treaty t in Diplomacy.Between(k, o))
+            {
+                if (t.Type == "non_aggression" || t.Type == "trade_treaty" || t.Type == "embassy" || t.Type == "defense_pact" || t.Type == "entente" || t.Type == "nuclear_umbrella" || t.Type == "royal_marriage") return true;
+            }
+            if (Orgs.Shares(k, o, x => true)) return true;
+            try
+            {
+                if (k.hasAlliance() && k.getAlliance() == o.getAlliance()) return true;
+            }
+            catch (Exception)
+            {
+            }
+            return false;
+        }
+
+        private static int Opinion(Kingdom a, Kingdom b)
+        {
+            try
+            {
+                KingdomOpinion op = World.world.diplomacy.getOpinion(a, b);
+                return op != null ? op.total : 0;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
+
+        private static bool Hostile(Kingdom k, Kingdom o, KProfile p)
+        {
+            if (World.world.wars.isInWarWith(k, o)) return true;
+            if (RecentFoe(k, o, 40)) return true;
+            return Opinion(k, o) < -25;
+        }
+
+        private static bool WallAgainst(Kingdom k, Kingdom o, KProfile p)
+        {
+            bool xeno = p.Xeno == "xenophobia";
+            if (Partner(k, o) && !xeno) return false;
+            float want = 0f;
+            if (World.world.wars.isInWarWith(k, o)) want += 1f;
+            if (RecentFoe(k, o, 40)) want += 0.6f;
+            int op = Opinion(k, o);
+            if (op < -20) want += 0.35f;
+            if (op < -60) want += 0.25f;
+            if (xeno)
+            {
+                want += 0.55f;
+                if (o.getSpecies() != k.getSpecies()) want += 0.2f;
+            }
+            if (p.Ideo == "nationalism") want += 0.25f;
+            if (p.Ideo == "militarism") want += 0.15f;
+            if (p.Xeno == "xenophilia") want -= 0.4f;
+            if (ModernPeace(k)) want -= 0.3f;
+            if (Profile.Get(o).Strength > p.Strength * 1.5f) want += 0.15f;
+            return want >= 0.5f;
+        }
+
+        private static Vector2 Center(Kingdom k)
+        {
+            WorldTile t = k.capital != null ? G.Tile(k.capital) : null;
+            if (t != null) return new Vector2(t.x, t.y);
+            float x = 0f, y = 0f;
+            int n = 0;
+            foreach (City c in G.Cities(k))
+            {
+                WorldTile ct = G.Tile(c);
+                if (ct == null) continue;
+                x += ct.x;
+                y += ct.y;
+                n++;
+            }
+            return n > 0 ? new Vector2(x / n, y / n) : Vector2.zero;
+        }
+
+        private static bool Mine(TileZone z, Kingdom k)
+        {
+            return z != null && z.city != null && z.city.kingdom == k;
+        }
+
+        private static List<TileZone> BorderZones(Kingdom k)
+        {
+            var list = new List<TileZone>();
+            foreach (City c in G.Cities(k))
+            {
+                foreach (TileZone z in c.zones)
+                {
+                    if (z == null || z.neighbours == null) continue;
+                    foreach (TileZone n in z.neighbours)
+                    {
+                        if (n != null && !Mine(n, k))
+                        {
+                            list.Add(z);
+                            break;
+                        }
+                    }
+                }
+            }
+            return list;
+        }
+
+        private static int Signature(Kingdom k, List<TileZone> zones)
+        {
+            unchecked
+            {
+                int h = 17;
+                foreach (TileZone z in zones)
+                {
+                    h ^= z.id * 486187739;
+                    h += 31;
+                    foreach (TileZone n in z.neighbours)
+                    {
+                        if (n == null || Mine(n, k)) continue;
+                        long o = n.city != null && n.city.kingdom != null ? n.city.kingdom.data.id : 0L;
+                        h ^= (int)(o * 16777619L) + n.id;
+                    }
+                }
+                foreach (global::War w in World.world.wars.getWars(k)) h ^= (int)(w.getID() * 2654435761L);
+                h ^= Policies.Id(k, "xeno").GetHashCode();
+                return h;
+            }
+        }
+
+        private static bool Buildable(WorldTile t)
+        {
+            if (t == null || t.Type == null || t.hasBuilding()) return false;
+            TileTypeBase ty = t.Type;
+            if (ty.liquid || ty.lava || ty.ocean) return false;
+            if (ty.block && !IsOurs(t)) return false;
+            TileType m = t.main_type;
+            if (m == null || m.liquid || m.lava || m.ocean || m.mountains || m.summit || m.rocks) return false;
+            foreach (WorldTile n in t.neighboursAll)
+            {
+                if (n == null || n.Type == null) return false;
+                if (n.Type.liquid || n.Type.ocean || n.main_type != null && (n.main_type.liquid || n.main_type.ocean)) return false;
+            }
+            if (m.sand)
+            {
+                foreach (WorldTile n in t.getTilesAround(3))
+                {
+                    if (n != null && n.main_type != null && (n.main_type.liquid || n.main_type.ocean)) return false;
+                }
+            }
+            return true;
+        }
+
+        private static bool Gate(WorldTile t)
+        {
+            return t != null && (t.Type != null && t.Type.road || t.top_type == Infrastructure.RailBed);
+        }
+
+        private static HashSet<int> Plan(Kingdom k, List<TileZone> zones)
+        {
+            KProfile p = Profile.Get(k);
+            Vector2 me = Center(k);
+            var against = new Dictionary<long, bool>();
+            var threats = new List<Vector2>();
+            foreach (Kingdom o in Fog.KnownKingdoms(k))
+            {
+                if (!G.Ok(o) || o == k || !o.isCiv() || o.capital == null) continue;
+                if (!Hostile(k, o, p)) continue;
+                Vector2 oc = Center(o);
+                if (oc != Vector2.zero) threats.Add(oc);
+            }
+            bool xenoAll = p.Xeno == "xenophobia";
+            var plan = new HashSet<int>();
+            foreach (TileZone z in zones)
+            {
+                var outside = new Dictionary<TileZone, bool>();
+                foreach (TileZone n in z.neighbours)
+                {
+                    if (n == null || Mine(n, k)) continue;
+                    Kingdom o = n.city != null && G.Ok(n.city) ? n.city.kingdom : null;
+                    bool want;
+                    if (o != null && o.isCiv())
+                    {
+                        if (!against.TryGetValue(o.data.id, out want)) against[o.data.id] = want = WallAgainst(k, o, p);
+                    }
+                    else if (n.tiles_with_ground <= 0)
+                    {
+                        want = false;
+                    }
+                    else
+                    {
+                        want = xenoAll || Facing(me, z, threats);
+                    }
+                    outside[n] = want;
+                }
+                if (!outside.Values.Any(x => x)) continue;
+                foreach (WorldTile t in z.tiles)
+                {
+                    if (t == null) continue;
+                    bool edge = false;
+                    foreach (WorldTile n in t.neighbours)
+                    {
+                        if (n == null || n.zone == null || n.zone == z) continue;
+                        bool w;
+                        if (outside.TryGetValue(n.zone, out w) && w)
+                        {
+                            edge = true;
+                            break;
+                        }
+                    }
+                    if (edge && Buildable(t)) plan.Add(t.tile_id);
+                }
+            }
+            return plan;
+        }
+
+        private static bool Facing(Vector2 me, TileZone z, List<Vector2> threats)
+        {
+            if (threats.Count == 0 || z.centerTile == null) return false;
+            Vector2 dir = new Vector2(z.centerTile.x, z.centerTile.y) - me;
+            if (dir.sqrMagnitude < 1f) return false;
+            foreach (Vector2 t in threats)
+            {
+                Vector2 td = t - me;
+                if (td.sqrMagnitude < 1f) continue;
+                if (Vector2.Angle(dir, td) <= 55f) return true;
+            }
+            return false;
+        }
+
+        private static HashSet<int> LoadPlan(Kingdom k)
+        {
+            HashSet<int> plan;
+            if (_plans.TryGetValue(k.data.id, out plan)) return plan;
+            plan = new HashSet<int>();
+            string s = Store.Str(k.data, KPlan);
+            if (s.Length > 0)
+            {
+                foreach (string x in s.Split(','))
+                {
+                    int id;
+                    if (int.TryParse(x, out id)) plan.Add(id);
+                }
+            }
+            _plans[k.data.id] = plan;
+            return plan;
+        }
+
+        private static void SavePlan(Kingdom k, HashSet<int> plan)
+        {
+            _plans[k.data.id] = plan;
+            Store.Put(k.data, KPlan, string.Join(",", plan.Select(x => x.ToString()).ToArray()));
+        }
+
+        private static TopTileType Want(Kingdom k)
+        {
+            int era = Research.Era(k);
+            if (era >= ShieldEra && _shield != null) return _shield;
+            if (era >= 11 || Research.Has(k, "concrete_walls")) return _border;
+            int level = Level(k);
+            if (level < 0) return null;
+            return _tiers[Math.Min(level, 3)];
+        }
+
+        private static int Rank(TopTileType t)
+        {
+            if (t == null) return -1;
+            if (t == _shield) return 6;
+            if (t == _border) return 5;
+            for (int i = 0; i < _tiers.Length; i++) if (_tiers[i] == t) return i + 1;
+            return 0;
+        }
+
+        private static readonly Dictionary<TopTileType, string[]> CostCache = new Dictionary<TopTileType, string[]>();
+
+        private static string[] Costs(TopTileType t)
+        {
+            if (t == _shield) return new[] { "civ_electronics:1", "civ_steel:1", "civ_concrete:2" };
+            if (t == _border) return new[] { "civ_concrete:1", "civ_steel:1", "stone:3" };
+            int i = Array.IndexOf(_tiers, t);
+            switch (i)
+            {
+                case 0: return new[] { "wood:1" };
+                case 1: return new[] { "stone:1", "wood:2" };
+                case 2: return new[] { "civ_bricks:1", "stone:2" };
+                default: return new[] { "stone:3", "civ_steel:1" };
+            }
+        }
+
+        private static bool Pay(City c, TopTileType t)
+        {
+            foreach (string opt in Costs(t))
             {
                 int i = opt.IndexOf(':');
                 string res = opt.Substring(0, i);
@@ -169,116 +580,263 @@ namespace Civilizations
             return false;
         }
 
-        private static readonly Dictionary<City, HashSet<WorldTile>> _gates = new Dictionary<City, HashSet<WorldTile>>();
-
-        private static bool Road(WorldTile t)
+        private static void Refund(City c, TopTileType t)
         {
-            return t != null && (t.Type != null && t.Type.road || t.top_type == Infrastructure.RailBed);
+            if (c == null || t == null) return;
+            string opt = Costs(t)[0];
+            int i = opt.IndexOf(':');
+            int n = int.Parse(opt.Substring(i + 1));
+            if (G.Chance(0.6f)) Economy.Give(c, opt.Substring(0, i), Math.Max(1, n / 2 + (G.Chance(0.5f) ? 1 : 0)));
         }
 
-        private static bool Gate(City c, WorldTile t)
+        public static int Tiers { get { return _tiers != null ? _tiers.Length : 0; } }
+
+        public static bool SandboxPlace(WorldTile t, int tier, Kingdom k)
         {
-            if (Road(t)) return true;
-            HashSet<WorldTile> g;
-            return _gates.TryGetValue(c, out g) && g.Contains(t);
+            if (_tiers == null || t == null || !G.Ok(k) || t.Type == null || t.Type.liquid || !t.Type.ground) return false;
+            TopTileType type = tier < 0 ? _border : tier >= _tiers.Length ? _shield : _tiers[tier];
+            if (type == null) return false;
+            Place(t, type, k);
+            return true;
         }
 
-        private static HashSet<WorldTile> Gates(City c, List<WorldTile> perim)
+        public static bool SandboxErase(WorldTile t)
         {
-            var set = new HashSet<WorldTile>();
-            WorldTile center = c.getTile();
-            if (center == null || perim.Count == 0) return set;
-            var perimSet = new HashSet<WorldTile>(perim);
-            int cx = center.x, cy = center.y;
-            int[][] dirs = { new[] { 0, 1 }, new[] { 0, -1 }, new[] { 1, 0 }, new[] { -1, 0 } };
-            foreach (int[] d in dirs)
-            {
-                WorldTile best = null;
-                int bestOff = int.MaxValue;
-                bool hasRoad = false;
-                foreach (WorldTile t in perim)
-                {
-                    int dx = t.x - cx, dy = t.y - cy;
-                    int along = d[0] != 0 ? dx * d[0] : dy * d[1];
-                    int side = d[0] != 0 ? Math.Abs(dy) : Math.Abs(dx);
-                    if (along <= 0 || side > along) continue;
-                    if (Road(t)) { hasRoad = true; break; }
-                    if (side < bestOff)
-                    {
-                        bestOff = side;
-                        best = t;
-                    }
-                }
-                if (hasRoad || best == null) continue;
-                set.Add(best);
-                foreach (WorldTile n in best.neighbours)
-                {
-                    if (n == null || !perimSet.Contains(n)) continue;
-                    bool across = d[0] != 0 ? n.x == best.x : n.y == best.y;
-                    if (across)
-                    {
-                        set.Add(n);
-                        break;
-                    }
-                }
-            }
-            return set;
+            if (t == null || !IsWall(t) && t.top_type != _trench) return false;
+            Remove(t);
+            Unregister(t.tile_id);
+            return true;
         }
 
-        private static List<WorldTile> Perimeter(City c)
-        {
-            var list = new List<WorldTile>();
-            var zones = new HashSet<TileZone>(c.zones);
-            foreach (TileZone z in c.zones.ToList())
-            {
-                bool edge = false;
-                foreach (TileZone n in z.neighbours) if (n != null && !zones.Contains(n)) edge = true;
-                if (!edge) continue;
-                foreach (WorldTile t in z.tiles.ToList())
-                {
-                    if (t == null || t.Type == null || t.Type.liquid) continue;
-                    if (t.Type.block && !IsOurs(t)) continue;
-                    if (t.main_type != null && (t.main_type.mountains || t.main_type.rocks)) continue;
-                    bool border = false;
-                    foreach (WorldTile n in t.neighbours)
-                    {
-                        if (n != null && n.zone != null && !zones.Contains(n.zone))
-                        {
-                            border = true;
-                            break;
-                        }
-                    }
-                    if (border) list.Add(t);
-                }
-            }
-            return list;
-        }
-
-        private static bool NearBuilding(WorldTile t)
-        {
-            foreach (WorldTile n in t.neighbours)
-            {
-                if (n == null) continue;
-                if (n.hasBuilding()) return true;
-                foreach (WorldTile m in n.neighbours) if (m != null && m.hasBuilding()) return true;
-            }
-            return false;
-        }
-
-        private static void Place(WorldTile t, TopTileType type)
+        private static void Place(WorldTile t, TopTileType type, Kingdom k)
         {
             MapAction.terraformTop(t, type, AssetManager.terraform.get("road"));
-            _hp.Remove(t);
+            _hp.Remove(t.tile_id);
+            Register(t, k);
         }
 
         private static void Remove(WorldTile t)
         {
-            _hp.Remove(t);
+            _hp.Remove(t.tile_id);
             MapAction.decreaseTile(t, false, "flash");
         }
 
-        private static void Migrate(City c)
+        public static void KingdomYear(Kingdom k, int yrs)
         {
+            if (_tiers == null || !G.Ok(k) || !k.isCiv()) return;
+            Ensure();
+            if (World.world.wars.hasWars(k)) Store.Put(k.data, KLastWar, G.Year);
+            Capture(k);
+            TopTileType want = Want(k);
+            HashSet<int> plan;
+            if (want == null)
+            {
+                plan = new HashSet<int>();
+                SavePlan(k, plan);
+            }
+            else
+            {
+                List<TileZone> zones = BorderZones(k);
+                int sig = Signature(k, zones);
+                int last = Store.Int(k.data, KPlanYear, int.MinValue);
+                if (sig != Store.Int(k.data, KSig, 0) || last == int.MinValue || G.Year - last >= ReplanYears)
+                {
+                    plan = Plan(k, zones);
+                    SavePlan(k, plan);
+                    Store.Put(k.data, KSig, sig);
+                    Store.Put(k.data, KPlanYear, G.Year);
+                }
+                else plan = LoadPlan(k);
+            }
+            Dismantle(k, plan, yrs);
+            if (want != null && plan.Count > 0)
+            {
+                int built = Build(k, plan, want, yrs);
+                Towers(k, plan);
+                if (built > 0)
+                {
+                    World.world.resetRedrawTimer();
+                    if (built > 8) CivMod.Safe("walls-news", () => WallNews(k, built));
+                }
+            }
+        }
+
+        private static void WallNews(Kingdom k, int built)
+        {
+            Kingdom foe = null;
+            foreach (Kingdom o in Fog.KnownKingdoms(k))
+            {
+                if (World.world.wars.isInWarWith(k, o))
+                {
+                    foe = o;
+                    break;
+                }
+            }
+            if (foe != null && G.Chance(0.25f)) Internet.OnBorderWall(k, foe);
+            else if (k.capital != null && G.Chance(0.2f)) Internet.OnWalls(k.capital, Math.Max(0, Level(k)));
+            if (G.Chance(0.05f)) Chronicle.Log("border_wall", k, G.Name(k), null, null, foe, null, k.capital, null, false);
+        }
+
+        private static void Capture(Kingdom k)
+        {
+            Owners();
+            var moved = new List<int>();
+            foreach (var kv in _byOwner)
+            {
+                if (kv.Key == k.data.id) continue;
+                foreach (int id in kv.Value)
+                {
+                    WorldTile t = At(id);
+                    if (t == null || !IsOurs(t))
+                    {
+                        moved.Add(-id - 1);
+                        continue;
+                    }
+                    if (Owner(t) == k) moved.Add(id);
+                }
+            }
+            foreach (int id in moved)
+            {
+                if (id < 0) Unregister(-id - 1);
+                else
+                {
+                    _reg[id] = k.data.id;
+                    _ownersDirty = true;
+                }
+            }
+        }
+
+        private static int Build(Kingdom k, HashSet<int> plan, TopTileType want, int yrs)
+        {
+            int engineers = 0;
+            foreach (City c in G.Cities(k)) engineers += Roles.Count(c, Roles.Engineer) + Roles.Count(c, Roles.Sapper);
+            bool war = World.world.wars.hasWars(k);
+            int budget = (int)((6 + engineers * 3) * yrs * (war ? 1.6f : 1f));
+            budget = Math.Min(budget, 160);
+            int rank = Rank(want);
+            int built = 0;
+            foreach (int id in plan)
+            {
+                if (budget <= 0) break;
+                WorldTile t = At(id);
+                if (t == null || Owner(t) != k) continue;
+                if (Gate(t))
+                {
+                    if (IsWall(t))
+                    {
+                        Remove(t);
+                        Unregister(id);
+                    }
+                    continue;
+                }
+                if (t.top_type == want) continue;
+                if (t.hasBuilding() || t.countUnits() > 0) continue;
+                if (IsOurs(t) && t.top_type != _damaged && Rank(t.top_type) >= rank) continue;
+                City c = t.zone.city;
+                if (!Pay(c, want)) continue;
+                Place(t, want, k);
+                budget--;
+                built++;
+            }
+            return built;
+        }
+
+        private static void Dismantle(Kingdom k, HashSet<int> plan, int yrs)
+        {
+            Owners();
+            List<int> mine;
+            if (!_byOwner.TryGetValue(k.data.id, out mine)) return;
+            int limit = Math.Min(60, 12 * yrs);
+            int n = 0;
+            foreach (int id in mine.ToList())
+            {
+                if (n >= limit) break;
+                if (plan.Contains(id)) continue;
+                WorldTile t = At(id);
+                if (t == null || !IsOurs(t))
+                {
+                    Unregister(id);
+                    continue;
+                }
+                if (!G.Chance(0.35f)) continue;
+                City c = t.zone != null ? t.zone.city : null;
+                Refund(c != null && c.kingdom == k ? c : k.capital, t.top_type);
+                Remove(t);
+                Unregister(id);
+                n++;
+            }
+            if (n > 10 && k.capital != null) Internet.OnWallsDown(k.capital);
+            if (n > 0) World.world.resetRedrawTimer();
+        }
+
+        private static BuildingAsset TowerAsset(City c, int era)
+        {
+            if (era >= 11) return AssetManager.buildings.get("civ_antiair");
+            BuildingAsset a = Buildings.Arch(c, "order_watch_tower");
+            return a ?? AssetManager.buildings.get("watch_tower_human");
+        }
+
+        private static void Towers(Kingdom k, HashSet<int> plan)
+        {
+            int era = Research.Era(k);
+            int have = 0;
+            var towers = new List<WorldTile>();
+            foreach (City c in G.Cities(k))
+            {
+                foreach (Building b in c.buildings)
+                {
+                    if (b == null || b.data == null || !Store.Bool(b.data, KTower)) continue;
+                    have++;
+                    WorldTile bt = b.current_tile;
+                    if (bt != null) towers.Add(bt);
+                }
+            }
+            int max = Math.Min(30, plan.Count / 24 + 1);
+            if (have >= max) return;
+            int made = 0;
+            int i = 0;
+            foreach (int id in plan)
+            {
+                if (have >= max || made >= 3) return;
+                if (i++ % 24 != 0) continue;
+                WorldTile t = At(id);
+                if (t == null || !IsWall(t)) continue;
+                bool near = false;
+                foreach (WorldTile o in towers)
+                {
+                    if (Math.Abs(o.x - t.x) + Math.Abs(o.y - t.y) < 14)
+                    {
+                        near = true;
+                        break;
+                    }
+                }
+                if (near) continue;
+                City c = t.zone.city;
+                if (c == null || c.kingdom != k) continue;
+                BuildingAsset asset = TowerAsset(c, era);
+                if (asset == null) continue;
+                WorldTile spot = null;
+                foreach (WorldTile n in t.neighbours)
+                {
+                    if (n != null && n.zone == t.zone && !n.hasBuilding() && n.Type != null && !n.Type.liquid && !n.Type.block && !n.Type.road && !plan.Contains(n.tile_id))
+                    {
+                        spot = n;
+                        break;
+                    }
+                }
+                if (spot == null || !Pay(c, _tiers[Math.Min(2, _tiers.Length - 1)])) continue;
+                Building b = World.world.buildings.addBuilding(asset, spot, true);
+                if (b == null) continue;
+                if (b.data != null) Store.Put(b.data, KTower, true);
+                towers.Add(spot);
+                have++;
+                made++;
+            }
+        }
+
+        public static void CityYear(City c, int yrs)
+        {
+            if (c == null || c.kingdom == null || !c.kingdom.isCiv()) return;
             foreach (Building b in c.buildings.ToList())
             {
                 if (b == null || b.asset == null || b.asset.type != "type_civ_wall") continue;
@@ -286,279 +844,116 @@ namespace Civilizations
             }
         }
 
-        public static void CityYear(City c, int yrs)
-        {
-            Kingdom k = c.kingdom;
-            if (k == null || !k.isCiv() || _tiers == null) return;
-            Migrate(c);
-            List<WorldTile> perim = Perimeter(c);
-            var perimSet = new HashSet<WorldTile>(perim);
-            _gates[c] = Gates(c, perim);
-            Cleanup(c, perimSet);
-            if (ModernPeace(k))
-            {
-                Demolish(c, yrs, false);
-                _cache[c] = perim.Where(IsWall).ToList();
-                return;
-            }
-            int level = Level(k);
-            if (level < 0)
-            {
-                _cache[c] = perim.Where(IsWall).ToList();
-                return;
-            }
-            int tier = Math.Min(level, 4);
-            bool modern = Research.Era(k) >= 11;
-            bool war = World.world.wars.hasWars(k);
-            if (Threat(c) < 0.45f || c.zones.Count < 9)
-            {
-                Repair(c, perim, yrs);
-                _cache[c] = perim.Where(IsWall).ToList();
-                return;
-            }
-            int budget = (int)((3 + Roles.Count(c, Roles.Engineer) * 3 + Roles.Count(c, Roles.Sapper) * 2) * yrs * (0.5f + Threat(c)));
-            TopTileType want = modern ? _trench : _tiers[tier];
-            if (modern && !war) want = _tiers[4];
-            int built = 0;
-            foreach (WorldTile t in perim)
-            {
-                if (budget <= 0) break;
-                if (t.hasBuilding() || t.top_type == want || t.top_type == _border || want != _trench && t.countUnits() > 0) continue;
-                if (!IsOurs(t) && NearBuilding(t)) continue;
-                if (Gate(c, t))
-                {
-                    if (IsWall(t)) Remove(t);
-                    continue;
-                }
-                if (t.top_type == _damaged) continue;
-                if (IsOurs(t) && want != _trench)
-                {
-                    int cur = Array.IndexOf(_tiers, t.top_type);
-                    if (cur >= tier) continue;
-                }
-                if (!Pay(c, modern ? 4 : tier)) break;
-                Place(t, want);
-                budget--;
-                built++;
-            }
-            Repair(c, perim, yrs);
-            Towers(c, perim, modern);
-            if (built > 8) Internet.OnWalls(c, level);
-            _cache[c] = perim.Where(IsWall).ToList();
-            World.world.resetRedrawTimer();
-        }
-
-        private static void Repair(City c, List<WorldTile> perim, int yrs)
-        {
-            int budget = (1 + Roles.Count(c, Roles.Engineer) * 2) * yrs;
-            int tier = Math.Max(0, Math.Min(4, Level(c.kingdom)));
-            foreach (WorldTile t in perim)
-            {
-                if (budget <= 0) return;
-                if (t.top_type != _damaged) continue;
-                if (!Pay(c, tier)) return;
-                Place(t, _tiers[tier]);
-                budget--;
-            }
-        }
-
-        private static void Cleanup(City c, HashSet<WorldTile> perim)
-        {
-            int n = 0;
-            foreach (TileZone z in c.zones.ToList())
-            {
-                foreach (WorldTile t in z.tiles.ToList())
-                {
-                    if (!IsOurs(t) || t.top_type == _border || perim.Contains(t)) continue;
-                    Remove(t);
-                    if (++n >= 60) return;
-                }
-            }
-        }
-
-        private static BuildingAsset TowerAsset(City c, bool modern)
-        {
-            if (modern) return AssetManager.buildings.get("civ_antiair");
-            BuildingAsset a = Buildings.Arch(c, "order_watch_tower");
-            return a ?? AssetManager.buildings.get("watch_tower_human");
-        }
-
-        private static void Towers(City c, List<WorldTile> perim, bool modern)
-        {
-            int have = 0;
-            foreach (Building b in c.buildings)
-            {
-                if (b != null && b.data != null && Store.Bool(b.data, KTower)) have++;
-            }
-            int max = Math.Min(10, 2 + Math.Max(0, Level(c.kingdom)) + perim.Count / 60);
-            if (have >= max) return;
-            BuildingAsset asset = TowerAsset(c, modern);
-            if (asset == null) return;
-            var spots = new List<WorldTile>();
-            foreach (WorldTile t in perim)
-            {
-                if (!Gate(c, t)) continue;
-                foreach (WorldTile n in t.neighbours)
-                {
-                    if (n != null && !n.hasBuilding() && n.Type != null && !n.Type.liquid && !n.Type.block && !n.Type.road && n.zone != null && n.zone.city == c) spots.Add(n);
-                }
-            }
-            for (int i = 0; i < perim.Count; i += 20)
-            {
-                WorldTile t = perim[i];
-                foreach (WorldTile n in t.neighbours)
-                {
-                    if (n != null && !n.hasBuilding() && n.Type != null && !n.Type.liquid && !n.Type.block && n.zone != null && n.zone.city == c)
-                    {
-                        spots.Add(n);
-                        break;
-                    }
-                }
-            }
-            foreach (WorldTile s in spots)
-            {
-                if (have >= max) return;
-                if (!Pay(c, 2)) return;
-                Building b = World.world.buildings.addBuilding(asset, s, true);
-                if (b == null) continue;
-                if (b.data != null) Store.Put(b.data, KTower, true);
-                have++;
-            }
-        }
-
         public static void Demolish(City c, int yrs, bool borders)
         {
-            int n = 0;
-            foreach (TileZone z in c.zones.ToList())
+        }
+
+        private static int MaxHp(TopTileType t)
+        {
+            if (t == _shield) return 90;
+            if (t == _border) return 60;
+            if (t == _damaged) return 8;
+            int i = _tiers != null ? Array.IndexOf(_tiers, t) : -1;
+            return i >= 0 ? 14 + i * 10 : 10;
+        }
+
+        private static void Hit(WorldTile t, int dmg)
+        {
+            int id = t.tile_id;
+            int hp;
+            if (!_hp.TryGetValue(id, out hp)) hp = MaxHp(t.top_type);
+            hp -= dmg;
+            if (hp <= 0)
             {
-                foreach (WorldTile t in z.tiles.ToList())
-                {
-                    if (!IsOurs(t)) continue;
-                    if (t.top_type == _border && !borders) continue;
-                    if (!G.Chance(0.25f * yrs)) continue;
-                    Remove(t);
-                    if (++n > 40) break;
-                }
-                if (n > 40) break;
+                Remove(t);
+                Unregister(id);
+                return;
             }
-            if (n > 10) Internet.OnWallsDown(c);
+            if (hp <= MaxHp(t.top_type) / 2 && t.top_type != _damaged && t.top_type != _border && t.top_type != _shield)
+            {
+                MapAction.terraformTop(t, _damaged, AssetManager.terraform.get("road"));
+                hp = Math.Min(hp, MaxHp(_damaged));
+            }
+            _hp[id] = hp;
         }
 
-        public static void Tick(float dt)
+        private static bool Enemy(WorldTile t, Kingdom by)
         {
-            if (_tiers == null) return;
-            _tick += dt;
-            if (_tick < 1f) return;
-            float span = _tick;
-            _tick = 0f;
-            foreach (var kv in _cache.ToList())
+            long owner;
+            if (!_reg.TryGetValue(t.tile_id, out owner) || !IsWall(t)) return false;
+            if (by == null) return true;
+            Kingdom k = World.world.kingdoms.get(owner);
+            return G.Ok(k) && k != by && World.world.wars.isInWarWith(by, k);
+        }
+
+        private static int Power(Actor a)
+        {
+            UnitDef d = Vehicles.Def(a);
+            if (d != null) return d.Cls == "siege" ? 6 : d.Cls == "tank" ? 4 : 2;
+            return 1;
+        }
+
+        public static void OnAttack(Actor a)
+        {
+            if (_tiers == null || !_loaded || _reg.Count == 0 || !G.Ok(a) || a.kingdom == null || a.current_tile == null) return;
+            if (!World.world.wars.hasWars(a.kingdom)) return;
+            WorldTile best = null;
+            float bestD = 99f;
+            foreach (WorldTile t in a.current_tile.getTilesAround(2))
             {
-                City c = kv.Key;
-                if (!G.Ok(c) || c.kingdom == null)
+                if (t == null || !Enemy(t, a.kingdom)) continue;
+                float d = Toolbox.DistTile(a.current_tile, t);
+                if (d < bestD)
                 {
-                    _cache.Remove(c);
-                    continue;
+                    bestD = d;
+                    best = t;
                 }
-                List<WorldTile> walls = kv.Value;
-                if (walls.Count == 0 || !World.world.wars.hasWars(c.kingdom)) continue;
-                int samples = Math.Min(walls.Count, 14);
-                for (int s = 0; s < samples; s++)
-                {
-                    WorldTile t = walls[UnityEngine.Random.Range(0, walls.Count)];
-                    if (!IsWall(t)) continue;
-                    int dmg = 0;
-                    foreach (Actor a in Finder.getUnitsFromChunk(t, 1, 2.5f))
-                    {
-                        if (!G.Ok(a) || a.kingdom == null || !World.world.wars.isInWarWith(a.kingdom, c.kingdom)) continue;
-                        UnitDef d = Vehicles.Def(a);
-                        if (d != null) dmg += d.Cls == "siege" ? 6 : d.Cls == "tank" ? 4 : 2;
-                        else if (a.isWarrior()) dmg += 1;
-                    }
-                    if (dmg <= 0) continue;
-                    int hp;
-                    if (!_hp.TryGetValue(t, out hp)) hp = MaxHp(t);
-                    hp -= (int)Math.Ceiling(dmg * span);
-                    if (hp <= 0)
-                    {
-                        Remove(t);
-                        continue;
-                    }
-                    if (hp <= MaxHp(t) / 2 && t.top_type != _damaged && t.top_type != _border)
-                    {
-                        MapAction.terraformTop(t, _damaged, AssetManager.terraform.get("road"));
-                        hp = Math.Min(hp, MaxHp(t));
-                    }
-                    _hp[t] = hp;
-                }
+            }
+            if (best != null) Hit(best, Power(a));
+        }
+
+        public static void OnBlast(WorldTile center, int rad, BaseSimObject by)
+        {
+            if (_tiers == null || !_loaded || _reg.Count == 0 || center == null) return;
+            Kingdom k = by != null && by.isActor() ? by.a.kingdom : by != null && by.isBuilding() ? by.b.kingdom : null;
+            int dmg = Math.Max(4, rad * 4);
+            foreach (WorldTile t in center.getTilesAround(Math.Max(1, Math.Min(rad, 12))))
+            {
+                if (t != null && Enemy(t, k)) Hit(t, dmg);
             }
         }
 
-        public static void Clear()
+        [HarmonyPatch(typeof(Actor), nameof(Actor.tryToAttack))]
+        private static class Attacked
         {
-            _cache.Clear();
-            _hp.Clear();
-            _gates.Clear();
-        }
-
-        private static void BorderWalls(Kingdom k, int yrs)
-        {
-            if (_border == null) return;
-            if (!Research.Has(k, "concrete_walls") && Research.Era(k) < 11) return;
-            string x = Policies.Id(k, "xeno");
-            string ideo = Policies.Id(k, "ideo");
-            foreach (City c in G.Cities(k))
+            private static void Postfix(Actor __instance, bool __result)
             {
-                foreach (City n in c.neighbours_cities)
+                if (!__result || _reg.Count == 0) return;
+                try
                 {
-                    if (n == null || n.kingdom == null || n.kingdom == k || !n.kingdom.isCiv()) continue;
-                    Kingdom o = n.kingdom;
-                    float want = 0f;
-                    if (x == "xenophobia" && o.getSpecies() != k.getSpecies()) want += 0.5f;
-                    if (ideo == "nationalism") want += 0.2f;
-                    if (World.world.wars.isInWarWith(k, o)) want += 0.3f;
-                    if (Politics.Satisfaction(o) < 0.35f && Bonus.Sum(k, "gold") > Bonus.Sum(o, "gold") + 20f) want += 0.3f;
-                    if (Research.Has(k, "concrete_walls")) want += 0.2f;
-                    if (x == "xenophilia") want -= 0.4f;
-                    if (Policies.Id(k, "transport") == "rail_first" && Economy.TradeOpinion(k, o) > 10) want -= 0.2f;
-                    if (want < 0.5f)
-                    {
-                        if (want < 0.2f) Demolish(c, yrs, true);
-                        continue;
-                    }
-                    BuildBorder(c, n, yrs);
+                    OnAttack(__instance);
+                }
+                catch (Exception e)
+                {
+                    CivMod.Report("walls-hit", e);
                 }
             }
         }
 
-        private static void BuildBorder(City mine, City theirs, int yrs)
+        [HarmonyPatch(typeof(MapAction), nameof(MapAction.damageWorld))]
+        private static class Blast
         {
-            int budget = 6 * yrs;
-            var theirZones = new HashSet<TileZone>(theirs.zones);
-            int built = 0;
-            foreach (TileZone z in mine.zones.ToList())
+            private static void Postfix(WorldTile pTile, int pRad, BaseSimObject pByWho)
             {
-                bool adj = false;
-                foreach (TileZone n in z.neighbours) if (n != null && theirZones.Contains(n)) adj = true;
-                if (!adj) continue;
-                foreach (WorldTile t in z.tiles.ToList())
+                if (_reg.Count == 0) return;
+                try
                 {
-                    if (budget <= 0) break;
-                    if (t == null || t.hasBuilding() || t.Type == null || t.Type.liquid || t.top_type == _border || t.countUnits() > 0) continue;
-                    if (t.Type.block && !IsOurs(t)) continue;
-                    bool edge = false;
-                    foreach (WorldTile n in t.neighbours) if (n != null && n.zone != null && theirZones.Contains(n.zone)) edge = true;
-                    if (!edge || (t.Type.road && (t.x + t.y) % 3 != 0)) continue;
-                    if (!Economy.Has(mine, "civ_concrete", 1) && !Economy.Has(mine, "stone", 30)) return;
-                    if (!Economy.Take(mine, "civ_concrete", 1)) Economy.Take(mine, "stone", 2);
-                    Place(t, _border);
-                    built++;
-                    budget--;
+                    OnBlast(pTile, pRad, pByWho);
                 }
-            }
-            if (built > 0)
-            {
-                World.world.resetRedrawTimer();
-                if (G.Chance(0.2f)) Internet.OnBorderWall(mine.kingdom, theirs.kingdom);
+                catch (Exception e)
+                {
+                    CivMod.Report("walls-blast", e);
+                }
             }
         }
     }

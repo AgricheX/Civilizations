@@ -337,5 +337,34 @@ namespace Civilizations
         {
             ScrollWindow.showWindow(id);
         }
+
+        public static Color Hex(string hex)
+        {
+            Color c;
+            if (string.IsNullOrEmpty(hex) || !ColorUtility.TryParseHtmlString(hex.StartsWith("#") ? hex : "#" + hex, out c)) return Color.white;
+            return c;
+        }
+
+        public static InputField Input(Transform parent, string value, Vector2 size, Vector2 pos, Action<string> done)
+        {
+            var go = new GameObject("Input", typeof(RectTransform), typeof(Image), typeof(InputField));
+            go.transform.SetParent(parent, false);
+            RectTransform r = go.GetComponent<RectTransform>();
+            r.sizeDelta = size;
+            r.localPosition = new Vector3(pos.x, pos.y, 0f);
+            Image bg = go.GetComponent<Image>();
+            bg.sprite = S("ui/special/windowInnerSliced");
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(0.2f, 0.22f, 0.3f, 1f);
+            Text t = Text(go.transform, value, Vector2.zero, size - new Vector2(8f, 2f), 9, TextAnchor.MiddleCenter);
+            t.resizeTextForBestFit = false;
+            t.raycastTarget = false;
+            InputField f = go.GetComponent<InputField>();
+            f.textComponent = t;
+            f.text = value ?? "";
+            f.characterLimit = 12;
+            f.onEndEdit.AddListener(s => done(s));
+            return f;
+        }
     }
 }

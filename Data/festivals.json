@@ -1,0 +1,448 @@
+[
+ {
+  "Id": "harvest",
+  "Tech": "harvest_festivals",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "farms"
+  ],
+  "Fx": {
+   "stability": 0.03,
+   "mood": 0.25,
+   "food": -20
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.5
+ },
+ {
+  "Id": "midsummer",
+  "Tech": "seasonal_rites",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "temperate_or_cold"
+  ],
+  "Fx": {
+   "stability": 0.02,
+   "mood": 0.2
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "midwinter",
+  "Tech": "seasonal_rites",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "cold"
+  ],
+  "Fx": {
+   "stability": 0.03,
+   "mood": 0.3,
+   "food": -10
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "new_year",
+  "Tech": "festival_calendar",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "stability": 0.03,
+   "mood": 0.2
+  },
+  "Big": false,
+  "Fireworks": true,
+  "W": 1.4
+ },
+ {
+  "Id": "lanterns",
+  "Tech": "paper_lanterns",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "river_or_coast"
+  ],
+  "Fx": {
+   "stability": 0.03,
+   "mood": 0.25,
+   "culture": 4
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "blossoms",
+  "Tech": "festival_calendar",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "temperate",
+   "era6"
+  ],
+  "Fx": {
+   "mood": 0.2,
+   "culture": 5
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "boat_races",
+  "Tech": "boat_racing",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "river_or_coast"
+  ],
+  "Fx": {
+   "mood": 0.15,
+   "trade": 3
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "carnival",
+  "Tech": "carnival",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "warm_or_temperate"
+  ],
+  "Fx": {
+   "mood": 0.35,
+   "prod": -6,
+   "culture": 6
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.3
+ },
+ {
+  "Id": "ancestors",
+  "Tech": "ancestor_worship",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "stability": 0.03,
+   "loyalty": 4
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "wine_beer",
+  "Tech": "early_brewing",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "tech_any:winemaking:early_brewing"
+  ],
+  "Fx": {
+   "mood": 0.25,
+   "trade": 3,
+   "brawls": 1
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "food_fight",
+  "Tech": "carnival",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "rich",
+   "era10"
+  ],
+  "Fx": {
+   "mood": 0.3,
+   "food": -25
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "ice_snow",
+  "Tech": "ice_sculpting",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "frozen"
+  ],
+  "Fx": {
+   "mood": 0.2,
+   "trade": 4,
+   "culture": 4
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "kites",
+  "Tech": "kite_making",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "plains_or_coast"
+  ],
+  "Fx": {
+   "mood": 0.2
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "founding_day",
+  "Tech": "public_holidays",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "stability": 0.04,
+   "legit": 0.03,
+   "mood": 0.2
+  },
+  "Big": false,
+  "Fireworks": true,
+  "W": 1.0
+ },
+ {
+  "Id": "victory_day",
+  "Tech": "processions",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "victory"
+  ],
+  "Fx": {
+   "stability": 0.04,
+   "legit": 0.04,
+   "mood": 0.3
+  },
+  "Big": true,
+  "Fireworks": true,
+  "W": 2.0
+ },
+ {
+  "Id": "jubilee",
+  "Tech": "processions",
+  "Need": [],
+  "Any": [
+   "fam:monarchy"
+  ],
+  "Cond": [
+   "king",
+   "jubilee"
+  ],
+  "Fx": {
+   "legit": 0.06,
+   "mood": 0.2,
+   "gold": -40
+  },
+  "Big": false,
+  "Fireworks": true,
+  "W": 1.0
+ },
+ {
+  "Id": "workers_day",
+  "Tech": "labor_unions",
+  "Need": [],
+  "Any": [
+   "fam:leftist",
+   "ideo:socialism",
+   "ideo:communism",
+   "ideo:anarchism"
+  ],
+  "Cond": [],
+  "Fx": {
+   "stability": 0.03,
+   "prod": 4,
+   "loyalty": 3
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "science_fair",
+  "Tech": "science_academies",
+  "Need": [],
+  "Any": [
+   "fam:technocratic",
+   "ideo:technoprogressivism",
+   "gov:technocracy"
+  ],
+  "Cond": [],
+  "Fx": {
+   "research": 5
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "great_games",
+  "Tech": "the_games",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "era_games"
+  ],
+  "Fx": {
+   "mood": 0.25,
+   "prestige": 5,
+   "culture": 4
+  },
+  "Big": true,
+  "Fireworks": false,
+  "W": 0.7
+ },
+ {
+  "Id": "music_festival",
+  "Tech": "music_festivals",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.35,
+   "trade": 4,
+   "culture": 6
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "remembrance",
+  "Tech": "remembrance",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "after_world_war"
+  ],
+  "Fx": {
+   "stability": 0.03,
+   "aggression": -1
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "first_contact_day",
+  "Tech": "first_contact_protocols",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "mark:first_contact"
+  ],
+  "Fx": {
+   "stability": 0.03,
+   "mood": 0.25,
+   "culture": 6
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.4
+ },
+ {
+  "Id": "two_moons",
+  "Tech": "orbital_habitats",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "cosmos:1"
+  ],
+  "Fx": {
+   "mood": 0.25,
+   "loyalty": 4
+  },
+  "Big": false,
+  "Fireworks": true,
+  "W": 1.0
+ },
+ {
+  "Id": "supernova_night",
+  "Tech": "stellar_cartography",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "cosmos:1"
+  ],
+  "Fx": {
+   "mood": 0.2,
+   "research": 4
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "colony_founding",
+  "Tech": "generation_ships",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "cosmos:1"
+  ],
+  "Fx": {
+   "loyalty": 6,
+   "stability": 0.03
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.3
+ },
+ {
+  "Id": "council_day",
+  "Tech": "xenounity",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "mark:council"
+  ],
+  "Fx": {
+   "trade": 5,
+   "culture": 6,
+   "mood": 0.2
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "star_victory",
+  "Tech": "orbital_shipyards",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "mark:cosmic_victory"
+  ],
+  "Fx": {
+   "mood": 0.3,
+   "loyalty": 5
+  },
+  "Big": false,
+  "Fireworks": true,
+  "W": 1.0
+ }
+]

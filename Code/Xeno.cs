@@ -225,6 +225,7 @@ namespace Civilizations
                 {
                     Store.Put(k.data, KAbolished, true);
                     Internet.OnAbolition(k);
+                    Chronicle.Log("abolition", k, G.Name(k));
                 }
             }
             float share = SlaveShare(c);
@@ -251,6 +252,7 @@ namespace Civilizations
                 Policies.Set(nk, "xeno", "xenophilia", "init");
                 Store.Put(nk.data, KAbolished, true);
                 Internet.OnSlaveRevolt(c, old, nk, leader);
+                Chronicle.Log("slave_revolt", old, G.Name(old), G.Name(c), null, nk, null, c, leader);
             }
             catch (Exception e)
             {

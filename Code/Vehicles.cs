@@ -42,6 +42,7 @@ namespace Civilizations
 
         public static bool Military(UnitDef d)
         {
+            if (d.Cls == "space") return !Spacecraft.Civil(d);
             return d.Cls != "land" || d.Id == "civ_chariot" || Store.Get(d.Stats, "damage") >= 30f;
         }
 
@@ -81,6 +82,7 @@ namespace Civilizations
         {
             if (k == null || d == null || !VehicleRoster.InService(d, Research.Era(k))) return false;
             if (!Research.Has(k, d.Tech) || !JapanStyle.Allows(k, d.Id)) return false;
+            if (d.Id == "civ_war_elephant" && (Research.Has(k, "gunpowder") || !Rarities.ElephantLand(k))) return false;
             if (!string.IsNullOrEmpty(d.Route))
             {
                 string r = Research.Route(k);
@@ -192,8 +194,10 @@ namespace Civilizations
             bool bioMounts = Research.Route(c.kingdom) == "bio" && Research.Has(c.kingdom, "bio_mounts");
             float cav = era >= 12 && !bioMounts ? 0f : era >= 11 ? 1f : 3f;
             bool air = Aircraft.EnemyAir(c.kingdom);
-            Fill(c, have, new[] { "cavalry", "siege", "tank", "apc", "aa" }, new[] { cav, 2f, 3f, 1.5f, air ? 1.5f : 0f }, Cap(30, war), PerYear(war, yrs), x => x == "cavalry" ? "" : Roles.Artillery, war);
+            float eleph = era >= 4 && era <= 7 ? 1.2f : 0f;
+            Fill(c, have, new[] { "cavalry", "siege", "tank", "apc", "aa", "elephant" }, new[] { cav, 2f, 3f, 1.5f, air ? 1.5f : 0f, eleph }, Cap(30, war), PerYear(war, yrs), x => x == "cavalry" || x == "elephant" ? "" : Roles.Artillery, war);
             Aircraft.CityYear(c, yrs, have);
+            Spacecraft.CityYear(c, yrs, have, war);
             Navy(c, yrs, war);
             Soldiers.CityYear(c, yrs, war);
             if (Store.Flt(c.data, "civ_fuel_ok", 1f) < 0.3f)
@@ -304,6 +308,11 @@ namespace Civilizations
                 have++;
                 made++;
             }
+        }
+
+        public static Actor SpawnFor(City c, string id)
+        {
+            return Spawn(c, id);
         }
 
         private static Actor Spawn(City c, string id)

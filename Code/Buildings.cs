@@ -70,8 +70,8 @@ namespace Civilizations
         {
             Infrastructure.InitAssets();
             Defs.Clear();
-            int[] hHousing = { 0, 5, 6, 8, 10, 12, 16, 22, 32, 46, 62 };
-            int[] hHealth = { 0, 120, 200, 320, 420, 560, 700, 1000, 1500, 2200, 3000 };
+            int[] hHousing = { 0, 5, 6, 8, 10, 12, 16, 22, 32, 46, 62, 62, 62, 62, 76, 90, 104, 120, 140, 160, 185 };
+            int[] hHealth = { 0, 120, 200, 320, 420, 560, 700, 1000, 1500, 2200, 3000, 3000, 3000, 3000, 3800, 4600, 5400, 6200, 7000, 8000, 9000 };
             string[][] hMats =
             {
                 null, new string[0], new[] { "civ_bricks" }, new[] { "civ_bricks" }, new[] { "civ_bricks", "civ_glass" }, new[] { "civ_bricks", "civ_glass" },
@@ -91,7 +91,7 @@ namespace Civilizations
                 {
                     Id = "civ_house_" + lv, Type = "type_house", Tech = h.Tech, Order = "civ_order_house_" + lv, Fund = f,
                     Cost = new ConstructionCost(lv <= 4 ? 4 : 0, 4 + lv * 2, lv >= 6 ? lv - 4 : 0, lv * 4), Housing = hHousing[Math.Min(lv, hHousing.Length - 1)], Health = hHealth[Math.Min(lv, hHealth.Length - 1)],
-                    UpgradeTo = up, Mats = hMats[Math.Min(lv, hMats.Length - 1)], MatAmounts = hAmt[Math.Min(lv, hAmt.Length - 1)], Pop = h.MinPop, Variants = lv >= 6, Tier = lv, Burnable = lv <= 4
+                    UpgradeTo = up, Mats = hMats[Math.Min(lv, hMats.Length - 1)], MatAmounts = hAmt[Math.Min(lv, hAmt.Length - 1)], Pop = h.MinPop, Variants = lv >= 6 && lv <= 13, Tier = lv, Burnable = lv <= 4
                 };
                 Defs[d.Id] = d;
             }
@@ -103,7 +103,7 @@ namespace Civilizations
                     Id = "civ_hall_" + lv, Type = "type_hall", Tech = h.Tech, Order = "civ_order_hall_" + lv, Fund = new BuildingFundament(3, 3, 4, 0),
                     Cost = new ConstructionCost(0, 20, 4, 60), Housing = 10 + lv * 4, Health = 600 + lv * 300, UpgradeTo = lv < topHall ? "civ_hall_" + (lv + 1) : "",
                     Mats = lv >= 5 ? new[] { "civ_concrete", "civ_steel" } : new[] { "civ_bricks" }, MatAmounts = lv >= 5 ? new[] { 10, 4 } : new[] { 8 }, Storage = true, Books = 6,
-                    Scale = 0.2f, Variants = lv >= 5, Tier = lv
+                    Scale = 0.2f, Variants = lv >= 5 && lv <= 7, Tier = lv
                 };
             }
             N("civ_kiln", "type_civ_kiln", 1, 12, 4, F(1, 1, 1), new ConstructionCost(2, 6), smoke: true, burnable: true);

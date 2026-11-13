@@ -222,6 +222,8 @@ namespace Civilizations
             UiKit.Bar(box, p, new Color(0.35f, 0.75f, 1f), new Vector2(150f, 9f), new Vector2(10f, -10f), Mathf.RoundToInt(p * 100f) + "%");
             string r = Txt.T("civ_rate") + " " + Research.Rate(_k, cur).ToString("0.00") + "  ·  " + Research.Known(_k).Count + " " + Txt.T("civ_techs");
             UiKit.Text(box, r, new Vector2(10f, -20f), new Vector2(150f, 10f), 7, TextAnchor.MiddleLeft, UiKit.Dim);
+            if (Research.AtCap(_k)) UiKit.Label(c, Txt.F("civ_cap_reached", Db.EraName(Research.Cap(_k))), 14f, 8, TextAnchor.MiddleCenter, new Color(1f, 0.85f, 0.45f));
+            else if (Research.SettingsCap() >= 0) UiKit.Label(c, Txt.F("civ_cap_settings", Db.EraName(Research.SettingsCap())), 12f, 7, TextAnchor.MiddleCenter, UiKit.Dim);
             Kingdom kk = _k;
             int kc = Research.KingdomCap(kk);
             int wc = Research.WorldCap();
@@ -381,7 +383,7 @@ namespace Civilizations
 
         public static void Changed(Kingdom k)
         {
-            if (k == _k) Refresh();
+            if (k == null || k == _k) Refresh();
         }
     }
 }

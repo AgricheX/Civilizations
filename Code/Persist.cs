@@ -10,6 +10,12 @@ namespace Civilizations
             CivMod.Safe("save-internet", Internet.Save);
             CivMod.Safe("save-companies", Companies.Save);
             CivMod.Safe("save-rails", Rails.Save);
+            CivMod.Safe("save-diplomacy", Diplomacy.Save);
+            CivMod.Safe("save-orgs", Orgs.Save);
+            CivMod.Safe("save-orders", WorldOrders.Save);
+            CivMod.Safe("save-fog", Fog.Save);
+            CivMod.Safe("save-walls", Walls.Save);
+            CivMod.Safe("save-cosmos", Cosmos.Save);
             CivMod.Safe("save-maps", Store.Flush);
         }
 

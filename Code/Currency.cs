@@ -118,6 +118,7 @@ namespace Civilizations
             foreach (float v in h) parts.Add(v.ToString("0.#####", System.Globalization.CultureInfo.InvariantCulture));
             Store.Put(k.data, KHist, string.Join(",", parts));
             if (infl > 0.5f && G.Chance(0.3f)) Internet.OnHyperinflation(k, infl);
+            if (infl > 0.8f && G.Chance(0.1f)) Chronicle.Log("hyperinflation", k, G.Name(k), Store.Str(k.data, KName));
             if (rate < 0.02f || infl > 1.2f)
             {
                 Reform(k);
@@ -142,6 +143,7 @@ namespace Civilizations
             Store.Put(k.data, KReforms, Store.Int(k.data, KReforms, 0) + 1);
             Create(k, true);
             Internet.OnCurrencyReform(k, old, Store.Str(k.data, KName));
+            Chronicle.Log("currency_reform", k, G.Name(k), Store.Str(k.data, KName), null, null, null, null, null, false);
         }
 
         private static void Unions(Kingdom k)
@@ -158,6 +160,7 @@ namespace Civilizations
             if (strongest == k) return;
             Store.Put(k.data, KUnion, strongest.data.id.ToString());
             Internet.OnCurrencyUnion(k, strongest);
+            Chronicle.Log("currency_union", k, G.Name(k), Store.Str(strongest.data, KName), null, strongest);
         }
 
         public static string Format(Kingdom k, float goldValue)
