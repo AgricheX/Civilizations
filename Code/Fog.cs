@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 
 namespace Civilizations
@@ -21,6 +22,15 @@ namespace Civilizations
         private static Texture2D _tex;
         private static long _drawnFor = -2;
         private static int _drawnVer = -1;
+        private static Kingdom _viewer;
+        private static byte[] _live;
+        private static float _liveWait;
+        private static int _liveHash;
+
+        public static Kingdom Viewer
+        {
+            get { return G.Ok(_viewer) ? _viewer : null; }
+        }
 
         public static void Clear()
         {
@@ -30,6 +40,8 @@ namespace Civilizations
             Version++;
             if (_go != null) _go.SetActive(false);
             _drawnFor = -2;
+            _viewer = null;
+            _live = null;
         }
 
         private static void Dims()
@@ -306,10 +318,75 @@ namespace Civilizations
             {
                 if (_go != null && _go.activeSelf) _go.SetActive(false);
                 _drawnFor = -2;
+                _viewer = null;
                 return;
+            }
+            if (_viewer != k)
+            {
+                _viewer = k;
+                _live = null;
+                _liveWait = 0f;
+            }
+            _liveWait -= Time.unscaledDeltaTime;
+            if (_live == null || _liveWait <= 0f)
+            {
+                _liveWait = 0.5f;
+                int h = Live(k);
+                if (h != _liveHash)
+                {
+                    _liveHash = h;
+                    _drawnVer = -1;
+                }
             }
             if (_drawnFor == k.data.id && _drawnVer == Version && _go != null && _go.activeSelf) return;
             Draw(k);
+        }
+
+        private static int Live(Kingdom k)
+        {
+            Dims();
+            int n = (_cw * _ch + 7) / 8;
+            if (_live == null || _live.Length != n) _live = new byte[n];
+            else Array.Clear(_live, 0, n);
+            bool all = Research.Level(k, "satellites") > 0 || Research.Era(k) >= 14;
+            if (all) RevealAll(_live);
+            else
+            {
+                int r = Math.Max(1, Radius(k) / 2);
+                foreach (City c in G.Cities(k))
+                {
+                    WorldTile t = G.Tile(c);
+                    if (t != null) Reveal(_live, t.x / Chunk, t.y / Chunk, r);
+                }
+                if (k.units != null)
+                {
+                    foreach (Actor a in k.units)
+                    {
+                        if (!G.Ok(a) || a.current_tile == null) continue;
+                        Reveal(_live, a.current_tile.x / Chunk, a.current_tile.y / Chunk, 1);
+                    }
+                }
+            }
+            int h = 17;
+            for (int i = 0; i < _live.Length; i++) h = h * 31 + _live[i];
+            return h;
+        }
+
+        public static bool SeesChunk(int cx, int cy)
+        {
+            if (_live == null) return true;
+            if (cx < 0 || cy < 0 || cx >= _cw || cy >= _ch) return false;
+            int i = cy * _cw + cx;
+            return (_live[i >> 3] & (1 << (i & 7))) != 0;
+        }
+
+        public static bool Hidden(float x, float y, bool live)
+        {
+            Kingdom v = Viewer;
+            if (v == null) return false;
+            int cx = (int)x / Chunk, cy = (int)y / Chunk;
+            if (!KnowsChunk(v, cx, cy)) return true;
+            return live && !SeesChunk(cx, cy);
         }
 
         private static void Draw(Kingdom k)
@@ -337,13 +414,92 @@ namespace Civilizations
                 _go.transform.position = new Vector3(_cw * Chunk / 2f, _ch * Chunk / 2f, -6f);
             }
             var px = new Color32[_cw * _ch];
-            Color32 dark = new Color32(14, 16, 26, 205), clear = new Color32(0, 0, 0, 0);
-            for (int y = 0; y < _ch; y++) for (int x = 0; x < _cw; x++) px[y * _cw + x] = KnowsChunk(k, x, y) ? clear : dark;
+            Color32 dark = new Color32(8, 9, 16, 255), dim = new Color32(20, 22, 32, 150), clear = new Color32(0, 0, 0, 0);
+            for (int y = 0; y < _ch; y++) for (int x = 0; x < _cw; x++) px[y * _cw + x] = !KnowsChunk(k, x, y) ? dark : SeesChunk(x, y) ? clear : dim;
             _tex.SetPixels32(px);
             _tex.Apply(false);
             _go.SetActive(true);
             _drawnFor = k.data.id;
             _drawnVer = Version;
+        }
+    
+        [HarmonyPatch(typeof(BatchActors), nameof(BatchActors.updateVisibility))]
+        private static class HideActors
+        {
+            private static void Postfix(BatchActors __instance)
+            {
+                Kingdom v = Viewer;
+                if (v == null || __instance._array == null) return;
+                try
+                {
+                    int n = Math.Min(__instance._count, __instance._array.Length);
+                    for (int i = 0; i < n; i++)
+                    {
+                        Actor a = __instance._array[i];
+                        if (a == null || !a.is_visible || a.current_tile == null || a.kingdom == v) continue;
+                        if (Hidden(a.current_tile.x, a.current_tile.y, true)) a.is_visible = false;
+                    }
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(BatchBuildings), nameof(BatchBuildings.updateVisibility))]
+        private static class HideBuildings
+        {
+            private static void Postfix(BatchBuildings __instance)
+            {
+                Kingdom v = Viewer;
+                if (v == null || __instance._array == null) return;
+                try
+                {
+                    int n = Math.Min(__instance._count, __instance._array.Length);
+                    for (int i = 0; i < n; i++)
+                    {
+                        Building b = __instance._array[i];
+                        if (b == null || !b.is_visible || b.current_tile == null || b.kingdom == v) continue;
+                        if (Hidden(b.current_tile.x, b.current_tile.y, false)) b.is_visible = false;
+                    }
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(NameplateText), nameof(NameplateText.showTextKingdom))]
+        private static class PlateKingdom
+        {
+            private static void Postfix(NameplateText __instance, Kingdom pMetaObject, Vector2 pPosition)
+            {
+                Kingdom v = Viewer;
+                if (v == null || pMetaObject == v) return;
+                if (!Knows(v, pMetaObject) || Hidden(pPosition.x, pPosition.y, false)) __instance.setShowing(false);
+            }
+        }
+
+        [HarmonyPatch(typeof(NameplateText), nameof(NameplateText.showTextCity))]
+        private static class PlateCity
+        {
+            private static void Postfix(NameplateText __instance, City pMetaObject, Vector2 pPosition)
+            {
+                Kingdom v = Viewer;
+                if (v == null || pMetaObject == null || pMetaObject.kingdom == v) return;
+                if (Hidden(pPosition.x, pPosition.y, false)) __instance.setShowing(false);
+            }
+        }
+
+        [HarmonyPatch(typeof(NameplateText), nameof(NameplateText.showTextArmy))]
+        private static class PlateArmy
+        {
+            private static void Postfix(NameplateText __instance, Army pMetaObject, Vector3 pPosition)
+            {
+                Kingdom v = Viewer;
+                if (v == null || pMetaObject == null || pMetaObject.getKingdom() == v) return;
+                if (Hidden(pPosition.x, pPosition.y, true)) __instance.setShowing(false);
+            }
         }
     }
 }

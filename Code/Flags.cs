@@ -84,6 +84,7 @@ namespace Civilizations
             if (_registered) return;
             _registered = true;
             FlagArt.Load();
+            FlagEditor.InjectAll();
             Hub.On(Hub.PolicyChanged, e =>
             {
                 if (!G.Ok(e.K)) return;
@@ -175,7 +176,7 @@ namespace Civilizations
 
         public static Sprite Sprite(Kingdom k)
         {
-            if (!On || !G.Ok(k)) return null;
+            if (!On || !G.Ok(k) || FlagEditor.Locked(k)) return null;
             FlagSpec f = Spec(k);
             return f == null ? null : FlagArt.Get(f, Main(k));
         }
@@ -542,7 +543,7 @@ namespace Civilizations
             {
                 try
                 {
-                    if (On && Has(__instance)) __result = FlagArt.Blank;
+                    if (On && Has(__instance) && !FlagEditor.Locked(__instance)) __result = FlagArt.Blank;
                 }
                 catch (Exception)
                 {
@@ -552,7 +553,7 @@ namespace Civilizations
 
         private static void White(Kingdom k, UnityEngine.UI.Image bg, UnityEngine.UI.Image icon)
         {
-            if (!On || !Has(k)) return;
+            if (!On || !Has(k) || FlagEditor.Locked(k)) return;
             if (bg != null) bg.color = Color.white;
             if (icon != null) icon.color = Color.white;
         }

@@ -31,6 +31,7 @@ namespace Civilizations
             Safe("jobs", Behaviours.InitAssets);
             Safe("moods", Moods.InitAssets);
             Safe("sandbox", Sandbox.InitAssets);
+            Safe("biomes", Biomes.InitAssets);
             Safe("cosmos-scale", CosmosScale.InitAssets);
             Safe("culture", Research.InitCultureLock);
             Safe("orgs-data", Orgs.InitData);
@@ -155,6 +156,7 @@ namespace Civilizations
             if (!_assetsDone) return;
             Sim.Update();
             Hud.Tick();
+            ControlHud.Tick();
             Safe("fog-view", Fog.Frame);
             CivProfiler.Frame();
         }

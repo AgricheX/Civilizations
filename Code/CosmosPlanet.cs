@@ -152,6 +152,9 @@ namespace Civilizations
             }
             string[] biomes;
             if (!Biomes.TryGetValue(n.Sub, out biomes)) biomes = Biomes["terran"];
+            string extra = global::Civilizations.Biomes.PlanetBiome(n.Sub);
+            if (extra == null && Cosmos.St != null && Cosmos.OwnerExact(Active) != null) extra = global::Civilizations.Biomes.PlanetBiome("terraformed");
+            if (extra != null && AssetManager.biome_library.get(extra) != null) biomes = biomes.Concat(new[] { extra, extra }).ToArray();
             var r = new Random(n.Seed);
             bool water = n.Sub == "ocean" || n.Sub == "reef" || n.Sub == "abyss";
             bool dry = n.Sub == "arid" || n.Sub == "barren" || n.Sub == "volcanic" || n.Sub == "machine" || n.Sub == "crystal";
@@ -185,7 +188,7 @@ namespace Civilizations
             ActorAsset same = AssetManager.actor_library.get(p.Species ?? "");
             if (same != null && same.civ) return p.Species;
             string[] opts;
-            if (SpeciesFor.TryGetValue(p.Species, out opts))
+            if (p.Species != null && SpeciesFor.TryGetValue(p.Species, out opts))
             {
                 foreach (string s in opts)
                 {
@@ -193,7 +196,7 @@ namespace Civilizations
                     if (a != null && a.civ) return s;
                 }
             }
-            ActorAsset own = AssetManager.actor_library.get(p.Species);
+            ActorAsset own = AssetManager.actor_library.get(p.Species ?? "");
             return own != null && own.civ ? p.Species : "human";
         }
 

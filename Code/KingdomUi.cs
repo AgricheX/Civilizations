@@ -203,8 +203,74 @@ namespace Civilizations
             return string.Join("/", parts.ToArray());
         }
 
+        private static readonly string[][] TabDefs =
+        {
+            new[] { "CivTech", "ui/Icons/civ/btn/tech", "civ_tech Title", "civ_btn_tech_d" },
+            new[] { "CivState", "ui/Icons/civ/btn/state", "civ_state Title", "civ_btn_state_d" },
+            new[] { "CivParliament", "ui/Icons/civ/btn/parliament", "civ_parliament Title", "civ_btn_parliament_d" },
+            new[] { "CivElections", "ui/Icons/civ/btn/elections", "civ_elections Title", "civ_btn_elections_d" },
+            new[] { "CivTreasury", "ui/Icons/civ/btn/treasury", "civ_treasury Title", "civ_btn_treasury_d" },
+            new[] { "CivEcon", "ui/Icons/civ/btn/econ", "civ_econ Title", "civ_btn_econ_d" },
+            new[] { "CivNet", "ui/Icons/civ/btn/net", "civ_net Title", "civ_btn_net_d" },
+            new[] { "CivControl", "ui/Icons/civ/btn/control", "civ_control Title", "civ_btn_control_d" }
+        };
+
+        private static UnityEngine.Events.UnityAction TabAction(string name)
+        {
+            switch (name)
+            {
+                case "CivTech": return () => WinTech.Open(SelectedMetas.selected_kingdom);
+                case "CivState": return () => WinState.Open(SelectedMetas.selected_kingdom);
+                case "CivParliament": return () => WinParliament.Open(SelectedMetas.selected_kingdom);
+                case "CivElections": return () => WinElections.Open(SelectedMetas.selected_kingdom);
+                case "CivTreasury": return () => WinTreasury.Open(SelectedMetas.selected_kingdom);
+                case "CivEcon": return WinEcon.Open;
+                case "CivNet": return WinNet.Open;
+                case "CivControl": return () => WinControl.Open(SelectedMetas.selected_kingdom);
+            }
+            return () => { };
+        }
+
+        private static bool TabBar(KingdomWindow w)
+        {
+            Transform tabs = w.transform.Find("Background/Tabs");
+            if (tabs == null) return false;
+            if (tabs.Find("CivTech") != null) return true;
+            Transform template = tabs.Find("Villages");
+            if (template == null)
+            {
+                foreach (Transform t in tabs)
+                {
+                    if (t.GetComponent<UnityEngine.UI.Button>() != null)
+                    {
+                        template = t;
+                        break;
+                    }
+                }
+            }
+            if (template == null) return false;
+            UnityEngine.UI.Button src = template.GetComponent<UnityEngine.UI.Button>();
+            if (src == null) return false;
+            string iconPath = template.Find("Icon") != null ? "Icon" : "";
+            GameObject first = null;
+            foreach (string[] d in TabDefs)
+            {
+                GameObject go = Clone(src, tabs, iconPath, d[1], d[2], d[3], TabAction(d[0]));
+                go.name = d[0];
+                UnityEngine.UI.Image bg = go.GetComponent<UnityEngine.UI.Image>();
+                Sprite vs = UiKit.S("ui/tab_button_vertical");
+                if (bg != null && vs != null) bg.sprite = vs;
+                go.transform.SetAsLastSibling();
+                if (first == null) first = go;
+            }
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)tabs);
+            _btn = first;
+            return true;
+        }
+
         private static bool CloneTabs(KingdomWindow w)
         {
+            if (TabBar(w)) return true;
             UnityEngine.UI.Image fav = w._favorite_icon;
             if (fav == null) return false;
             UnityEngine.UI.Button src = fav.GetComponentInParent<UnityEngine.UI.Button>();
@@ -222,29 +288,16 @@ namespace Civilizations
             if (best < float.MaxValue) step = best;
             bool layout = parent.GetComponent<UnityEngine.UI.LayoutGroup>() != null;
             string iconPath = fav.transform == src.transform ? "" : PathTo(src.transform, fav.transform);
-            GameObject tech = Clone(src, parent, iconPath, "ui/Icons/civ/btn/tech", "civ_tech Title", "civ_btn_tech_d", () => WinTech.Open(SelectedMetas.selected_kingdom));
-            GameObject net = Clone(src, parent, iconPath, "ui/Icons/civ/btn/net", "civ_net Title", "civ_btn_net_d", WinNet.Open);
-            GameObject state = Clone(src, parent, iconPath, "ui/Icons/civ/btn/state", "civ_state Title", "civ_btn_state_d", () => WinState.Open(SelectedMetas.selected_kingdom));
-            GameObject ctrl = Clone(src, parent, iconPath, "ui/Icons/civ/btn/control", "civ_control Title", "civ_btn_control_d", () => WinControl.Open(SelectedMetas.selected_kingdom));
-            ctrl.name = "CivControl";
-            tech.name = "CivTech";
-            net.name = "CivNet";
-            state.name = "CivState";
-            if (!layout)
+            int i = 1;
+            foreach (string[] d in TabDefs)
             {
-                tech.transform.localPosition = srt.localPosition - new Vector3(0f, step, 0f);
-                net.transform.localPosition = srt.localPosition - new Vector3(0f, step * 2f, 0f);
-                state.transform.localPosition = srt.localPosition - new Vector3(0f, step * 3f, 0f);
-                ctrl.transform.localPosition = srt.localPosition - new Vector3(0f, step * 4f, 0f);
+                GameObject go = Clone(src, parent, iconPath, d[1], d[2], d[3], TabAction(d[0]));
+                go.name = d[0];
+                if (!layout) go.transform.localPosition = srt.localPosition - new Vector3(0f, step * i, 0f);
+                else go.transform.SetAsLastSibling();
+                if (_btn == null) _btn = go;
+                i++;
             }
-            else
-            {
-                tech.transform.SetAsLastSibling();
-                net.transform.SetAsLastSibling();
-                state.transform.SetAsLastSibling();
-                ctrl.transform.SetAsLastSibling();
-            }
-            _btn = tech;
             return true;
         }
 

@@ -193,7 +193,7 @@ namespace Civilizations
             SimpleButton b = Btn(parent, null, icon, act, new Vector2(size, size), pos, tipTitle, tipDesc);
             if (!frame) b.Background.color = new Color(1f, 1f, 1f, 0f);
             else b.Background.sprite = S("ui/special/button2") ?? b.Background.sprite;
-            b.Icon.color = on ? Color.white : new Color(0.3f, 0.3f, 0.3f, 0.85f);
+            b.Icon.color = on ? Color.white : new Color(0.5f, 0.5f, 0.55f, 0.9f);
             b.Icon.preserveAspect = true;
             return b;
         }

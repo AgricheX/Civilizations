@@ -72,6 +72,7 @@ namespace Civilizations
                     CivMod.Safe("orgs-year", Orgs.Year);
                     CivMod.Safe("orders-year", WorldOrders.Year);
                     CivMod.Safe("events-year", Events.Year);
+                    CivMod.Safe("biomes-year", Biomes.Year);
                     CivMod.Safe("sagas-year", Sagas.Year);
                     CivMod.Safe("regression-year", Regression.Year);
                     CivMod.Safe("cosmos-year", Cosmos.Year);

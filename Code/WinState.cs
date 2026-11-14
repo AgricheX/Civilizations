@@ -196,6 +196,37 @@ namespace Civilizations
             foreach (WorldOrder o in WorldOrders.Active) if (o.Outlaws.Contains(_k.data.id)) UiKit.Stat(c, "ui/Icons/civ/state/war", Txt.T("state_outlaw"), Txt.T("civ_order_" + o.Type), UiKit.Bad);
         }
 
+        private static string _sheet = "";
+
+        private void Great(Transform c, string id, Actor a, string role, string name, GreatRecord rec)
+        {
+            bool alive = G.Ok(a);
+            RectTransform box = UiKit.Box(c, "Great", 15f);
+            UiKit.Img(box, UiKit.Icon("ui/Icons/civ/great/" + role), new Vector2(12f, 12f), new Vector2(-UiKit.W / 2f + 9f, 0f));
+            string right = Txt.T("civ_great_" + role) + (alive ? "" : rec != null ? " · " + rec.From + "-" + (rec.To >= 0 ? rec.To.ToString() : "?") : " †");
+            string tip = rec != null ? GovGreats.Sheet(rec) : Txt.T("civ_great_" + role);
+            Actor target = a;
+            string gid = id;
+            UiKit.Btn(box, "", null, () =>
+            {
+                if (G.Ok(target))
+                {
+                    ActionLibrary.openUnitWindow(target);
+                    return;
+                }
+                _sheet = _sheet == gid ? "" : gid;
+                Render();
+            }, new Vector2(UiKit.W - 6f, 14f), Vector2.zero, name, tip, new Color(1f, 1f, 1f, 0.08f));
+            UiKit.Text(box, name, new Vector2(-UiKit.W / 2f + 18f + 60f, 0f), new Vector2(120f, 14f), 9, TextAnchor.MiddleLeft, alive ? UiKit.Soft : UiKit.Dim);
+            UiKit.Text(box, right, new Vector2(UiKit.W / 2f - 50f, 0f), new Vector2(96f, 14f), 8, TextAnchor.MiddleRight, alive ? UiKit.Gold : UiKit.Dim);
+            if (!alive && _sheet == id && rec != null)
+            {
+                RectTransform sh = UiKit.Box(c, "Sheet", 46f);
+                UiKit.Panel(sh, 0.7f);
+                UiKit.Text(sh, GovGreats.Sheet(rec), Vector2.zero, new Vector2(UiKit.W - 12f, 42f), 7, TextAnchor.UpperLeft, UiKit.Soft);
+            }
+        }
+
         private void Culture(Transform c)
         {
             UiKit.Header(c, Txt.T("state_festivals"), UiKit.Gold, "ui/Icons/civ/state/culture");
@@ -204,13 +235,21 @@ namespace Civilizations
             foreach (string f in fs) UiKit.Stat(c, "ui/Icons/civ/fest/" + f, Txt.T("civ_fest_" + f), "", UiKit.Soft);
             UiKit.Header(c, Txt.T("state_greats"), UiKit.Gold);
             int n = 0;
+            var shown = new HashSet<string>();
             foreach (string entry in Store.Set(_k.data, "civ_greats"))
             {
                 string[] parts = entry.Split('|');
                 Actor a = G.ActorById(parts[0]);
                 string role = parts.Length > 1 ? parts[1] : "";
                 string name = G.Ok(a) ? a.getName() : parts.Length > 2 ? parts[2] : "?";
-                UiKit.Stat(c, "ui/Icons/civ/great/" + role, name, Txt.T("civ_great_" + role), UiKit.Gold);
+                shown.Add(parts[0]);
+                Great(c, parts[0], a, role, name, GovGreats.Find(_k, parts[0]));
+                n++;
+            }
+            foreach (GreatRecord r in GovGreats.Dead(_k).Take(12))
+            {
+                if (shown.Contains(r.Id)) continue;
+                Great(c, r.Id, null, r.Role, r.Name, r);
                 n++;
             }
             if (n == 0) UiKit.Label(c, Txt.T("state_no_greats"), 18f, 8, TextAnchor.MiddleCenter, UiKit.Dim);

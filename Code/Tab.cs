@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using HarmonyLib;
 using NeoModLoader.General;
 using NeoModLoader.General.UI.Tab;
 using NeoModLoader.ui;
@@ -9,15 +8,28 @@ using UnityEngine.UI;
 
 namespace Civilizations
 {
+    internal class TabGroup
+    {
+        public string Id;
+        public PowersTab Tab;
+        public Color Tint;
+        public GameObject Line;
+        public readonly List<PowerButton> Buttons = new List<PowerButton>();
+    }
+
     internal static class Tab
     {
         public const string GCommunity = "community", GWindows = "windows", GTools = "tools", GFavs = "favs";
         private static bool _done;
-        private static bool _own;
-        private static PowersTab _tab;
         private static float _retry;
+        private static PowersTab _main;
+        private static PowersTab _sandbox;
+        private static readonly Dictionary<string, TabGroup> _groups = new Dictionary<string, TabGroup>();
+        private static readonly List<TabGroup> _order = new List<TabGroup>();
 
         public static bool Ready { get { return _done; } }
+
+        public static PowersTab SandboxTab { get { return _sandbox ?? _main; } }
 
         public static void Try()
         {
@@ -47,35 +59,14 @@ namespace Civilizations
             }
             try
             {
-                PowersTab tab = null;
-                try
-                {
-                    tab = TabManager.CreateTab("civilizations", "civ_tab", "civ_tab Description", UiKit.Icon("ui/Icons/civ/tab"));
-                    GameObject entry = GameObject.Find("Button_civilizations");
-                    Transform icon = entry != null ? entry.transform.Find("Icon") : null;
-                    Image img = icon != null ? icon.GetComponent<Image>() : null;
-                    if (img != null) img.preserveAspect = true;
-                }
-                catch (Exception)
-                {
-                    tab = null;
-                }
-                _own = tab != null;
-                if (tab == null) tab = PowerButtonCreator.GetTab(PowerTabNames.Other);
-                if (tab == null) return;
-                _tab = tab;
-                if (_own)
-                {
-                    try
-                    {
-                        tab.SetLayout(new List<string> { GCommunity, GWindows, GTools, GFavs });
-                    }
-                    catch (Exception)
-                    {
-                        _own = false;
-                    }
-                }
-                Add(GCommunity, "civ_btn_nexus", "ui/Icons/civ/btn/nexus", () => Application.OpenURL(Updates.NexusUrl));
+                _main = Make("civilizations", "civ_tab", "ui/Icons/civ/tab");
+                if (_main == null) _main = PowerButtonCreator.GetTab(PowerTabNames.Other);
+                if (_main == null) return;
+                _sandbox = Make("civ_sandbox", "civ_tab_sandbox", "ui/Icons/civ/btn/sandbox");
+                Group(_main, GCommunity, new Color(1f, 0.85f, 0.5f));
+                Group(_main, GWindows, new Color(0.65f, 0.8f, 1f));
+                Group(_main, GTools, new Color(0.7f, 1f, 0.7f));
+                Add(GCommunity, "civ_btn_nexus", "ui/Icons/civ/btn/nexus", () => Application.OpenURL(Updates.NexusHome));
                 Add(GCommunity, "civ_btn_discord", "ui/Icons/civ/btn/discord", () => Application.OpenURL(Updates.DiscordUrl));
                 Add(GCommunity, "civ_btn_config", "ui/Icons/civ/btn/config", () =>
                 {
@@ -99,22 +90,16 @@ namespace Civilizations
                 }
                 try
                 {
-                    Sandbox.Tab = tab;
+                    Sandbox.Tab = SandboxTab;
                     Sandbox.Build();
-                    Sandbox.Button = PowerButtonCreator.CreateGodPowerButton(Sandbox.PowerId, UiKit.Icon("ui/Icons/civ/btn/sandbox"));
-                    Put(GTools, Sandbox.Button);
-                    for (int i = 0; i < Sandbox.Cats.Length; i++)
-                    {
-                        int cat = i;
-                        Add(GTools, "civ_btn_sb_" + Sandbox.Cats[i], "ui/Icons/civ/sb/" + Sandbox.Cats[i], () => WinSandbox.Open(cat));
-                    }
-                    Sandbox.FavButtons();
+                    SandboxTabs.Build(SandboxTab);
                 }
                 catch (Exception e)
                 {
                     Debug.LogError("[Civilizations] sandbox: " + e);
                 }
                 Relayout();
+                Biomes.Ui();
             }
             catch (Exception e)
             {
@@ -122,57 +107,162 @@ namespace Civilizations
             }
         }
 
-        private static void Add(string group, string id, string icon, Action a)
+        private static PowersTab Make(string id, string key, string icon)
+        {
+            try
+            {
+                PowersTab tab = TabManager.CreateTab(id, key, key + " Description", UiKit.Icon(icon));
+                GameObject entry = GameObject.Find("Button_" + id);
+                Transform t = entry != null ? entry.transform.Find("Icon") : null;
+                Image img = t != null ? t.GetComponent<Image>() : null;
+                if (img != null) img.preserveAspect = true;
+                return tab;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("[Civilizations] tab " + id + ": " + e.Message);
+                return null;
+            }
+        }
+
+        public static void Group(PowersTab tab, string id, Color tint)
+        {
+            if (tab == null || _groups.ContainsKey(id)) return;
+            var g = new TabGroup { Id = id, Tab = tab, Tint = tint };
+            _groups[id] = g;
+            _order.Add(g);
+        }
+
+        public static void Add(string group, string id, string icon, Action a)
         {
             Put(group, PowerButtonCreator.CreateSimpleButton(id, () => a(), UiKit.Icon(icon)));
         }
 
+        public static void Label(string id, string name, string desc)
+        {
+            try
+            {
+                LM.AddToCurrentLocale(id, name ?? id);
+                LM.AddToCurrentLocale(id + " Description", desc ?? "");
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private static bool First(TabGroup g)
+        {
+            foreach (TabGroup o in _order)
+            {
+                if (o.Tab != g.Tab) continue;
+                if (o == g) return true;
+                if (o.Buttons.Count > 0) return false;
+            }
+            return true;
+        }
+
+        private static int After(TabGroup g)
+        {
+            int idx = -1;
+            bool past = false;
+            foreach (TabGroup o in _order)
+            {
+                if (o.Tab != g.Tab) continue;
+                if (o.Line != null) idx = Math.Max(idx, o.Line.transform.GetSiblingIndex());
+                foreach (PowerButton b in o.Buttons) if (b != null) idx = Math.Max(idx, b.transform.GetSiblingIndex());
+                if (o == g) past = true;
+                if (past) break;
+            }
+            return idx + 1;
+        }
+
         public static void Put(string group, PowerButton b)
         {
-            if (_tab == null || b == null) return;
-            if (_own)
+            if (b == null) return;
+            TabGroup g;
+            if (!_groups.TryGetValue(group, out g))
             {
-                try
-                {
-                    _tab.AddPowerButton(group, b);
-                    return;
-                }
-                catch (Exception)
-                {
-                }
+                PowersTab fallback = group == GFavs ? SandboxTab : _main;
+                if (fallback == null) return;
+                Group(fallback, group, Color.white);
+                g = _groups[group];
             }
-            PowerButtonCreator.AddButtonToTab(b, _tab);
+            if (g.Line == null && g.Buttons.Count == 0 && !First(g)) Line(g);
+            int at = After(g);
+            PowerButtonCreator.AddButtonToTab(b, g.Tab);
+            if (at >= 0 && at < g.Tab.transform.childCount) b.transform.SetSiblingIndex(at);
+            g.Buttons.Add(b);
+            Image bg = b.GetComponent<Image>();
+            if (bg != null) bg.color = Color.Lerp(Color.white, g.Tint, 0.45f);
+        }
+
+        private static void Line(TabGroup g)
+        {
+            try
+            {
+                GameObject src = ResourcesFinder.FindResource<GameObject>("_line");
+                if (src == null) return;
+                GameObject line = UnityEngine.Object.Instantiate(src, g.Tab.transform);
+                line.name = "_line_civ_" + g.Id;
+                Image img = line.GetComponent<Image>();
+                if (img != null)
+                {
+                    img.enabled = true;
+                    img.color = Color.Lerp(Color.white, g.Tint, 0.6f);
+                }
+                line.SetActive(true);
+                int at = After(g);
+                if (at >= 0 && at < g.Tab.transform.childCount) line.transform.SetSiblingIndex(at);
+                g.Line = line;
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public static void Remove(PowerButton b)
         {
             if (b == null) return;
-            if (_own && _tab != null)
+            foreach (TabGroup g in _order)
             {
-                try
+                if (!g.Buttons.Remove(b)) continue;
+                if (g.Tab != null) g.Tab._power_buttons.Remove(b);
+                if (g.Buttons.Count == 0 && g.Line != null)
                 {
-                    object w = AccessTools.Method(typeof(PowersTabExtension), "_getWrappedPowersTab").Invoke(null, new object[] { _tab });
-                    var groups = Traverse.Create(w).Field("ButtonGroups").GetValue() as Dictionary<string, List<PowerButton>>;
-                    if (groups != null) foreach (List<PowerButton> l in groups.Values) l.Remove(b);
-                }
-                catch (Exception)
-                {
+                    g.Line.SetActive(false);
+                    UnityEngine.Object.Destroy(g.Line);
+                    g.Line = null;
                 }
             }
+            b.gameObject.SetActive(false);
             UnityEngine.Object.Destroy(b.gameObject);
             Relayout();
         }
 
+        public static void Show(string group, bool on)
+        {
+            TabGroup g;
+            if (!_groups.TryGetValue(group, out g)) return;
+            foreach (PowerButton b in g.Buttons) if (b != null) b.gameObject.SetActive(on);
+            if (g.Line != null) g.Line.SetActive(on);
+        }
+
         public static void Relayout()
         {
-            if (!_own || _tab == null) return;
-            try
+            var tabs = new HashSet<PowersTab>();
+            foreach (TabGroup g in _order) if (g.Tab != null) tabs.Add(g.Tab);
+            foreach (PowersTab t in tabs)
             {
-                _tab.UpdateLayout();
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("[Civilizations] tab layout: " + e);
+                try
+                {
+                    t.sortButtons();
+                    t.setNewWidth();
+                    t.findNeighbours(true);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning("[Civilizations] tab layout: " + e.Message);
+                }
             }
         }
     }

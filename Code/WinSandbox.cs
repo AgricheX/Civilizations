@@ -116,14 +116,14 @@ namespace Civilizations
                 {
                     SbTool t = page[r * Cols + i];
                     float x = -UiKit.W / 2f + 4f + cell * i + cell / 2f;
-                    SimpleButton b = UiKit.IconBtn(row, UiKit.Icon(t.Icon), () => Sandbox.Pick(t), cell - 4f, new Vector2(x, 0f), t.Name, t.Desc + (t.Era >= 0 ? "\n" + Db.EraName(t.Era) : ""), Sandbox.Current == t, true);
-                    if (Sandbox.IsFav(t)) UiKit.Img(b.transform, UiKit.Icon("ui/Icons/civ/sb/star"), new Vector2(8f, 8f), new Vector2(cell / 2f - 6f, cell / 2f - 6f));
+                    SimpleButton b = UiKit.IconBtn(row, UiKit.Icon(t.Icon), () => Sandbox.Pick(t), cell - 4f, new Vector2(x, 0f), t.Name, t.Desc + (t.Era >= 0 ? "\n" + Db.EraName(t.Era) : ""), true, true);
+                    if (Sandbox.Current == t) b.Background.color = new Color(1f, 0.82f, 0.36f);
                     SbTool fav = t;
                     UiKit.IconBtn(row, UiKit.Icon("ui/Icons/civ/sb/star"), () =>
                     {
                         Sandbox.ToggleFav(fav);
                         Render();
-                    }, 9f, new Vector2(x - cell / 2f + 6f, cell / 2f - 6f), Txt.T("sb_fav"), null, Sandbox.IsFav(t), false);
+                    }, 10f, new Vector2(x + cell / 2f - 8f, -cell / 2f + 8f), Txt.T("sb_fav"), null, Sandbox.IsFav(t), false);
                 }
             }
             UiKit.Pager(c, _page, pages, p =>

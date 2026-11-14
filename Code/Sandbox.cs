@@ -64,6 +64,30 @@ namespace Civilizations
             AssetManager.powers.add(p);
         }
 
+        public static readonly Dictionary<string, Func<Kingdom, bool>> Hooks = new Dictionary<string, Func<Kingdom, bool>>();
+
+        public static SbTool Extra(string cat, string id, string name, string desc, string icon, int era, Func<WorldTile, bool> act, bool heavy = false)
+        {
+            SbTool t;
+            if (ById.TryGetValue(cat + ":" + id, out t)) return t;
+            return Add(cat, id, name, desc, icon, era, act, heavy);
+        }
+
+        public static bool Hook(string id, Kingdom k)
+        {
+            Func<Kingdom, bool> f;
+            if (!G.Ok(k) || !Hooks.TryGetValue(id, out f) || f == null) return false;
+            try
+            {
+                return f(k);
+            }
+            catch (Exception e)
+            {
+                CivMod.Report("sandbox-hook-" + id, e);
+                return false;
+            }
+        }
+
         private static SbTool Add(string cat, string id, string name, string desc, string icon, int era, Func<WorldTile, bool> act, bool heavy = false)
         {
             var t = new SbTool { Id = cat + ":" + id, Cat = cat, Name = name, Desc = desc, Icon = icon, Era = era, Act = act, Heavy = heavy };
@@ -176,18 +200,18 @@ namespace Civilizations
             }
         }
 
-        private static Kingdom Owner(WorldTile t)
+        public static Kingdom Owner(WorldTile t)
         {
             City c = t != null && t.zone != null ? t.zone.city : null;
             return c != null && G.Ok(c.kingdom) ? c.kingdom : null;
         }
 
-        private static City CityAt(WorldTile t)
+        public static City CityAt(WorldTile t)
         {
             return t != null && t.zone != null ? t.zone.city : null;
         }
 
-        private static bool CityAct(WorldTile t, Action<City> a)
+        public static bool CityAct(WorldTile t, Action<City> a)
         {
             City c = CityAt(t);
             if (c == null || !G.Ok(c.kingdom)) return false;
@@ -195,7 +219,7 @@ namespace Civilizations
             return true;
         }
 
-        private static bool KingdomAct(WorldTile t, Action<Kingdom> a)
+        public static bool KingdomAct(WorldTile t, Action<Kingdom> a)
         {
             Kingdom k = Owner(t);
             if (!G.Ok(k)) return false;
@@ -205,7 +229,7 @@ namespace Civilizations
             return true;
         }
 
-        private static bool SpawnUnit(WorldTile t, string id)
+        public static bool SpawnUnit(WorldTile t, string id)
         {
             if (AssetManager.actor_library.get(id) == null) return false;
             Actor v = World.world.units.createNewUnit(id, t, false, 0f, null, null, false, true);
@@ -220,7 +244,7 @@ namespace Civilizations
             return true;
         }
 
-        private static bool PlaceBuilding(WorldTile t, string id)
+        public static bool PlaceBuilding(WorldTile t, string id)
         {
             BuildingAsset a = AssetManager.buildings.get(id);
             if (a == null || t == null || t.Type == null || t.Type.liquid || t.Type.lava) return false;

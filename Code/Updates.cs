@@ -10,6 +10,7 @@ namespace Civilizations
     internal static class Updates
     {
         public const string NexusUrl = "https://agrichex.github.io/Nexus/mods/civilizations/";
+        public const string NexusHome = "https://agrichex.github.io/Nexus/";
         public const string DiscordUrl = "https://discord.gg/s3EbgNSsJW";
         private const string RemoteUrl = "https://raw.githubusercontent.com/AgricheX/Civilizations/main/mod.json";
         private static bool _started;

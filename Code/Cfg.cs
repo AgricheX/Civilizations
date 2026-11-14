@@ -56,6 +56,7 @@ namespace Civilizations
         public bool Profiler { get { return B("Civilizations", "civ_profiler", false); } }
         public bool DebugLog { get { return B("Civilizations", "civ_debug", false); } }
         public bool NightLights { get { return B("CivVisual", "civ_night_lights", true); } }
+        public bool NewBiomes { get { return B("CivWorld", "civ_new_biomes", true); } }
         public bool EraSkins { get { return B("CivVisual", "civ_era_skins", true); } }
         public bool FogView { get { return B("CivVisual", "civ_fog_view", false); } }
         public bool Regression { get { return B("Civilizations", "civ_regression", true); } }

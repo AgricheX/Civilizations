@@ -21,6 +21,14 @@ namespace Civilizations
             CreateAndInit(Id);
         }
 
+        public static void OpenTab(int tab)
+        {
+            _tab = Math.Max(0, Math.Min(TabKeys.Length - 1, tab));
+            _pick = Player.K;
+            _page = 0;
+            UiKit.Open(Id);
+        }
+
         public static void Open(Kingdom k)
         {
             _pick = k;

@@ -15,6 +15,11 @@ namespace Civilizations
             if (w == null || w.data == null || !_busy.Add(w.data.id)) return;
             try
             {
+                if (GovWar.Pending(w))
+                {
+                    GovWar.Apply(w);
+                    return;
+                }
                 Run(w, winner);
             }
             finally

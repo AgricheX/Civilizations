@@ -36,6 +36,7 @@ namespace Civilizations
         {
             _crises.Clear();
             Ledger.Clear();
+            Gov.Clear();
         }
 
         public static void Register()
@@ -67,6 +68,7 @@ namespace Civilizations
                 Store.Put(e.O.data, KHumilY, G.Year);
                 Legitimacy.Shock(e.O, -0.05f);
             });
+            Gov.Register();
         }
 
         public static global::War Find(Kingdom a, Kingdom b)
@@ -159,6 +161,7 @@ namespace Civilizations
             foreach (global::War w in Wars()) CivMod.Safe("warscore", () => WarYear(w));
             CivMod.Safe("crises", Crises);
             CivMod.Safe("coalitions", Coalitions);
+            CivMod.Safe("gov-year", Gov.Year);
         }
 
         private static void WarYear(global::War w)
@@ -167,11 +170,17 @@ namespace Civilizations
             if (!G.Ok(a) || !G.Ok(d)) return;
             float da = w.getDeadAttackers(), dd = w.getDeadDefenders();
             AddScore(w, G.Clamp((dd - da) / (dd + da + 20f) * 12f, -10f, 10f));
+            if (Gov.On("civ_gov_peace")) AddScore(w, GovWar.Extra(w));
             int age = WarAge(w);
             float s = Score(w);
             foreach (Kingdom k in w.getAttackers()) AddExh(k, 3f + Math.Max(0f, -s) / 25f);
             foreach (Kingdom k in w.getDefenders()) AddExh(k, 3f + Math.Max(0f, s) / 25f);
             if (age < 3) return;
+            if (Gov.On("civ_gov_peace"))
+            {
+                GovWar.Consider(w, s, age);
+                return;
+            }
             if (Player.Locks(a, "war") || Player.Locks(d, "war")) return;
             float p = 0.05f + Math.Abs(s) / 250f + (Exhaustion(a) + Exhaustion(d)) / 400f + age * 0.01f;
             if (!G.Chance(Math.Min(0.85f, p))) return;
@@ -189,8 +198,10 @@ namespace Civilizations
             if (ex > 40f) Politics.AddStability(k, -(ex - 40f) * 0.0004f * yrs);
             float ae = Aggressive(k);
             if (ae > 0f) Store.Put(k.data, KAe, Math.Max(0f, ae - 2f * yrs));
-            Dynasty(k, p, yrs);
+            if (Gov.On("civ_gov_cycle")) Mandate.Year(k, p, yrs);
+            else Dynasty(k, p, yrs);
             Revanche(k, p, yrs);
+            Gov.KingdomYear(k, yrs);
         }
 
         private static void Coalitions()
@@ -377,6 +388,11 @@ namespace Civilizations
         public static void Advance(Kingdom k)
         {
             if (!G.Ok(k)) return;
+            if (Gov.On("civ_gov_cycle"))
+            {
+                Mandate.Push(k);
+                return;
+            }
             int ph = Phase(k);
             if (ph < 0) ph = 0;
             SetPhase(k, (ph + 1) % Phases.Length, true);
@@ -386,7 +402,8 @@ namespace Civilizations
         {
             var fx = new Dictionary<string, float>();
             if (!G.Ok(k)) return fx;
-            switch (Phase(k))
+            foreach (var kv in Gov.Effects(k)) Store.Add(fx, kv.Key, kv.Value);
+            if (!Gov.On("civ_gov_cycle")) switch (Phase(k))
             {
                 case 0:
                     fx["prod"] = 0.03f;
@@ -439,24 +456,16 @@ namespace Civilizations
             return w;
         }
 
-        private static float Lean(Kingdom k, string f, string id)
-        {
-            int h = 17;
-            foreach (char ch in f + "|" + id) h = h * 31 + ch;
-            float s = (Math.Abs(h) % 1000) / 500f - 1f;
-            return s * 0.6f + 0.25f + (Politics.Stability(k) - 0.5f) * 0.4f;
-        }
-
         public static float Support(Kingdom k, string id)
         {
-            float yes = 0f, all = 0f;
-            foreach (string f in Factions(Profile.Get(k).Era))
-            {
-                float w = Weight(k, f);
-                all += w;
-                if (Lean(k, f, id) > 0f) yes += w;
-            }
-            return all > 0f ? yes / all : 1f;
+            PolicyDef p = Db.Policy(id);
+            LawDef l = p == null ? Laws.Law(id) : null;
+            string group = p != null ? p.Group : l != null ? l.Group : null;
+            if (group == null || !G.Ok(k)) return 1f;
+            if (Parliament.Active(k) && Parliament.Total(k) > 0) return Parliament.Support(k, group, id);
+            float target = Politics.Stability(k);
+            float[] pos = Laws.Pos(group, id), cur = Laws.Pos(group, Laws.Current(k, group));
+            return G.Clamp(0.5f + (target - 0.5f) * 0.4f - (Math.Abs(pos[0] - cur[0]) + Math.Abs(pos[1] - cur[1])) * 0.1f, 0f, 1f);
         }
 
         public static bool Blocked(Kingdom k)
@@ -471,7 +480,7 @@ namespace Civilizations
 
         public static bool Vote(Kingdom k, string group, string id, string reason)
         {
-            if (reason == "player" || reason == "init" || reason == "sandbox" || group == "transport") return true;
+            if (reason == "player" || reason == "init" || reason == "sandbox" || reason == "parliament" || reason == "decree" || reason == "coup" || reason == "revolution" || reason == "forced" || group == "transport") return true;
             if (!G.Ok(k) || Profile.Get(k).Era < 3) return true;
             if (Blocked(k)) return false;
             float s = Support(k, id);

@@ -14,6 +14,9 @@ namespace Civilizations
         public static readonly string[] Groups = { "civ_science", "civ_politics", "civ_economy", "civ_diplomacy", "civ_military", "civ_infrastructure", "civ_society", "civ_cosmos" };
         public static readonly string[] Titles = { "chief", "high_priest", "president", "prime_minister", "doge", "chairman", "general", "director", "ceo", "emperor" };
         public static readonly string[] KingAssets = { "king_new", "king_left", "king_fled_city", "king_fled_capital", "king_dead", "king_killed" };
+        public static readonly string[] RealmAssets = { "kingdom_new", "kingdom_destroyed" };
+        public static readonly string[] Polities = { "tribe", "chiefdom", "city_state", "republic", "empire", "nation" };
+        [ThreadStatic] private static Kingdom _parent;
 
         private static readonly Dictionary<string, string[]> Types = new Dictionary<string, string[]>
         {
@@ -153,7 +156,51 @@ namespace Civilizations
                     });
                 }
             }
+            foreach (string src in RealmAssets)
+            {
+                WorldLogAsset a = AssetManager.world_log_library.get(src);
+                if (a == null) continue;
+                foreach (string t in Polities)
+                {
+                    string id = src + "__" + t;
+                    if (AssetManager.world_log_library.get(id) != null) continue;
+                    AssetManager.world_log_library.add(new WorldLogAsset
+                    {
+                        id = id,
+                        group = a.group,
+                        path_icon = a.path_icon,
+                        color = a.color,
+                        locale_id = "civ_wl_" + src + "_" + t,
+                        text_replacer = a.text_replacer
+                    });
+                }
+            }
             Hub.OnAny(OnHub);
+        }
+
+        public static string Polity(Kingdom k, Kingdom parent)
+        {
+            if (!G.Ok(k) || k.data == null) return null;
+            string stage = Store.Str(k.data, Politics.KStage, "");
+            Kingdom src = k;
+            if (stage.Length == 0)
+            {
+                if (!G.Ok(parent) || parent == k) return Research.Era(k) <= 1 ? "tribe" : null;
+                src = parent;
+                stage = Politics.Stage(parent);
+            }
+            string t = Title(src);
+            switch (stage)
+            {
+                case "tribe":
+                case "village": return "tribe";
+                case "town": return "chiefdom";
+            }
+            if (t == "president" || t == "prime_minister" || t == "doge") return "republic";
+            if (stage == "city_state") return "city_state";
+            if (stage == "nation") return "nation";
+            if (stage == "empire" && src == k) return "empire";
+            return null;
         }
 
         private static void Replace(WorldLogMessage m, ref string text)
@@ -377,6 +424,18 @@ namespace Civilizations
             private static void Prefix(WorldLogMessage pMessage)
             {
                 if (pMessage == null || pMessage.asset_id == null || !_done) return;
+                if (Array.IndexOf(RealmAssets, pMessage.asset_id) >= 0)
+                {
+                    try
+                    {
+                        string p = Polity(pMessage.kingdom, pMessage.asset_id == "kingdom_new" ? _parent : null);
+                        if (p != null && AssetManager.world_log_library.get(pMessage.asset_id + "__" + p) != null) pMessage.asset_id = pMessage.asset_id + "__" + p;
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    return;
+                }
                 if (Array.IndexOf(KingAssets, pMessage.asset_id) < 0) return;
                 try
                 {
@@ -386,6 +445,20 @@ namespace Civilizations
                 catch (Exception)
                 {
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(KingdomManager), nameof(KingdomManager.makeNewCivKingdom))]
+        private static class Founding
+        {
+            private static void Prefix(Actor pActor)
+            {
+                _parent = pActor != null && pActor.isAlive() ? pActor.kingdom : null;
+            }
+
+            private static void Finalizer()
+            {
+                _parent = null;
             }
         }
 

@@ -12,6 +12,7 @@ namespace Civilizations
         private static readonly HashSet<string> _alias = new HashSet<string>();
         private static readonly Dictionary<string, string> _orig = new Dictionary<string, string>();
         private static Dictionary<string, Sprite[]> _lists;
+        private static readonly HashSet<string> Humanoid = new HashSet<string> { "elf", "dwarf", "orc" };
 
         private static string Alias(string path, ActorAsset asset)
         {
@@ -59,7 +60,7 @@ namespace Civilizations
             ActorAsset s = a.asset;
             if (s == null || !a.isSapient()) return null;
             if (s.id == "human") return "human";
-            if (s.has_advanced_textures) return "advanced";
+            if (s.has_advanced_textures && Humanoid.Contains(s.id)) return "advanced";
             if (s.id.StartsWith("civ_")) return "animal";
             return null;
         }

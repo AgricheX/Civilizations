@@ -185,6 +185,54 @@
       "Type": "TEXT",
       "IconPath": "ui/Icons/civ/cfg/log_limit",
       "TextVal": "100000"
+    },
+    {
+      "Id": "civ_gov_parliament",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/parliament",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_gov_cycle",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/cycle",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_gov_vassals",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/vassals",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_gov_peace",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/peace",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_gov_treasury",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/treasury",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_gov_alliances",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/alliances",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_gov_armies",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/armies",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_gov_names",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cfg/gov_names",
+      "BoolVal": true
     }
   ],
   "CivVisual": [
@@ -293,6 +341,12 @@
       "IntVal": 5,
       "MinIntVal": 1,
       "MaxIntVal": 40
+    },
+    {
+      "Id": "civ_new_biomes",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/biome/terraformed",
+      "BoolVal": true
     }
   ],
   "CivCosmos": [

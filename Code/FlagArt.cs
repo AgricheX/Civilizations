@@ -419,6 +419,79 @@ namespace Civilizations
             return px;
         }
 
+        public static Color32[] EditorBackground(int shapeIndex, string div)
+        {
+            if (!Ready || shapeIndex < 0 || shapeIndex >= Shapes.Count) return null;
+            var px = new Color32[N * N];
+            int[] b = Box(shapeIndex);
+            float bw = b[2] - b[0] + 1, bh = b[3] - b[1] + 1;
+            float aspect = bw / Math.Max(1f, bh);
+            byte[] tone = { 255, 178, 118 };
+            var cloth = new bool[N * N];
+            for (int y = 0; y < N; y++)
+            {
+                for (int x = 0; x < N; x++)
+                {
+                    Color32 c = _shp.Get(shapeIndex, x, y);
+                    if (c.a == 0) continue;
+                    if (!IsCloth(c))
+                    {
+                        byte g = (byte)(Lum(c) * 255f);
+                        px[y * N + x] = new Color32(g, g, g, c.a);
+                        continue;
+                    }
+                    cloth[y * N + x] = true;
+                    float u = (x - b[0] + 0.5f) / bw, v = (y - b[1] + 0.5f) / bh;
+                    byte t = tone[Math.Min(2, Region(div, u, v, aspect))];
+                    px[y * N + x] = new Color32(t, t, t, 255);
+                }
+            }
+            for (int y = 0; y < N; y++)
+            {
+                for (int x = 0; x < N; x++)
+                {
+                    int i = y * N + x;
+                    if (!cloth[i]) continue;
+                    bool edge = x == 0 || y == 0 || x == N - 1 || y == N - 1 || !cloth[i - 1] || !cloth[i + 1] || !cloth[i - N] || !cloth[i + N];
+                    if (edge) px[i] = Mul(px[i], 0.62f);
+                }
+            }
+            return px;
+        }
+
+        public static Color32[] EditorIcon(int emblemIndex)
+        {
+            if (!Ready || _emb == null || emblemIndex < 0 || emblemIndex >= Emblems.Count) return null;
+            var px = new Color32[N * N];
+            int size = 20, scale = 2, x0 = (N - size * scale) / 2, y0 = (N - size * scale) / 2;
+            for (int y = 0; y < size * scale; y++)
+            {
+                for (int x = 0; x < size * scale; x++)
+                {
+                    Color32 g = _emb.Get(emblemIndex, x / scale, y / scale);
+                    if (g.a == 0) continue;
+                    byte v = (byte)Math.Max(60, (int)g.r);
+                    px[(y0 + y) * N + x0 + x] = new Color32(v, v, v, 255);
+                }
+            }
+            return px;
+        }
+
+        public static Sprite ToSprite(Color32[] px, string name)
+        {
+            if (px == null) return null;
+            var tex = new Texture2D(N, N, TextureFormat.RGBA32, false);
+            tex.filterMode = FilterMode.Point;
+            tex.wrapMode = TextureWrapMode.Clamp;
+            var flip = new Color32[N * N];
+            for (int y = 0; y < N; y++) Array.Copy(px, y * N, flip, (N - 1 - y) * N, N);
+            tex.SetPixels32(flip);
+            tex.Apply(false);
+            Sprite s = Sprite.Create(tex, new Rect(0, 0, N, N), new Vector2(0.5f, 0.5f), 1f);
+            s.name = name;
+            return s;
+        }
+
         private static Color32 Sample(Color32[] px, int x, int y)
         {
             x = Mathf.Clamp(x, 0, N - 1);
