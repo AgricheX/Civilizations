@@ -11,6 +11,10 @@ namespace Civilizations
         private static bool _done;
         private static Kingdom _plate;
         private static readonly List<string> _legacy = new List<string>();
+        private static readonly HashSet<string> _legacyGroups = new HashSet<string>();
+        private static List<KingdomTrait> _shownTraits;
+        private static List<KingdomTraitGroupAsset> _shownGroups;
+        private static int _traitsSeen = -1, _groupsSeen = -1;
 
         public static void Legacy()
         {
@@ -22,6 +26,7 @@ namespace Civilizations
             };
             foreach (var g in groups)
             {
+                _legacyGroups.Add(g.Key);
                 if (AssetManager.kingdoms_traits_groups.get(g.Key) == null) AssetManager.kingdoms_traits_groups.add(new KingdomTraitGroupAsset { id = g.Key, name = g.Key, color = "#888888" });
                 foreach (string id in g.Value)
                 {
@@ -41,6 +46,46 @@ namespace Civilizations
                         can_be_in_book = false
                     });
                 }
+            }
+        }
+
+        private static List<KingdomTrait> ShownTraits(List<KingdomTrait> all)
+        {
+            if (all == null || _legacy.Count == 0) return all;
+            if (_shownTraits == null || _traitsSeen != all.Count)
+            {
+                _shownTraits = all.Where(t => t != null && !_legacy.Contains(t.id) && !_legacyGroups.Contains(t.group_id)).ToList();
+                _traitsSeen = all.Count;
+            }
+            return _shownTraits;
+        }
+
+        private static List<KingdomTraitGroupAsset> ShownGroups(List<KingdomTraitGroupAsset> all)
+        {
+            if (all == null || _legacyGroups.Count == 0) return all;
+            if (_shownGroups == null || _groupsSeen != all.Count)
+            {
+                _shownGroups = all.Where(g => g != null && !_legacyGroups.Contains(g.id)).ToList();
+                _groupsSeen = all.Count;
+            }
+            return _shownGroups;
+        }
+
+        [HarmonyPatch(typeof(KingdomTraitsEditor), "all_augmentations_list", MethodType.Getter)]
+        private static class HideLegacyTraits
+        {
+            private static void Postfix(ref List<KingdomTrait> __result)
+            {
+                __result = ShownTraits(__result);
+            }
+        }
+
+        [HarmonyPatch(typeof(KingdomTraitsEditor), "augmentation_groups_list", MethodType.Getter)]
+        private static class HideLegacyGroups
+        {
+            private static void Postfix(ref List<KingdomTraitGroupAsset> __result)
+            {
+                __result = ShownGroups(__result);
             }
         }
 

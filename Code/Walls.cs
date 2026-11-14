@@ -404,9 +404,45 @@ namespace Civilizations
                     }
                 }
                 foreach (global::War w in World.world.wars.getWars(k)) h ^= (int)(w.getID() * 2654435761L);
+                int houses = 0;
+                foreach (TileZone z in zones)
+                {
+                    foreach (Building b in z.buildings_all) if (Solid(b)) houses++;
+                }
+                h ^= houses * 92821;
                 h ^= Policies.Id(k, "xeno").GetHashCode();
                 return h;
             }
+        }
+
+        private static bool Solid(Building b)
+        {
+            if (b == null || b.asset == null || b.asset.flora || b.current_tile == null || b.asset.fundament == null) return false;
+            string id = b.asset.id ?? "";
+            return !id.Contains("watch_tower") && id != "civ_antiair";
+        }
+
+        private static bool Covers(Building b, WorldTile t)
+        {
+            BuildingFundament f = b.asset.fundament;
+            WorldTile c = b.current_tile;
+            int x0 = c.x - f.left - 1, x1 = c.x - f.left + f.width;
+            int y0 = c.y - f.bottom - 1, y1 = c.y - f.bottom + f.height + 1;
+            return t.x >= x0 && t.x <= x1 && t.y >= y0 && t.y <= y1;
+        }
+
+        private static bool Crowded(WorldTile t)
+        {
+            TileZone z = t.zone;
+            if (z == null) return false;
+            foreach (Building b in z.buildings_all) if (Solid(b) && Covers(b, t)) return true;
+            if (z.neighbours_all == null) return false;
+            foreach (TileZone n in z.neighbours_all)
+            {
+                if (n == null) continue;
+                foreach (Building b in n.buildings_all) if (Solid(b) && Covers(b, t)) return true;
+            }
+            return false;
         }
 
         private static bool Buildable(WorldTile t)
@@ -452,6 +488,7 @@ namespace Civilizations
             }
             bool xenoAll = p.Xeno == "xenophobia";
             var plan = new HashSet<int>();
+            var blocked = new HashSet<int>();
             foreach (TileZone z in zones)
             {
                 var outside = new Dictionary<TileZone, bool>();
@@ -489,10 +526,122 @@ namespace Civilizations
                             break;
                         }
                     }
-                    if (edge && Buildable(t)) plan.Add(t.tile_id);
+                    if (!edge) continue;
+                    if (Crowded(t) || t.building != null && Solid(t.building)) blocked.Add(t.tile_id);
+                    else if (Buildable(t)) plan.Add(t.tile_id);
                 }
             }
+            if (blocked.Count > 0) Detour(k, plan, blocked);
             return plan;
+        }
+
+        private static void Detour(Kingdom k, HashSet<int> plan, HashSet<int> blocked)
+        {
+            var seen = new HashSet<int>();
+            foreach (int start in blocked)
+            {
+                if (seen.Contains(start)) continue;
+                var cluster = new List<WorldTile>();
+                var stack = new Stack<int>();
+                stack.Push(start);
+                seen.Add(start);
+                int x0 = int.MaxValue, y0 = int.MaxValue, x1 = int.MinValue, y1 = int.MinValue;
+                while (stack.Count > 0)
+                {
+                    WorldTile t = At(stack.Pop());
+                    if (t == null) continue;
+                    cluster.Add(t);
+                    x0 = Math.Min(x0, t.x);
+                    y0 = Math.Min(y0, t.y);
+                    x1 = Math.Max(x1, t.x);
+                    y1 = Math.Max(y1, t.y);
+                    foreach (WorldTile n in t.neighboursAll)
+                    {
+                        if (n == null || !blocked.Contains(n.tile_id) || !seen.Add(n.tile_id)) continue;
+                        stack.Push(n.tile_id);
+                    }
+                }
+                var ends = new HashSet<int>();
+                foreach (WorldTile t in cluster)
+                {
+                    foreach (WorldTile n in t.neighboursAll)
+                    {
+                        if (n != null && plan.Contains(n.tile_id)) ends.Add(n.tile_id);
+                    }
+                }
+                List<List<int>> groups = Groups(ends);
+                if (groups.Count < 2) continue;
+                int pad = 6;
+                var box = new RectInt(x0 - pad, y0 - pad, x1 - x0 + pad * 2 + 1, y1 - y0 + pad * 2 + 1);
+                int limit = (x1 - x0 + y1 - y0) * 3 + 24;
+                for (int i = 1; i < groups.Count; i++)
+                {
+                    List<int> path = Route(k, groups[0], groups[i], box, limit);
+                    if (path == null) continue;
+                    foreach (int id in path) plan.Add(id);
+                }
+            }
+        }
+
+        private static List<List<int>> Groups(HashSet<int> ends)
+        {
+            var groups = new List<List<int>>();
+            var left = new HashSet<int>(ends);
+            while (left.Count > 0)
+            {
+                int first = left.First();
+                left.Remove(first);
+                var g = new List<int> { first };
+                for (int i = 0; i < g.Count; i++)
+                {
+                    WorldTile t = At(g[i]);
+                    if (t == null) continue;
+                    foreach (WorldTile n in t.neighboursAll)
+                    {
+                        if (n != null && left.Remove(n.tile_id)) g.Add(n.tile_id);
+                    }
+                }
+                groups.Add(g);
+            }
+            return groups;
+        }
+
+        private static List<int> Route(Kingdom k, List<int> from, List<int> to, RectInt box, int limit)
+        {
+            var goal = new HashSet<int>(to);
+            var back = new Dictionary<int, int>();
+            var dist = new Dictionary<int, int>();
+            var queue = new Queue<int>();
+            foreach (int id in from)
+            {
+                dist[id] = 0;
+                back[id] = -1;
+                queue.Enqueue(id);
+            }
+            while (queue.Count > 0)
+            {
+                int id = queue.Dequeue();
+                int d = dist[id];
+                if (d >= limit) continue;
+                WorldTile t = At(id);
+                if (t == null) continue;
+                foreach (WorldTile n in t.neighbours)
+                {
+                    if (n == null || dist.ContainsKey(n.tile_id)) continue;
+                    if (goal.Contains(n.tile_id))
+                    {
+                        var path = new List<int>();
+                        for (int c = id; c >= 0 && !from.Contains(c); c = back[c]) path.Add(c);
+                        return path;
+                    }
+                    if (n.x < box.xMin || n.x >= box.xMax || n.y < box.yMin || n.y >= box.yMax) continue;
+                    if (Owner(n) != k || !Buildable(n) || Crowded(n)) continue;
+                    dist[n.tile_id] = d + 1;
+                    back[n.tile_id] = id;
+                    queue.Enqueue(n.tile_id);
+                }
+            }
+            return null;
         }
 
         private static bool Facing(Vector2 me, TileZone z, List<Vector2> threats)
@@ -730,7 +879,7 @@ namespace Civilizations
                     continue;
                 }
                 if (t.top_type == want) continue;
-                if (t.hasBuilding() || t.countUnits() > 0) continue;
+                if (t.hasBuilding() || t.countUnits() > 0 || Crowded(t)) continue;
                 if (IsOurs(t) && t.top_type != _damaged && Rank(t.top_type) >= rank) continue;
                 City c = t.zone.city;
                 if (!Pay(c, want)) continue;
@@ -758,7 +907,7 @@ namespace Civilizations
                     Unregister(id);
                     continue;
                 }
-                if (!G.Chance(0.35f)) continue;
+                if (!Crowded(t) && !G.Chance(0.35f)) continue;
                 City c = t.zone != null ? t.zone.city : null;
                 Refund(c != null && c.kingdom == k ? c : k.capital, t.top_type);
                 Remove(t);

@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NeoModLoader.api;
+using NeoModLoader.General;
 using NeoModLoader.General.UI.Prefabs;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Civilizations
 {
@@ -36,12 +38,72 @@ namespace Civilizations
         }
 
         private static float _zoom = 1f;
+        private static float _cw = UiKit.W;
+        private static string _sec = "places";
 
         protected override void Init()
         {
             UiKit.Setup(ContentTransform);
-            Vector2 size = WinSize.Set(BackgroundTransform, ContentTransform, 520f, 460f);
-            _zoom = Mathf.Max(1f, Mathf.Floor((size.x - 40f) / CosmosArt.W * 4f) / 4f);
+            Vector2 size = WinSize.Set(BackgroundTransform, ContentTransform, 452f, 320f);
+            _cw = Mathf.Max(UiKit.W, size.x - 18f);
+            _zoom = 1f;
+        }
+
+        private static bool Wide
+        {
+            get { return _cw >= UiKit.W * 2f + 6f; }
+        }
+
+        private static RectTransform Column(RectTransform box, float x)
+        {
+            var go = new GameObject("Col", typeof(RectTransform));
+            go.transform.SetParent(box, false);
+            RectTransform r = go.GetComponent<RectTransform>();
+            r.anchorMin = new Vector2(0.5f, 1f);
+            r.anchorMax = new Vector2(0.5f, 1f);
+            r.pivot = new Vector2(0.5f, 1f);
+            r.sizeDelta = new Vector2(UiKit.W, 10f);
+            r.anchoredPosition = new Vector2(x, 0f);
+            VerticalLayoutGroup vl = go.AddComponent<VerticalLayoutGroup>();
+            OT.InitializeNoActionVerticalLayoutGroup(vl);
+            vl.spacing = 3;
+            vl.childAlignment = TextAnchor.UpperCenter;
+            return r;
+        }
+
+        private static Transform[] Cols(Transform c, string name)
+        {
+            if (!Wide) return new[] { c, c };
+            RectTransform box = UiKit.Box(c, name, 10f, _cw);
+            float x = _cw / 2f - UiKit.W / 2f - 2f;
+            return new Transform[] { Column(box, -x), Column(box, x) };
+        }
+
+        private static float Height(Transform col)
+        {
+            float h = 0f;
+            int n = 0;
+            for (int i = 0; i < col.childCount; i++)
+            {
+                Transform t = col.GetChild(i);
+                if (!t.gameObject.activeSelf) continue;
+                LayoutElement le = t.GetComponent<LayoutElement>();
+                RectTransform r = t as RectTransform;
+                h += le != null && le.preferredHeight > 0f ? le.preferredHeight : r != null ? r.sizeDelta.y : 0f;
+                n++;
+            }
+            return h + Math.Max(0, n - 1) * 3f;
+        }
+
+        private static void Fit(Transform[] cols, float min = 0f)
+        {
+            if (cols[0] == cols[1]) return;
+            float h = Math.Max(min, Math.Max(Height(cols[0]), Height(cols[1])));
+            foreach (Transform t in cols) ((RectTransform)t).sizeDelta = new Vector2(UiKit.W, h);
+            RectTransform box = (RectTransform)cols[0].parent;
+            box.sizeDelta = new Vector2(_cw, h);
+            LayoutElement le = box.GetComponent<LayoutElement>();
+            if (le != null) le.preferredHeight = h;
         }
 
         public override void OnNormalEnable()
@@ -114,12 +176,53 @@ namespace Civilizations
                 if (up != null) UiKit.Btn(UiKit.Box(c, "Up", 24f), Txt.T("cos_scale_up"), UiKit.Icon("ui/Icons/civ/cos/scale_up"), () => CosmosPlanet.Open(up), new Vector2(UiKit.W - 20f, 20f), Vector2.zero, Txt.T("cos_scale_up"), Txt.T("cos_scale_up_d"));
             }
             Nav(c, n);
-            View(c, n);
-            Info(c, n);
-            Realm(c);
-            Children(c, n);
-            if (n.Level >= 1) Powers(c, n);
-            if (Cosmos.Shared) Worlds(c);
+            Transform[] body = Cols(c, "Body");
+            View(body[0], n);
+            Info(body[1], n);
+            Fit(body, CosmosArt.H * _zoom + 4f);
+            var secs = new List<string>();
+            var icons = new List<string>();
+            var keys = new List<string>();
+            if (CosmosGen.Children(n).Count > 0)
+            {
+                secs.Add("places");
+                keys.Add("cos_contains_" + CosmosGen.LevelIds[Math.Max(0, n.Level - 1)]);
+                icons.Add("ui/Icons/civ/cos/locate");
+            }
+            if (RealmKingdom() != null)
+            {
+                secs.Add("realm");
+                keys.Add("cos_tab_realm");
+                icons.Add("ui/Icons/civ/cos/home");
+            }
+            if (n.Level >= 1 && PowerList(n).Count > 0)
+            {
+                secs.Add("powers");
+                keys.Add("cos_powers_here");
+                icons.Add("ui/Icons/civ/world/cosmos");
+            }
+            if (Cosmos.Shared)
+            {
+                secs.Add("worlds");
+                keys.Add("cos_worlds");
+                icons.Add("ui/Icons/civ/cfg/shared");
+            }
+            if (secs.Count == 0) return;
+            if (!secs.Contains(_sec)) _sec = secs[0];
+            UiKit.Tabs(c, keys.ToArray(), icons.ToArray(), secs.IndexOf(_sec), i =>
+            {
+                _sec = secs[i];
+                _page = 0;
+                Render();
+            });
+            UiKit.Header(c, Txt.T(keys[secs.IndexOf(_sec)]), UiKit.Gold);
+            switch (_sec)
+            {
+                case "places": Children(c, n); break;
+                case "realm": Realm(c); break;
+                case "powers": Powers(c, n); break;
+                case "worlds": Worlds(c); break;
+            }
         }
 
         private static bool _armReset;
@@ -131,19 +234,20 @@ namespace Civilizations
             foreach (UniWorld w in Universe.Worlds())
             {
                 if (w.Lost) continue;
-                RectTransform row = UiKit.Box(c, "World" + w.Tag, 22f);
+                float rw = Wide ? _cw : UiKit.W;
+                RectTransform row = UiKit.Box(c, "World" + w.Tag, 22f, rw);
                 UiKit.Panel(row, 0.5f);
                 string name = string.IsNullOrEmpty(w.Name) ? Txt.F("cos_world_n", w.Tag) : w.Name;
                 string state = w == me ? Txt.T("cos_world_here") : w.Frozen ? Txt.T("cos_world_frozen") : Txt.F("cos_world_away", Cosmos.St.Clock - w.Seen);
-                UiKit.Text(row, "<color=" + w.Color + ">■</color> " + name + "  ·  " + Db.EraName(w.Era) + "  ·  " + state, new Vector2(-30f, 0f), new Vector2(UiKit.W - 80f, 20f), 8, TextAnchor.MiddleLeft, w == me ? UiKit.Gold : UiKit.Soft);
+                UiKit.Text(row, "<color=" + w.Color + ">■</color> " + name + "  ·  " + Db.EraName(w.Era) + "  ·  " + state, new Vector2(-40f, 0f), new Vector2(rw - 100f, 20f), 8, TextAnchor.MiddleLeft, w == me ? UiKit.Gold : UiKit.Soft);
                 if (w == me) continue;
                 UniWorld target = w;
                 UiKit.Btn(row, w.Frozen ? Txt.T("cos_world_thaw") : Txt.T("cos_world_freeze"), UiKit.Icon(w.Frozen ? "ui/Icons/civ/cos/thaw" : "ui/Icons/civ/cos/freeze"), () =>
                 {
                     Universe.SetFrozen(target, !target.Frozen);
                     Render();
-                }, new Vector2(58f, 18f), new Vector2(UiKit.W / 2f - 34f, 0f), Txt.T("cos_world_freeze"), Txt.T("cos_world_freeze_d"));
-                if (w.Home != null) UiKit.IconBtn(row, UiKit.Icon("ui/Icons/civ/cos/locate"), () => Go(CosmosGen.ParentPath(target.Home)), 16f, new Vector2(UiKit.W / 2f - 74f, 0f), Txt.T("cos_world_go"), name);
+                }, new Vector2(58f, 18f), new Vector2(rw / 2f - 34f, 0f), Txt.T("cos_world_freeze"), Txt.T("cos_world_freeze_d"));
+                if (w.Home != null) UiKit.IconBtn(row, UiKit.Icon("ui/Icons/civ/cos/locate"), () => Go(CosmosGen.ParentPath(target.Home)), 16f, new Vector2(rw / 2f - 74f, 0f), Txt.T("cos_world_go"), name);
             }
             RectTransform tools = UiKit.Box(c, "WorldTools", 24f);
             RectTransform tools2 = UiKit.Box(c, "WorldTools2", 24f);
@@ -256,14 +360,22 @@ namespace Civilizations
             }
         }
 
-        private void Realm(Transform c)
+        private static Kingdom RealmKingdom()
         {
             Kingdom k = SelectedMetas.selected_kingdom;
             if (!G.Ok(k) || !k.isCiv())
             {
                 k = G.Kingdoms().Where(x => x.isCiv()).OrderByDescending(x => Research.Era(x)).FirstOrDefault();
             }
-            if (!G.Ok(k) || Research.Era(k) < 13) return;
+            return G.Ok(k) && Research.Era(k) >= 13 ? k : null;
+        }
+
+        private void Realm(Transform parent)
+        {
+            Kingdom k = RealmKingdom();
+            if (k == null) return;
+            Transform[] cols = Cols(parent, "Realm");
+            Transform c = cols[0];
             UiKit.Header(c, G.Name(k), UiKit.Hex(G.Hex(k)));
             int scale = CosmosSim.CachedScale(k);
             UiKit.Stat(c, null, Txt.T("cos_scale"), Txt.T("cos_scale_" + scale), UiKit.Gold);
@@ -274,7 +386,12 @@ namespace Civilizations
             int travel = Cosmos.St.Voyages.Count(v => v.King == Cosmos.Key(k));
             if (travel > 0) UiKit.Stat(c, null, Txt.T("cos_voyages"), travel.ToString(), UiKit.Cyan);
             UiKit.Stat(c, null, Txt.T("cos_fleet"), Mathf.RoundToInt(CosmosWar.Strength(k)).ToString());
-            UiKit.Stat(c, null, Txt.T("cos_mega_admin"), Megastructures.Used(k) + " / " + Megastructures.Admin(k) + "   " + Txt.F("cos_mega_logistics", Megastructures.Logistics(k)));
+            Dictionary<string, float> stock = CosmosSim.Stock(k);
+            if (stock.Count > 0) UiKit.Paragraph(c, Txt.T("cos_resources") + ": " + string.Join(", ", stock.Select(kv => Txt.T("cos_res_" + kv.Key) + " " + kv.Value.ToString("0")).ToArray()), 7, UiKit.Cyan);
+            foreach (Threat t in Cosmos.St.Threats.Where(x => x.King == Cosmos.Key(k) && x.Warned)) UiKit.Label(c, Txt.F("cos_threat_line", Txt.T("cos_inv_" + t.Kind), CosmosGen.Get(t.Target).Name, t.Main - G.Year), 14f, 8, TextAnchor.MiddleCenter, UiKit.Bad);
+            c = cols[1];
+            UiKit.Header(c, Txt.T("cos_mega_admin"), UiKit.Gold);
+            UiKit.Label(c, Megastructures.Used(k) + " / " + Megastructures.Admin(k) + "   " + Txt.F("cos_mega_logistics", Megastructures.Logistics(k)), 14f, 8, TextAnchor.MiddleCenter, UiKit.Soft);
             foreach (Mega m in Megastructures.Of(k))
             {
                 MegaDef md = Megastructures.Def(m.Id);
@@ -285,9 +402,6 @@ namespace Civilizations
             }
             int ruins = Cosmos.St.Megas.Count(x => x.Ruin);
             if (ruins > 0) UiKit.Stat(c, null, Txt.T("cos_mega_ruins"), ruins.ToString(), UiKit.Dim);
-            Dictionary<string, float> stock = CosmosSim.Stock(k);
-            if (stock.Count > 0) UiKit.Paragraph(c, Txt.T("cos_resources") + ": " + string.Join(", ", stock.Select(kv => Txt.T("cos_res_" + kv.Key) + " " + kv.Value.ToString("0")).ToArray()), 7, UiKit.Cyan);
-            foreach (Threat t in Cosmos.St.Threats.Where(x => x.King == Cosmos.Key(k) && x.Warned)) UiKit.Label(c, Txt.F("cos_threat_line", Txt.T("cos_inv_" + t.Kind), CosmosGen.Get(t.Target).Name, t.Main - G.Year), 14f, 8, TextAnchor.MiddleCenter, UiKit.Bad);
             var battles = Cosmos.St.Battles.Where(b => Cosmos.Now - b.Year < 30).Reverse().Take(4).ToList();
             if (battles.Count > 0)
             {
@@ -303,6 +417,7 @@ namespace Civilizations
                     UiKit.Paragraph(c, i > 0 ? "<color=#FFD25C>" + line.Substring(0, i) + "</color>  " + line.Substring(i + 1) : line, 7, UiKit.Soft);
                 }
             }
+            Fit(cols);
         }
 
         public static string Pop(float millions)
@@ -319,18 +434,24 @@ namespace Civilizations
         {
             List<CNode> kids = CosmosGen.Children(n);
             if (kids.Count == 0) return;
-            UiKit.Header(c, Txt.T("cos_contains_" + CosmosGen.LevelIds[Math.Max(0, n.Level - 1)]), UiKit.Gold);
-            int per = 8;
+            int cols = Wide ? 2 : 1;
+            int per = 6 * cols;
             int pages = Math.Max(1, (kids.Count + per - 1) / per);
             _page = Math.Min(_page, pages - 1);
+            float rw = Wide ? _cw : UiKit.W;
+            float bw = rw / cols - 6f;
+            RectTransform box = null;
+            int i = 0;
             foreach (CNode k in kids.Skip(_page * per).Take(per))
             {
                 CNode kk = k;
-                RectTransform box = UiKit.Box(c, "Kid", 18f);
+                if (i % cols == 0) box = UiKit.Box(c, "Kid", 18f, rw);
+                float x = cols == 1 ? 0f : (i % 2 == 0 ? -rw / 4f : rw / 4f);
                 Polity p = Cosmos.OwnerExact(k.Path);
                 string label = (CosmosGen.Contains(k.Path, Cosmos.St.Home) ? "★ " : "") + k.Name;
-                SimpleButton b = UiKit.Btn(box, label, null, () => Go(kk.Path), new Vector2(UiKit.W - 8f, 16f), Vector2.zero, k.Name, Tip(k));
+                SimpleButton b = UiKit.Btn(box, label, null, () => Go(kk.Path), new Vector2(bw, 16f), new Vector2(x, 0f), k.Name, Tip(k));
                 if (p != null) b.Background.color = Color.Lerp(Color.white, UiKit.Hex(p.Color), 0.5f);
+                i++;
             }
             UiKit.Pager(c, _page, pages, x =>
             {
@@ -341,18 +462,26 @@ namespace Civilizations
 
         private void Powers(Transform c, CNode n)
         {
-            var list = Cosmos.St.Polities.Where(p => p.Nodes.Any(x => CosmosGen.Contains(n.Path, x))).GroupBy(p => p.King != 0 ? "k" + p.King : "p" + p.Id).Take(10).ToList();
+            var list = PowerList(n);
             if (list.Count == 0) return;
-            UiKit.Header(c, Txt.T("cos_powers_here"), UiKit.Gold);
+            Transform[] cols = Cols(c, "Powers");
+            int i = 0;
             foreach (var g in list)
             {
+                Transform col = cols[i++ % 2];
                 Polity first = g.First();
                 Kingdom k = first.King != 0 ? Cosmos.KingOf(first.King) : null;
                 string name = G.Ok(k) ? G.Name(k) : first.Name;
                 float pop = g.Sum(p => p.Pop);
                 int worlds = g.Sum(p => p.Nodes.Count(x => CosmosGen.Contains(n.Path, x)));
-                UiKit.Stat(c, null, name, Txt.F("cos_power_line", worlds, Pop(pop)), UiKit.Hex(first.Color));
+                UiKit.Stat(col, null, name, Txt.F("cos_power_line", worlds, Pop(pop)), UiKit.Hex(first.Color));
             }
+            Fit(cols);
+        }
+
+        private static List<IGrouping<string, Polity>> PowerList(CNode n)
+        {
+            return Cosmos.St.Polities.Where(p => p.Nodes.Any(x => CosmosGen.Contains(n.Path, x))).GroupBy(p => p.King != 0 ? "k" + p.King : "p" + p.Id).Take(12).ToList();
         }
     }
 }

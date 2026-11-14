@@ -175,7 +175,7 @@ namespace Civilizations
         private static void SystemView(CNode n, CosView v)
         {
             Begin(new Color32(8, 10, 22, 255), n.Seed);
-            float sx = 16, sy = H / 2f;
+            float sx = W / 2f, sy = H / 2f;
             string col;
             Color32 sc = Hex(StarCol.TryGetValue(n.Sub, out col) ? col : "#FFE9A0");
             if (n.Sub == "black_hole")
@@ -191,11 +191,13 @@ namespace Civilizations
                 if (n.Sub == "binary") Disc(sx + 6, sy - 9, 4, Hex("#FF9A6A"));
             }
             List<CNode> kids = CosmosGen.Children(n);
-            float step = kids.Count > 0 ? (W - 34f) / kids.Count : 20f;
+            float inner = n.Sub == "red_giant" ? 20f : 14f;
+            float outer = W / 2f - 6f;
+            float step = kids.Count > 1 ? (outer - inner) / (kids.Count - 1) : 0f;
             for (int i = 0; i < kids.Count; i++)
             {
                 CNode b = kids[i];
-                float rx = 18 + step * (i + 0.8f), ry = rx * 0.42f;
+                float rx = kids.Count > 1 ? inner + step * i : (inner + outer) / 2f, ry = Math.Min(rx * 0.62f, H / 2f - 6f);
                 Ring(sx, sy, rx, ry, new Color32(70, 80, 120, 255), 0.45f);
                 double ang = b.Y * Math.PI * 2 + Phase * (0.6 / (1 + i));
                 float bx = sx + (float)Math.Cos(ang) * rx, by = sy + (float)Math.Sin(ang) * ry;
@@ -372,8 +374,8 @@ namespace Civilizations
                 if (n.Level == 1 && (m.Id.Contains("dyson") || m.Id == "matrioshka_brain" || m.Id == "stellar_engine" || m.Id == "ringworld"))
                 {
                     float r = m.Id == "dyson_sphere" || m.Id == "matrioshka_brain" ? 13f : m.Id == "ringworld" ? 17f : 11f;
-                    Ring(16, H / 2f, r, m.Id == "ringworld" ? r * 0.35f : r, c, a);
-                    if (m.Id == "dyson_swarm") for (int i = 0; i < 18; i++) Blend((int)(16 + Math.Cos(i * 0.35) * r), (int)(H / 2f + Math.Sin(i * 0.35) * r), c, a);
+                    Ring(W / 2f, H / 2f, r, m.Id == "ringworld" ? r * 0.35f : r, c, a);
+                    if (m.Id == "dyson_swarm") for (int i = 0; i < 18; i++) Blend((int)(W / 2f + Math.Cos(i * 0.35) * r), (int)(H / 2f + Math.Sin(i * 0.35) * r), c, a);
                     continue;
                 }
                 if (n.Level == 0 && m.Id == "orbital_ring" && m.Node == n.Path)

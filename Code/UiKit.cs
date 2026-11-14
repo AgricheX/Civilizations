@@ -181,6 +181,7 @@ namespace Civilizations
                 td = new TooltipData { tip_name = Dyn(tipTitle), tip_description = Dyn(tipDesc ?? "") };
             }
             b.Setup(act, icon, text, size, tip, td);
+            if (icon == null && b.Icon != null) b.Icon.gameObject.SetActive(false);
             b.transform.localPosition = new Vector3(pos.x, pos.y, 0f);
             b.transform.localScale = Vector3.one;
             if (bg.HasValue) b.Background.color = bg.Value;

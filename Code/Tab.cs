@@ -100,11 +100,6 @@ namespace Civilizations
                 }
                 Relayout();
                 Biomes.Ui();
-                CivMod.Safe("skin-tabs", () =>
-                {
-                    if (_main != null) Skin.Apply(_main.gameObject);
-                    if (SandboxTab != null) Skin.Apply(SandboxTab.gameObject);
-                });
             }
             catch (Exception e)
             {
@@ -121,6 +116,7 @@ namespace Civilizations
                 Transform t = entry != null ? entry.transform.Find("Icon") : null;
                 Image img = t != null ? t.GetComponent<Image>() : null;
                 if (img != null) img.preserveAspect = true;
+                if (tab != null) DebugButton(tab);
                 return tab;
             }
             catch (Exception e)
@@ -128,6 +124,36 @@ namespace Civilizations
                 Debug.LogWarning("[Civilizations] tab " + id + ": " + e.Message);
                 return null;
             }
+        }
+
+        private static void DebugButton(PowersTab tab)
+        {
+            try
+            {
+                int at = -1;
+                for (int i = 0; i < Math.Min(6, tab.transform.childCount); i++)
+                {
+                    if (tab.transform.GetChild(i).name.StartsWith("_line")) at = i;
+                }
+                PowerButton b = PowerButtonCreator.CreateSimpleButton("civ_btn_debug", () => ScrollWindow.showWindow("debug"), DebugIcon());
+                if (b == null) return;
+                b.gameObject.name = "civ_debug_button";
+                if (at >= 0) PowerButtonCreator.AddButtonToTab(b, tab, at);
+                else PowerButtonCreator.AddButtonToTab(b, tab);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("[Civilizations] debug button: " + e.Message);
+            }
+        }
+
+        private static Sprite DebugIcon()
+        {
+            GameObject src = DebugConfig.instance != null ? DebugConfig.instance.debugButton : null;
+            if (src == null) src = ResourcesFinder.FindResource<GameObject>("DebugButton");
+            Transform t = src != null ? src.transform.Find("Icon") : null;
+            Image img = t != null ? t.GetComponent<Image>() : null;
+            return img != null && img.sprite != null ? img.sprite : UiKit.Icon("ui/Icons/civ/btn/config");
         }
 
         public static void Group(PowersTab tab, string id, Color tint)
@@ -166,19 +192,24 @@ namespace Civilizations
             return true;
         }
 
-        private static int After(TabGroup g)
+        private static int Before(TabGroup g)
         {
-            int idx = -1;
             bool past = false;
             foreach (TabGroup o in _order)
             {
                 if (o.Tab != g.Tab) continue;
-                if (o.Line != null) idx = Math.Max(idx, o.Line.transform.GetSiblingIndex());
-                foreach (PowerButton b in o.Buttons) if (b != null) idx = Math.Max(idx, b.transform.GetSiblingIndex());
-                if (o == g) past = true;
-                if (past) break;
+                if (o == g)
+                {
+                    past = true;
+                    continue;
+                }
+                if (!past) continue;
+                int idx = int.MaxValue;
+                if (o.Line != null) idx = Math.Min(idx, o.Line.transform.GetSiblingIndex());
+                foreach (PowerButton b in o.Buttons) if (b != null) idx = Math.Min(idx, b.transform.GetSiblingIndex());
+                if (idx != int.MaxValue) return idx;
             }
-            return idx + 1;
+            return -1;
         }
 
         public static void Put(string group, PowerButton b)
@@ -193,9 +224,9 @@ namespace Civilizations
                 g = _groups[group];
             }
             if (g.Line == null && g.Buttons.Count == 0 && !First(g)) Line(g);
-            int at = After(g);
+            int at = Before(g);
             PowerButtonCreator.AddButtonToTab(b, g.Tab);
-            if (at >= 0 && at < g.Tab.transform.childCount) b.transform.SetSiblingIndex(at);
+            if (at >= 0) b.transform.SetSiblingIndex(at);
             g.Buttons.Add(b);
             Image bg = b.GetComponent<Image>();
             if (bg != null) bg.color = Color.Lerp(Color.white, g.Tint, 0.45f);
@@ -216,8 +247,8 @@ namespace Civilizations
                     img.color = Color.Lerp(Color.white, g.Tint, 0.6f);
                 }
                 line.SetActive(true);
-                int at = After(g);
-                if (at >= 0 && at < g.Tab.transform.childCount) line.transform.SetSiblingIndex(at);
+                int at = Before(g);
+                if (at >= 0) line.transform.SetSiblingIndex(at);
                 g.Line = line;
             }
             catch (Exception)
