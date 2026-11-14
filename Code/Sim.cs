@@ -67,6 +67,7 @@ namespace Civilizations
                     CivMod.Safe("rails", Rails.Year);
                     CivMod.Safe("era-skins", EraSkins.Year);
                     CivMod.Safe("war-year", War.Year);
+                    CivMod.Safe("soldiers-year", Soldiers.Year);
                     CivMod.Safe("internet-year", Internet.Year);
                     CivMod.Safe("diplomacy-year", Diplomacy.Year);
                     CivMod.Safe("orgs-year", Orgs.Year);
@@ -160,9 +161,9 @@ namespace Civilizations
             }
         }
 
-        private static readonly string[] HeavyNames = { "vehicles-tick", "soldiers-tick", "air-ops", "navy", "carriers", "ammo" };
-        private static readonly Action<float>[] HeavyRuns = { Vehicles.Tick, Soldiers.Tick, Aircraft.Tick, Navy.Tick, Carriers.Tick, Ammo.Tick };
-        private static readonly float[] HeavyAcc = { 0f, 0.33f, 0.66f, 1f, 1.33f, 1.66f };
+        private static readonly string[] HeavyNames = { "vehicles-tick", "air-ops", "navy", "carriers", "ammo" };
+        private static readonly Action<float>[] HeavyRuns = { Vehicles.Tick, Aircraft.Tick, Navy.Tick, Carriers.Tick, Ammo.Tick };
+        private static readonly float[] HeavyAcc = { 0f, 0.4f, 0.8f, 1.2f, 1.6f };
         private const float HeavyEvery = 2f;
 
         private static void Heavy(float dt)

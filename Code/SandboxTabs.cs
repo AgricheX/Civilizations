@@ -428,6 +428,11 @@ namespace Civilizations
         {
             if (t == null) return false;
             Kingdom k = Sandbox.Owner(t);
+            if (!G.Ok(k) || !k.isCiv())
+            {
+                City near = Sandbox.NearestCity(t);
+                k = near != null ? near.kingdom : null;
+            }
             UnitDef d = null;
             if (G.Ok(k))
             {

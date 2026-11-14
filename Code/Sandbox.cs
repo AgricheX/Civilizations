@@ -206,6 +206,28 @@ namespace Civilizations
             return c != null && G.Ok(c.kingdom) ? c.kingdom : null;
         }
 
+        public const string KSandbox = "civ_sandbox";
+
+        public static City NearestCity(WorldTile t)
+        {
+            if (t == null) return null;
+            City best = null;
+            float bd = 80f * 80f;
+            foreach (City c in G.Cities())
+            {
+                if (!G.Ok(c) || !G.Ok(c.kingdom) || !c.kingdom.isCiv()) continue;
+                WorldTile ct = c.getTile();
+                if (ct == null) continue;
+                float dx = ct.x - t.x, dy = ct.y - t.y, d = dx * dx + dy * dy;
+                if (d < bd)
+                {
+                    bd = d;
+                    best = c;
+                }
+            }
+            return best;
+        }
+
         public static City CityAt(WorldTile t)
         {
             return t != null && t.zone != null ? t.zone.city : null;
@@ -234,7 +256,9 @@ namespace Civilizations
             if (AssetManager.actor_library.get(id) == null) return false;
             Actor v = World.world.units.createNewUnit(id, t, false, 0f, null, null, false, true);
             if (v == null) return false;
+            Store.Put(v.data, KSandbox, true);
             City c = CityAt(t);
+            if (c == null || !G.Ok(c.kingdom) || !c.kingdom.isCiv()) c = NearestCity(t);
             if (c != null && G.Ok(c.kingdom))
             {
                 v.setKingdom(c.kingdom);

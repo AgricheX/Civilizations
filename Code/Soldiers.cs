@@ -8,7 +8,6 @@ namespace Civilizations
     {
         private static readonly string[] Duties = { "sol_melee", "sol_ranged", "sol_heavy" };
         private static readonly float[] Weights = { 3.5f, 4f, 2.5f };
-        private static float _tick;
         private static List<ActorAsset> _assets;
 
         public static bool On
@@ -136,12 +135,9 @@ namespace Civilizations
             return k != null && k.isAlive() && k.isCiv() && World.world.wars.hasWars(k);
         }
 
-        public static void Tick(float dt)
+        public static void Year()
         {
-            _tick += dt;
-            if (_tick < 2f) return;
-            _tick = 0f;
-            int budget = 40;
+            int budget = 400;
             foreach (UnitDef d in Db.Units)
             {
                 if (budget <= 0) return;
@@ -152,6 +148,7 @@ namespace Civilizations
                 {
                     if (budget <= 0) return;
                     if (!G.Ok(a) || a.isFavorite() || a.is_inside_boat || a.isInsideSomething()) continue;
+                    if (Store.Bool(a.data, Sandbox.KSandbox)) continue;
                     if (a.asset.is_boat)
                     {
                         Boat boat = a.getSimpleComponent<Boat>();
