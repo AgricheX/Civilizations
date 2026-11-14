@@ -4,244 +4,383 @@ using System.Linq;
 
 namespace Civilizations
 {
-    internal class WorksCount
-    {
-        public int Year;
-        public int Market, Temple, Barracks, Tower, Statue, Windmill;
-    }
-
     internal static class Treasury
     {
-        private const string KRes = "civ_tr_res";
-        private const string KUnpaid = "civ_tr_unpaid";
-        private const string KLog = "civ_tr_log";
-        private const string KFlow = "civ_tr_flow";
-        public static readonly string[] Sources = { "taxes", "companies", "currency", "tribute" };
-        public static readonly string[] Uses = { "soldiers", "court", "works", "armament" };
-        private static readonly Dictionary<long, WorksCount> _works = new Dictionary<long, WorksCount>();
+        private const string KGold = Gov.P + "gold";
+        private const string KDelta = Gov.P + "gold_delta";
+        private const string KOwed = Gov.P + "owed";
+        private const string KUnpaidY = Gov.P + "unpaid_y";
+        private const string KFlow = Gov.P + "flow";
+        private const string KFlowCur = Gov.P + "flow_cur";
+        private const string KLedger = Gov.P + "ledger";
+        private const string KTier = Gov.P + "arms";
+        private const string KLast = Gov.P + "tr_last";
+        private const string KCityUnpaid = Gov.P + "tr_unpaid";
+        private const string KWorks = Gov.P + "works";
+        public static readonly string[] WorkTypes = { "market", "temple", "barracks", "statue" };
+        public static readonly string[] Outs = { "court", "guard", "local", "arms", "works", "rep_out", "tribute_out" };
 
-        public static float Reserve(Kingdom k)
+        public static void Register()
         {
-            return G.Ok(k) ? Store.Flt(k.data, KRes, 0f) : 0f;
         }
 
-        public static void AddReserve(Kingdom k, float v)
+        public static bool Coin(Kingdom k)
         {
-            if (G.Ok(k)) Store.Put(k.data, KRes, Math.Max(0f, Reserve(k) + v));
+            return G.Ok(k) && k.isCiv() && Gov.On("civ_gov_treasury") && GovEra.Has(k, GovEra.Coin);
         }
 
-        public static int Unpaid(Kingdom k)
+        public static float Gold(Kingdom k)
         {
-            return G.Ok(k) ? Store.Int(k.data, KUnpaid, 0) : 0;
+            return G.Ok(k) ? Store.Flt(k.data, KGold, 0f) : 0f;
         }
 
-        public static float TaxRate(Kingdom k)
+        public static void SetGold(Kingdom k, float v)
         {
-            switch (Laws.Get(k, "taxation"))
-            {
-                case "light_tax": return 0.04f;
-                case "flat_tax": return 0.08f;
-                case "progressive_tax": return 0.1f;
-                case "heavy_tax": return 0.16f;
-            }
-            return 0.06f;
+            if (G.Ok(k)) Store.Put(k.data, KGold, Math.Max(0f, v));
         }
 
-        public static float Pay(Kingdom k)
+        public static float Delta(Kingdom k)
         {
-            return 0.5f + Gov.Band(k) * 0.25f;
+            return G.Ok(k) ? Store.Flt(k.data, KDelta, 0f) : 0f;
         }
 
-        public static WorksCount Works(Kingdom k)
+        public static float Owed(Kingdom k)
         {
-            WorksCount w;
-            if (_works.TryGetValue(k.data.id, out w) && w.Year == G.Year) return w;
-            w = new WorksCount { Year = G.Year };
-            foreach (City c in G.Cities(k))
-            {
-                WorksCount cw = Works(c);
-                w.Market += cw.Market;
-                w.Temple += cw.Temple;
-                w.Barracks += cw.Barracks;
-                w.Tower += cw.Tower;
-                w.Statue += cw.Statue;
-                w.Windmill += cw.Windmill;
-            }
-            _works[k.data.id] = w;
-            return w;
+            return G.Ok(k) ? Store.Flt(k.data, KOwed, 0f) : 0f;
         }
 
-        public static WorksCount Works(City c)
+        public static int UnpaidYears(Kingdom k)
         {
-            var w = new WorksCount();
-            if (!G.Ok(c) || c.buildings == null) return w;
-            foreach (Building b in c.buildings)
-            {
-                if (b == null || b.asset == null || b.asset.id == null) continue;
-                string id = b.asset.id;
-                if (id.Contains("market")) w.Market++;
-                else if (id.Contains("temple")) w.Temple++;
-                else if (id.Contains("barracks")) w.Barracks++;
-                else if (id.Contains("watch_tower") || id.Contains("watchtower")) w.Tower++;
-                else if (id.Contains("statue")) w.Statue++;
-                else if (id.Contains("windmill")) w.Windmill++;
-            }
-            return w;
+            return G.Ok(k) ? Store.Int(k.data, KUnpaidY, 0) : 0;
         }
 
-        public static int Statues(Kingdom k)
+        public static int Tier(Kingdom k)
         {
-            return G.Ok(k) ? Works(k).Statue : 0;
+            return G.Ok(k) ? Store.Int(k.data, KTier, 0) : 0;
         }
 
-        public static int TempleLoyalty(City c)
-        {
-            if (!G.Ok(c) || !Gov.On("civ_gov_treasury")) return 0;
-            return Math.Min(9, Works(c).Temple * 3);
-        }
-
-        public static Dictionary<string, float> Flow(Kingdom k)
+        public static Dictionary<string, float> Flows(Kingdom k)
         {
             return G.Ok(k) ? Store.Map(k.data, KFlow) : new Dictionary<string, float>();
         }
 
-        public static List<string[]> Ledger(Kingdom k)
+        private static void Flow(Kingdom k, string key, float v)
         {
-            var l = new List<string[]>();
-            if (!G.Ok(k)) return l;
-            foreach (string e in Store.Str(k.data, KLog).Split(';'))
+            Dictionary<string, float> m = Store.Map(k.data, KFlowCur);
+            Store.Add(m, key, v);
+            Store.Map(k.data, KFlowCur, m);
+        }
+
+        public static void Receive(Kingdom k, float v, string source)
+        {
+            if (!G.Ok(k) || v <= 0f) return;
+            if (!Coin(k))
             {
-                string[] p = e.Split('|');
-                if (p.Length >= 3) l.Add(p);
+                if (k.capital != null) Economy.Give(k.capital, "gold", (int)v);
+                return;
+            }
+            SetGold(k, Gold(k) + v);
+            Flow(k, "in_" + source, v);
+        }
+
+        public static void PaidOut(Kingdom k, float v, string what)
+        {
+            if (G.Ok(k) && v > 0f && Coin(k)) Flow(k, "out_" + what, v);
+        }
+
+        public static float Seize(Kingdom k, float share)
+        {
+            if (!G.Ok(k)) return 0f;
+            float got = 0f;
+            if (Coin(k))
+            {
+                float t = Gold(k) * share;
+                SetGold(k, Gold(k) - t);
+                Flow(k, "out_rep_out", t);
+                got += t;
+            }
+            foreach (City c in G.Cities(k)) got += Economy.TakeUpTo(c, "gold", (int)(Economy.Amount(c, "gold") * share));
+            return got;
+        }
+
+        public static void Note(Kingdom k, string text)
+        {
+            if (!G.Ok(k) || !GovEra.Has(k, GovEra.Ledger) || !Gov.On("civ_gov_treasury")) return;
+            List<string> l = Store.Str(k.data, KLedger).Split('\n').Where(x => x.Length > 0).ToList();
+            l.Insert(0, G.Year + "\t" + text.Replace("\n", " ").Replace("\t", " "));
+            if (l.Count > 30) l.RemoveRange(30, l.Count - 30);
+            Store.Put(k.data, KLedger, string.Join("\n", l.ToArray()));
+        }
+
+        public static List<KeyValuePair<int, string>> Ledger(Kingdom k)
+        {
+            var l = new List<KeyValuePair<int, string>>();
+            if (!G.Ok(k)) return l;
+            foreach (string e in Store.Str(k.data, KLedger).Split('\n'))
+            {
+                int t = e.IndexOf('\t');
+                int y;
+                if (t <= 0 || !int.TryParse(e.Substring(0, t), out y)) continue;
+                l.Add(new KeyValuePair<int, string>(y, e.Substring(t + 1)));
             }
             return l;
         }
 
-        private static void Note(Kingdom k, string what, float amount)
+        public static float TaxShare(Kingdom k)
         {
-            if (Math.Abs(amount) < 1f) return;
-            List<string> l = Store.Str(k.data, KLog).Split(';').Where(x => x.Length > 0).ToList();
-            l.Insert(0, G.Year + "|" + what + "|" + ((int)amount));
-            if (l.Count > 24) l.RemoveRange(24, l.Count - 24);
-            Store.Put(k.data, KLog, string.Join(";", l.ToArray()));
+            if (!Parl.Active(k)) return 0.4f;
+            switch (Parl.Get(k, "tax"))
+            {
+                case 0: return 0.25f;
+                case 2: return 0.75f;
+            }
+            return 0.5f;
+        }
+
+        public static float LevyShare(Kingdom k)
+        {
+            if (!GovEra.Has(k, GovEra.Guard)) return 0f;
+            if (!Parl.Active(k)) return 0.25f;
+            return Parl.Get(k, "levy") * 0.25f;
+        }
+
+        public static int GuardSize(Kingdom k)
+        {
+            if (!G.Ok(k) || !GovEra.Has(k, GovEra.Guard)) return 0;
+            float n = 0f, share = LevyShare(k);
+            foreach (City c in G.Cities(k)) n += c == k.capital ? c.countWarriors() : c.countWarriors() * share;
+            return (int)n;
+        }
+
+        public static Dictionary<string, float> Works(City c)
+        {
+            return G.Ok(c) ? Store.Map(c.data, KWorks) : new Dictionary<string, float>();
+        }
+
+        public static int WorkCount(City c, string type)
+        {
+            return (int)Store.Get(Works(c), type);
+        }
+
+        private static int Built(City c, string part)
+        {
+            int n = 0;
+            if (c.buildings == null) return 0;
+            foreach (Building b in c.buildings)
+            {
+                if (b != null && b.asset != null && b.asset.id != null && b.asset.id.Contains(part)) n++;
+            }
+            return n;
         }
 
         public static void KingdomYear(Kingdom k, KProfile p, int yrs)
         {
-            if (p.Era < 1) return;
-            var flow = new Dictionary<string, float>();
-            float rate = TaxRate(k);
-            float taxes = 0f;
+            if (!GovEra.Has(k, GovEra.Works)) return;
+            if (!Coin(k))
+            {
+                Monument(k, yrs);
+                return;
+            }
+            float before = Gold(k);
+            float share = TaxShare(k), levy = LevyShare(k);
+            float income = 0f, local = 0f;
+            var taxes = new Dictionary<string, float>();
             foreach (City c in G.Cities(k))
             {
-                WorksCount cw = Works(c);
-                float r = rate * (1f + Math.Min(0.5f, cw.Market * 0.1f));
-                int amt = (int)(Economy.Amount(c, "gold") * r);
-                if (amt > 0 && Economy.Take(c, "gold", amt)) taxes += amt;
+                int g = Economy.Amount(c, "gold");
+                int last = Store.Int(c.data, KLast, g);
+                float gain = Math.Max(0, g - last);
+                int markets = Built(c, "market") + WorkCount(c, "market");
+                float mult = 1f + Math.Min(0.6f, markets * 0.15f);
+                int amt = (int)((gain * share + c.getPopulationPeople() * 0.02f * share * yrs) * mult);
+                amt = Economy.TakeUpTo(c, "gold", amt);
+                income += amt;
+                if (amt > 0) taxes["c" + c.data.id] = amt;
+                float troops = c == k.capital ? 0f : c.countWarriors() * (1f - levy);
+                int pay = (int)Math.Ceiling(troops * 0.5f * yrs);
+                int paid = Economy.TakeUpTo(c, "gold", pay);
+                local += paid;
+                Store.Put(c.data, KCityUnpaid, paid < pay ? Store.Int(c.data, KCityUnpaid, 0) + yrs : 0);
+                if (paid < pay && GovEra.Has(k, GovEra.Disband)) Disband(k, c, Math.Max(1, (int)(troops * 0.25f)));
+                Store.Put(c.data, KLast, Economy.Amount(c, "gold"));
             }
-            flow["taxes"] = taxes;
-            flow["companies"] = Companies.Of(k).Count * 3f * yrs;
-            flow["currency"] = Currency.Has(k) ? 5f * yrs + Reserve(k) * 0.02f : 0f;
-            float tribute = 0f;
-            foreach (Kingdom v in Diplomacy.DependentsOf(k)) tribute += 2f * Vassals.TributeMult(k) * Profile.Get(v).Cities;
-            flow["tribute"] = tribute * yrs;
-            float income = flow["taxes"] + flow["companies"] + flow["currency"] + flow["tribute"];
-            string fis = Laws.Get(k, "fiscal");
-            float soldiers = k.countTotalWarriors() * Pay(k) * yrs;
-            float court = p.Cities * (0.5f + Gov.Band(k) * 0.2f) * yrs * (fis == "court_first" ? 1.5f : fis == "reserve_first" ? 0.7f : 1f);
-            float res = Reserve(k) + income - court;
-            flow["court"] = -court;
-            if (res >= soldiers)
+            float gold = Gold(k) + income;
+            Dictionary<string, float> flow = Store.Map(k.data, KFlowCur);
+            foreach (var kv in taxes) flow["in_" + kv.Key] = kv.Value;
+            float court = income * 0.1f;
+            gold -= court;
+            flow["out_court"] = court;
+            flow["out_local"] = local;
+            if (GovEra.Has(k, GovEra.Guard))
             {
-                res -= soldiers;
-                flow["soldiers"] = -soldiers;
-                if (Unpaid(k) > 0) Store.Put(k.data, KUnpaid, 0);
+                int size = GuardSize(k);
+                float pay = size * 0.5f * yrs;
+                if (gold >= pay + Owed(k))
+                {
+                    gold -= pay + Owed(k);
+                    flow["out_guard"] = pay + Owed(k);
+                    if (Owed(k) > 0f) Note(k, Txt.T("civ_treas_note_paid"));
+                    Store.Put(k.data, KOwed, 0f);
+                    Store.Put(k.data, KUnpaidY, 0);
+                }
+                else
+                {
+                    float paid = Math.Max(0f, gold);
+                    flow["out_guard"] = paid;
+                    gold -= paid;
+                    float owed = Owed(k) + pay - paid;
+                    Store.Put(k.data, KOwed, owed);
+                    Store.Put(k.data, KUnpaidY, UnpaidYears(k) + yrs);
+                    if (UnpaidYears(k) <= yrs) Note(k, Txt.F("civ_treas_note_unpaid", (int)owed));
+                    Gov.Log("unpaid", k, G.Name(k), ((int)owed).ToString());
+                    if (GovEra.Has(k, GovEra.Disband) && k.capital != null) Disband(k, null, Math.Max(1, size / 4));
+                }
+                float reserve = pay * (p.AtWar ? 4f : 2f);
+                float surplus = gold - reserve;
+                float worksShare = Parl.Active(k) ? (Parl.Get(k, "spending") == 0 ? 1f : Parl.Get(k, "spending") == 1 ? 0.5f : 0f) : 0.5f;
+                if (surplus > 0f)
+                {
+                    float spent = FundWorks(k, surplus * worksShare, flow);
+                    gold -= spent;
+                    surplus -= spent;
+                    gold -= Arm(k, surplus * (1f - worksShare), flow);
+                }
             }
-            else
-            {
-                flow["soldiers"] = -Math.Max(0f, res);
-                res = 0f;
-                int u = Unpaid(k) + yrs;
-                Store.Put(k.data, KUnpaid, u);
-                Bonus.Dirty(k);
-                Desert(k, u);
-                Gov.Log("treasury_unpaid", k, G.Name(k), u.ToString());
-            }
-            float works = 0f;
-            float keep = fis == "reserve_first" ? 400f : 150f;
-            if ((fis == "works_first" && res > 60f) || res > keep * 2f) works = FundWorks(k, Math.Min(res * 0.3f, 200f));
-            res -= works;
-            flow["works"] = -works;
-            float arm = ArmyCommand.Spend(k, res, keep);
-            res -= arm;
-            flow["armament"] = -arm;
-            Store.Put(k.data, KRes, Math.Max(0f, res));
+            else gold -= FundWorks(k, gold * 0.5f, flow);
+            SetGold(k, gold);
+            Store.Put(k.data, KDelta, gold - before);
+            flow["saved"] = gold - before;
             Store.Map(k.data, KFlow, flow);
-            Note(k, "income", income);
-            Note(k, "spent", court + soldiers + works + arm);
+            Store.Put(k.data, KFlowCur, "");
             Bonus.Dirty(k);
         }
 
-        private static void Desert(Kingdom k, int unpaid)
+        private static void Monument(Kingdom k, int yrs)
         {
-            if (unpaid < 2) return;
-            int n = 0, max = Math.Max(1, k.countTotalWarriors() / 10);
-            foreach (Actor a in k.getUnits().ToList())
+            City cap = k.capital;
+            if (cap == null || WorkCount(cap, "statue") >= 3 || Economy.Amount(cap, "gold") < 150 || !G.Chance(0.15f * yrs)) return;
+            if (!Economy.Take(cap, "gold", 60)) return;
+            AddWork(k, cap, "statue");
+        }
+
+        private static void AddWork(Kingdom k, City c, string type)
+        {
+            Dictionary<string, float> w = Works(c);
+            Store.Add(w, type, 1f);
+            Store.Map(c.data, KWorks, w);
+            Note(k, Txt.F("civ_treas_note_works", Txt.T("civ_treas_work_" + type), G.Name(c)));
+            long fam = Fam.Holder(c, k);
+            if (fam != 0L && c != k.capital) Fam.Remember(fam, Fam.Royal(k), 10f);
+            if (G.Chance(0.3f)) Gov.Log("works", k, G.Name(k), Txt.T("civ_treas_work_" + type), G.Name(c), null, c);
+        }
+
+        private static float FundWorks(Kingdom k, float budget, Dictionary<string, float> flow)
+        {
+            float cost = 40f + GovEra.Of(k) * 5f;
+            if (budget < cost) return 0f;
+            List<City> cities = G.Cities(k);
+            if (cities.Count == 0) return 0f;
+            City pick = null;
+            string type = null;
+            bool threat = Profile.Get(k).AtWar;
+            if (threat)
             {
-                if (n >= max) break;
+                pick = cities.Where(c => WorkCount(c, "barracks") < 2 && c.neighbours_kingdoms != null && c.neighbours_kingdoms.Any(o => World.world.wars.isInWarWith(k, o))).FirstOrDefault();
+                type = "barracks";
+            }
+            if (pick == null)
+            {
+                pick = cities.Where(c => WorkCount(c, "temple") < 2 && c.getLoyalty(false) < 10).OrderBy(c => c.getLoyalty(false)).FirstOrDefault();
+                type = "temple";
+            }
+            if (pick == null)
+            {
+                pick = cities.Where(c => WorkCount(c, "market") < 2).OrderByDescending(c => c.getPopulationPeople()).FirstOrDefault();
+                type = "market";
+            }
+            if (pick == null && k.capital != null && WorkCount(k.capital, "statue") < 3)
+            {
+                pick = k.capital;
+                type = "statue";
+            }
+            if (pick == null) return 0f;
+            AddWork(k, pick, type);
+            Store.Add(flow, "out_works", cost);
+            return cost;
+        }
+
+        public static int MaxTier(Kingdom k)
+        {
+            return GovEra.Has(k, GovEra.Guard) ? Math.Min(6, 1 + (GovEra.Of(k) - GovEra.Guard) / 3) : 0;
+        }
+
+        private static float Arm(Kingdom k, float budget, Dictionary<string, float> flow)
+        {
+            int t = Tier(k);
+            if (t >= MaxTier(k)) return 0f;
+            float cost = 100f * (t + 1);
+            if (budget < cost) return 0f;
+            Store.Put(k.data, KTier, t + 1);
+            Store.Add(flow, "out_arms", cost);
+            Note(k, Txt.F("civ_treas_note_arms", t + 1));
+            return cost;
+        }
+
+        private static void Disband(Kingdom k, City c, int n)
+        {
+            foreach (Actor a in (c != null ? c.units : k.getUnits()).ToList())
+            {
+                if (n <= 0) break;
                 if (!G.Ok(a) || !a.isWarrior() || a.is_army_captain) continue;
                 a.setProfession(UnitProfession.Unit, true);
-                n++;
+                n--;
             }
         }
 
-        private static float FundWorks(Kingdom k, float budget)
+        public static bool LocalUnpaid(City c)
         {
-            if (budget < 20f) return 0f;
-            City c = G.Cities(k).Where(x => G.Ok(x)).OrderBy(x => x.buildings != null ? x.buildings.Count : 0).FirstOrDefault();
-            if (c == null) return 0f;
-            int amt = (int)budget;
-            Economy.Give(c, "gold", amt);
-            if (G.Chance(0.3f)) Gov.Log("treasury_works", k, G.Name(k), G.Name(c), amt.ToString(), null, c);
-            return amt;
-        }
-
-        public static float MandateShare(Kingdom k)
-        {
-            if (Unpaid(k) > 0) return -10f;
-            float upkeep = k.countTotalWarriors() * Pay(k) + Profile.Get(k).Cities;
-            return Reserve(k) > upkeep * 2f ? 5f : 0f;
+            return G.Ok(c) && Store.Int(c.data, KCityUnpaid, 0) > 0;
         }
 
         public static Dictionary<string, float> Effects(Kingdom k)
         {
             var fx = new Dictionary<string, float>();
-            if (!G.Ok(k) || !k.isCiv()) return fx;
-            if (Unpaid(k) > 0)
+            if (!Coin(k)) return fx;
+            int u = UnpaidYears(k);
+            if (u > 0) fx["attack"] = -Math.Min(25f, u * 8f);
+            int t = Tier(k);
+            if (t > 0)
             {
-                fx["attack"] = -0.12f;
-                fx["defense"] = -0.06f;
+                Store.Add(fx, "attack", t * 2f);
+                Store.Add(fx, "defense", t * 1.5f);
             }
-            WorksCount w = Works(k);
-            if (w.Market > 0) fx["trade"] = Math.Min(0.08f, w.Market * 0.01f);
-            if (w.Barracks > 0) Store.Add(fx, "attack", Math.Min(0.06f, w.Barracks * 0.01f));
-            if (w.Tower > 0) Store.Add(fx, "defense", Math.Min(0.06f, w.Tower * 0.01f));
-            if (w.Windmill > 0) Store.Add(fx, "prod", Math.Min(0.06f, w.Windmill * 0.01f));
+            int barracks = 0, statues = 0;
+            foreach (City c in G.Cities(k))
+            {
+                barracks += WorkCount(c, "barracks");
+                statues += WorkCount(c, "statue");
+            }
+            if (barracks > 0) Store.Add(fx, "attack", Math.Min(6f, barracks));
+            if (statues > 0) Store.Add(fx, "stability", Math.Min(4f, statues));
             return fx;
+        }
+
+        public static int CityLoyalty(City c)
+        {
+            if (!G.Ok(c) || c.kingdom == null || !Gov.On("civ_gov_treasury")) return 0;
+            int v = Math.Min(8, WorkCount(c, "temple") * 4);
+            if (LocalUnpaid(c)) v -= 6;
+            return v;
         }
 
         public static void Bankrupt(Kingdom k)
         {
             if (!G.Ok(k)) return;
-            Store.Put(k.data, KRes, 0f);
-            Store.Put(k.data, KUnpaid, Math.Max(1, Unpaid(k)));
+            SetGold(k, 0f);
+            Store.Put(k.data, KOwed, Math.Max(Owed(k), GuardSize(k) * 0.5f + 1f));
+            Store.Put(k.data, KUnpaidY, Math.Max(1, UnpaidYears(k)));
+            Note(k, Txt.F("civ_treas_note_unpaid", (int)Owed(k)));
             Bonus.Dirty(k);
-            Gov.Log("treasury_unpaid", k, G.Name(k), Unpaid(k).ToString());
-        }
-
-        public static void SetReserve(Kingdom k, float v)
-        {
-            if (G.Ok(k)) Store.Put(k.data, KRes, Math.Max(0f, v));
         }
     }
 }

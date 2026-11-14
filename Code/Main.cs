@@ -157,6 +157,8 @@ namespace Civilizations
             Sim.Update();
             Hud.Tick();
             ControlHud.Tick();
+            global::Civilizations.Tab.Tick();
+            Safe("skin", Skin.Tick);
             Safe("fog-view", Fog.Frame);
             CivProfiler.Frame();
         }

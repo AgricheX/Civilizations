@@ -9,41 +9,71 @@ namespace Civilizations
     internal static class GovHooks
     {
         private static bool _done;
-        private static Kingdom _plateK;
-        private static Alliance _plateA;
+        private static Kingdom _plate;
+        private static readonly List<string> _legacy = new List<string>();
+
+        public static void Legacy()
+        {
+            var groups = new Dictionary<string, string[]>
+            {
+                { "civ_tg_phase", new[] { "civ_ph_renewal", "civ_ph_peak", "civ_ph_decline", "civ_ph_collapse" } },
+                { "civ_tg_vassal", new[] { "civ_vs_0", "civ_vs_1", "civ_vs_2", "civ_vs_3" } },
+                { "civ_tg_regime", new[] { "civ_rgt_feudal", "civ_rgt_absolutist", "civ_rgt_militarist", "civ_rgt_confessional", "civ_rgt_bureaucratic", "civ_rgt_federal", "civ_rgt_expansionist", "civ_rgt_isolationist", "civ_rgt_mercantile" } }
+            };
+            foreach (var g in groups)
+            {
+                if (AssetManager.kingdoms_traits_groups.get(g.Key) == null) AssetManager.kingdoms_traits_groups.add(new KingdomTraitGroupAsset { id = g.Key, name = g.Key, color = "#888888" });
+                foreach (string id in g.Value)
+                {
+                    _legacy.Add(id);
+                    if (AssetManager.kingdoms_traits.get(id) != null) continue;
+                    AssetManager.kingdoms_traits.add(new KingdomTrait
+                    {
+                        id = id,
+                        group_id = g.Key,
+                        spawn_random_trait_allowed = false,
+                        needs_to_be_explored = false,
+                        special_locale_id = id,
+                        special_locale_description = id + "_d",
+                        special_locale_description_2 = id + "_d2",
+                        path_icon = "ui/Icons/civ/pol/legacy",
+                        base_stats = new BaseStats(),
+                        can_be_in_book = false
+                    });
+                }
+            }
+        }
+
+        public static void Strip(Kingdom k)
+        {
+            foreach (string id in _legacy) if (k.hasTrait(id)) k.removeTrait(id);
+        }
 
         public static void InitAssets()
         {
             if (_done) return;
             _done = true;
-            Loyalty("civ_mandate", c => Mandate.Loyalty(c));
-            Loyalty("civ_decree", c => Gov.On("civ_gov_parliament") ? Parliament.DecreePenalty(c) : 0);
-            Loyalty("civ_clan_seat", c => Gov.On("civ_gov_parliament") ? Parliament.ClanLoyalty(c) : 0);
-            Loyalty("civ_temples", c => Treasury.TempleLoyalty(c));
-            Loyalty("civ_unpaid", c => c != null && c.kingdom != null && Gov.On("civ_gov_treasury") && Treasury.Unpaid(c.kingdom) > 0 ? -10 : 0);
-            if (AssetManager.opinion_library.get("civ_alliance_bond") == null)
+            Loyalty("civ_g2_mandate", Mandate.Loyalty);
+            Loyalty("civ_g2_policies", Parl.CityLoyalty);
+            Loyalty("civ_g2_treasury", Treasury.CityLoyalty);
+            if (AssetManager.opinion_library.get("civ_g2_vassal") == null)
             {
                 AssetManager.opinion_library.add(new OpinionAsset
                 {
-                    id = "civ_alliance_bond",
-                    translation_key = "opinion_civ_alliance_bond",
-                    translation_key_negative = "opinion_civ_alliance_bond_bad",
-                    calc = delegate(Kingdom a, Kingdom b) { return a == null || b == null || a == b ? 0 : AllianceLife.Opinion(a, b); }
-                });
-            }
-            if (AssetManager.opinion_library.get("civ_vassal_bond") == null)
-            {
-                AssetManager.opinion_library.add(new OpinionAsset
-                {
-                    id = "civ_vassal_bond",
-                    translation_key = "opinion_civ_vassal_bond",
-                    translation_key_negative = "opinion_civ_vassal_bond_bad",
+                    id = "civ_g2_vassal",
+                    translation_key = "opinion_civ_g2_vassal",
+                    translation_key_negative = "opinion_civ_g2_vassal_bad",
                     calc = delegate(Kingdom a, Kingdom b)
                     {
-                        if (a == null || b == null || a == b || !Gov.On("civ_gov_vassals")) return 0;
-                        if (Diplomacy.Overlord(a) == b) return (int)((Vassals.Integration(a) - 50f) / 2.5f);
-                        if (Diplomacy.Overlord(b) == a) return 5;
-                        return 0;
+                        if (a == null || b == null || a == b) return 0;
+                        try
+                        {
+                            return Vassals.Opinion(a, b);
+                        }
+                        catch (Exception)
+                        {
+                            return 0;
+                        }
                     }
                 });
             }
@@ -81,59 +111,37 @@ namespace Civilizations
         public static void KingdomTip(Tooltip t, Kingdom k)
         {
             if (!G.Ok(k) || !k.isCiv() || KingdomUi.Hidden(k)) return;
-            Line(t, "civ_tip_regime", Laws.Regime(k), "#FFD27A");
-            if (k.hasKing()) Line(t, "civ_tip_ruler", Gov.RulerName(k));
-            if (Gov.On("civ_gov_cycle") && Statecraft.Phase(k) >= 0) Line(t, "civ_tip_mandate", Txt.T("civ_phase_" + Statecraft.Phases[Statecraft.Phase(k)]) + " " + (int)Mandate.Get(k), Mandate.Get(k) >= 50f ? "#8CF07A" : "#FF9A6A");
-            if (Parliament.Active(k) && Profile.Get(k).Era >= 3 && Parliament.Total(k) > 0) Line(t, "civ_tip_council", Gov.Council(k) + " " + G.Pct(Parliament.RoyalShare(k)));
+            Line(t, "civ_gov_tip_form", Gov.FormName(k) + " · " + Parl.Regime(k), "#FFD27A");
+            if (k.hasKing()) Line(t, "civ_gov_tip_ruler", Gov.RulerName(k));
+            if (Mandate.Active(k)) Line(t, "civ_gov_tip_mandate", Mandate.PhaseName(Mandate.Phase(k)) + " " + (int)Mandate.Get(k), Mandate.Get(k) >= 50f ? "#8CF07A" : "#FF9A6A");
             Kingdom lord = Diplomacy.Overlord(k);
-            if (G.Ok(lord)) Line(t, "civ_tip_bond", Vassals.BondName(k) + " · " + G.Name(lord) + " · " + (int)Vassals.Integration(k), "#9AC8E8");
+            if (G.Ok(lord)) Line(t, "civ_gov_tip_lord", G.Name(lord) + " · " + Vassals.StateName(Vassals.State(k)), "#9AC8E8");
             int deps = Diplomacy.DependentsOf(k).Count;
-            if (deps > 0) Line(t, "civ_tip_vassals", deps.ToString(), "#9AC8E8");
-            Alliance a = AllianceLife.Of(k);
-            if (a != null && Gov.On("civ_gov_alliances")) Line(t, "civ_tip_alliance", AllianceLife.Label(a) + " · " + (int)AllianceLife.Cohesion(a));
-            if (Gov.On("civ_gov_treasury")) Line(t, "civ_tip_treasury", ((int)Treasury.Reserve(k)).ToString() + (Treasury.Unpaid(k) > 0 ? " !" : ""), Treasury.Unpaid(k) > 0 ? "#FF7A6A" : "#FFD25C");
+            if (deps > 0) Line(t, "civ_gov_tip_vassals", deps.ToString(), "#9AC8E8");
+            if (Treasury.Coin(k)) Line(t, "civ_gov_tip_treasury", ((int)Treasury.Gold(k)).ToString() + (Treasury.Owed(k) > 0f ? " !" : ""), Treasury.Owed(k) > 0f ? "#FF7A6A" : "#FFD25C");
         }
 
         public static void CityTip(Tooltip t, City c)
         {
             if (!G.Ok(c) || c.kingdom == null || !c.kingdom.isCiv() || KingdomUi.Hidden(c.kingdom)) return;
-            if (Parliament.Active(c.kingdom) && Profile.Get(c.kingdom).Era >= 3)
+            if (Parl.Active(c.kingdom) && GovEra.Has(c.kingdom, GovEra.Nobles))
             {
-                long h = Parliament.Holder(c, c.kingdom);
-                Line(t, "civ_tip_seats", Parliament.SeatsFor(c) + " · " + Gov.ClanName(h));
-                if (h != 0L) Line(t, "civ_tip_faction", Parliament.FactionOf(c.kingdom, h));
-                int dp = Parliament.DecreePenalty(c);
-                if (dp != 0) Line(t, "civ_tip_decree", dp.ToString(), "#FF7A6A");
+                long h = Fam.Holder(c, c.kingdom);
+                Line(t, "civ_gov_tip_seats", Fam.SeatsOf(c) + " · " + Fam.Name(h));
             }
-            if (Gov.On("civ_gov_treasury"))
-            {
-                WorksCount w = Treasury.Works(c);
-                int n = w.Market + w.Temple + w.Barracks + w.Tower + w.Statue + w.Windmill;
-                if (n > 0) Line(t, "civ_tip_works", n.ToString());
-            }
+            var w = Treasury.Works(c);
+            if (w.Count > 0) Line(t, "civ_gov_tip_works", string.Join(", ", w.Select(x => Txt.T("civ_treas_work_" + x.Key) + " ×" + (int)x.Value).ToArray()));
+            if (Treasury.LocalUnpaid(c)) Line(t, "civ_gov_tip_unpaid", Txt.T("civ_yes"), "#FF7A6A");
         }
 
         public static void WarTip(Tooltip t, global::War w)
         {
             if (w == null || w.data == null || w.hasEnded()) return;
             float s = Statecraft.Score(w);
-            Line(t, "civ_tip_warscore", G.Signed(s), s >= 0 ? "#8CF07A" : "#FF7A6A");
+            string lead = Math.Abs(s) < 15f ? Txt.T("civ_war_stalemate") : Txt.F(s > 0 ? "civ_war_att_ahead" : "civ_war_def_ahead", (int)Math.Abs(s));
+            Line(t, "civ_gov_tip_score", lead, s >= 0 ? "#8CF07A" : "#FF7A6A");
             int age = Statecraft.WarAge(w);
-            Line(t, "civ_tip_talks", age >= 3 ? Txt.T("civ_talks_open") : Txt.F("civ_talks_in", 3 - age));
-            string goal = WarGoals.Get(w);
-            if (!string.IsNullOrEmpty(goal)) Line(t, "civ_tip_goal", Txt.T("civ_goal_" + goal));
-        }
-
-        public static void AllianceTip(Tooltip t, Alliance a)
-        {
-            if (a == null || a.data == null || !Gov.On("civ_gov_alliances")) return;
-            Line(t, "civ_tip_altype", AllianceLife.Label(a), "#FFD27A");
-            float c = AllianceLife.Cohesion(a);
-            Line(t, "civ_tip_cohesion", ((int)c).ToString(), c >= 50f ? "#8CF07A" : c >= 25f ? "#FFD25C" : "#FF7A6A");
-            Kingdom lead = AllianceLife.Leader(a);
-            if (lead != null) Line(t, "civ_tip_alleader", G.Name(lead));
-            string why = AllianceLife.Reason(a);
-            if (why.Length > 0) Line(t, "civ_tip_alreason", Txt.T("civ_alwhy_" + why));
+            Line(t, "civ_gov_tip_talks", age >= 3 ? Txt.T("civ_war_talks_open") : Txt.F("civ_war_talks_in", 3 - age));
         }
 
         [HarmonyPatch(typeof(TooltipLibrary), nameof(TooltipLibrary.showKingdom))]
@@ -166,41 +174,17 @@ namespace Civilizations
             }
         }
 
-        [HarmonyPatch(typeof(TooltipLibrary), nameof(TooltipLibrary.showAlliance))]
-        private static class TipAlliance
-        {
-            private static void Postfix(Tooltip pTooltip, TooltipData pData)
-            {
-                if (pData == null) return;
-                CivMod.Safe("tip-alliance", () => AllianceTip(pTooltip, pData.alliance));
-            }
-        }
-
         [HarmonyPatch(typeof(NameplateText), nameof(NameplateText.showTextKingdom))]
         private static class PlateKingdom
         {
             private static void Prefix(Kingdom pMetaObject)
             {
-                _plateK = pMetaObject;
+                _plate = pMetaObject;
             }
 
             private static void Postfix()
             {
-                _plateK = null;
-            }
-        }
-
-        [HarmonyPatch(typeof(NameplateText), nameof(NameplateText.showTextAlliance))]
-        private static class PlateAlliance
-        {
-            private static void Prefix(Alliance pMetaObject)
-            {
-                _plateA = pMetaObject;
-            }
-
-            private static void Postfix()
-            {
-                _plateA = null;
+                _plate = null;
             }
         }
 
@@ -211,16 +195,7 @@ namespace Civilizations
             {
                 try
                 {
-                    if (_plateK != null && Gov.On("civ_gov_names") && G.Ok(_plateK) && _plateK.isCiv() && !KingdomUi.Hidden(_plateK))
-                    {
-                        string gov = Txt.T("civ_p_" + Policies.Id(_plateK, "gov"));
-                        if (!string.IsNullOrEmpty(gov)) pNewText = pNewText + " · " + gov;
-                    }
-                    else if (_plateA != null && Gov.On("civ_gov_alliances"))
-                    {
-                        string l = AllianceLife.Label(_plateA);
-                        if (l.Length > 0) pNewText = pNewText + " · " + l;
-                    }
+                    if (_plate != null && Gov.On("civ_gov_names") && G.Ok(_plate) && _plate.isCiv() && !KingdomUi.Hidden(_plate) && GovEra.Has(_plate, GovEra.Nobles)) pNewText = pNewText + " · " + Gov.FormName(_plate);
                 }
                 catch (Exception)
                 {

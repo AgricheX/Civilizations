@@ -16,6 +16,7 @@ namespace Civilizations
         public float Hostility;
         public string[] SylA;
         public string[] SylB;
+        public bool Folk;
     }
 
     internal static class CosmosLife
@@ -34,7 +35,61 @@ namespace Civilizations
             K("hive", "hive", "arid,jungle,terran", "hive_mind", "militarism,cosmism", "planned", 1.25f, 0.6f, "zz,kir,vra,ch,xa,tik", "zz,ix,ra,ek"),
             K("machine", "machine", "machine,barren,asteroid", "ai_technocracy,technocracy", "transhumanism,authoritarianism", "planned,post_scarcity", 1.4f, 0.55f, "unit,zer,ax,kor,vex,ion", "-0,-1,-9,on"),
             K("energy", "energy", "gas_giant,volcanic,crystal", "distributed_consciousness,cosmic_theocracy", "cosmism,transhumanism", "post_scarcity", 0.5f, 0.3f, "ael,lum,syr,phae,iri,ora", "ae,is,yn,ar"),
+            F("human", "terran,arid,jungle,ocean", 1.05f, 0.35f, "ar,bel,cor,dan,el,mar,tor,val", "ia,on,or,heim,mar,ton"),
+            F("elf", "terran,jungle,crystal,fungal", 0.85f, 0.2f, "ael,ith,lor,syl,thal,ery,nar", "iel,wen,dor,ae,ath"),
+            F("dwarf", "barren,ice,volcanic,crystal", 0.9f, 0.3f, "bor,dur,gim,kaz,thr,mor,dun", "grim,dun,ak,in,heim"),
+            F("orc", "arid,volcanic,swamp,barren", 1.1f, 0.6f, "gor,ur,mag,dak,gru,zug,kra", "ok,ak,ash,uk,gul"),
         };
+
+        private static AlienKind F(string id, string homes, float pace, float host, string a, string b)
+        {
+            return new AlienKind { Id = id, Life = "carbon", Homes = homes.Split(','), Govs = new string[0], Ideos = new[] { "traditionalism", "religious_zeal", "humanism", "nationalism", "militarism", "liberalism" }, Econs = new string[0], Pace = pace, Hostility = host, SylA = a.Split(','), SylB = b.Split(','), Folk = true };
+        }
+
+        private static readonly string[][] EraGovs =
+        {
+            new[] { "tribal_band", "chiefdom", "tribal_council" },
+            new[] { "chiefdom", "monarchy", "theocracy" },
+            new[] { "monarchy", "feudal_monarchy", "republic", "theocracy", "elective_monarchy" },
+            new[] { "absolute_monarchy", "merchant_republic", "constitutional_monarchy", "elective_monarchy" },
+            new[] { "constitutional_monarchy", "presidential_republic", "parliamentary_republic", "single_party_state", "military_junta" },
+            new[] { "democracy", "technocracy", "corporatocracy", "parliamentary_republic" },
+            new[] { "planetary_federation", "stellar_empire", "interstellar_republic", "ai_technocracy" }
+        };
+
+        private static readonly string[][] EraEcons =
+        {
+            new[] { "reciprocity" },
+            new[] { "palace_economy", "tributary" },
+            new[] { "manorialism", "guild_economy", "tributary" },
+            new[] { "mercantilism", "guild_economy" },
+            new[] { "laissez_faire", "planned", "mixed_economy", "welfare" },
+            new[] { "digital_economy", "corporatist", "mixed_economy" },
+            new[] { "post_scarcity", "galactic_market" }
+        };
+
+        private static int Band(int era)
+        {
+            return era <= 2 ? 0 : era <= 5 ? 1 : era <= 7 ? 2 : era <= 9 ? 3 : era <= 12 ? 4 : era <= 14 ? 5 : 6;
+        }
+
+        public static string EraGov(int era, Random r)
+        {
+            string[] o = EraGovs[Band(era)];
+            return o[r.Next(0, o.Length)];
+        }
+
+        public static string EraEcon(int era, Random r)
+        {
+            string[] o = EraEcons[Band(era)];
+            return o[r.Next(0, o.Length)];
+        }
+
+        public static List<AlienKind> Pool()
+        {
+            if (CivMod.C != null && !CivMod.C.NpcFolk) return Kinds.Where(k => !k.Folk).ToList();
+            return Kinds;
+        }
 
         private static AlienKind K(string id, string life, string homes, string govs, string ideos, string econs, float pace, float host, string a, string b)
         {
@@ -111,7 +166,8 @@ namespace Civilizations
                     if (!Cosmos.St.Ruins.Contains(b.Path)) Cosmos.St.Ruins.Add(b.Path);
                 }
                 if (Cosmos.St.Polities.Count >= MaxPolities || r.NextDouble() >= chance) continue;
-                AlienKind kind = Kinds[r.Next(0, Kinds.Count)];
+                List<AlienKind> pool = Pool();
+                AlienKind kind = pool[r.Next(0, pool.Count)];
                 CNode home = bodies.OrderByDescending(b => (Array.IndexOf(kind.Homes, b.Sub) >= 0 ? 2.0 : 0.0) + b.Hab + r.NextDouble() * 0.3).First();
                 if (Cosmos.OwnerExact(home.Path) != null) continue;
                 Spawn(kind, home, r);
@@ -142,9 +198,9 @@ namespace Civilizations
             Polity p = Cosmos.NewPolity(null, "alien", home.Path, Name(kind, r));
             p.Species = kind.Id;
             p.Era = era;
-            p.Gov = era < 4 ? "tribal_council" : kind.Govs[r.Next(0, kind.Govs.Length)];
+            p.Gov = kind.Folk || kind.Govs.Length == 0 ? EraGov(era, r) : era < 4 ? "tribal_council" : kind.Govs[r.Next(0, kind.Govs.Length)];
             p.Ideo = kind.Ideos[r.Next(0, kind.Ideos.Length)];
-            p.Econ = kind.Econs[r.Next(0, kind.Econs.Length)];
+            p.Econ = kind.Folk || kind.Econs.Length == 0 ? EraEcon(era, r) : kind.Econs[r.Next(0, kind.Econs.Length)];
             p.Pace = kind.Pace;
             p.Pop = 0.5f + (float)r.NextDouble() * (era >= 15 ? 40f : 6f);
             p.Stance = stance.Length > 0 ? stance : r.NextDouble() < kind.Hostility ? "wary" : "open";

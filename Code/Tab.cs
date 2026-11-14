@@ -100,6 +100,11 @@ namespace Civilizations
                 }
                 Relayout();
                 Biomes.Ui();
+                CivMod.Safe("skin-tabs", () =>
+                {
+                    if (_main != null) Skin.Apply(_main.gameObject);
+                    if (SandboxTab != null) Skin.Apply(SandboxTab.gameObject);
+                });
             }
             catch (Exception e)
             {
@@ -247,8 +252,21 @@ namespace Civilizations
             if (g.Line != null) g.Line.SetActive(on);
         }
 
+        private static bool _pending;
+        private static float _relay;
+        private static int _tries;
+
+        public static void Tick()
+        {
+            if (!_pending || _tries > 40 || Time.unscaledTime < _relay) return;
+            _relay = Time.unscaledTime + 0.5f;
+            _tries++;
+            Relayout();
+        }
+
         public static void Relayout()
         {
+            _pending = false;
             var tabs = new HashSet<PowersTab>();
             foreach (TabGroup g in _order) if (g.Tab != null) tabs.Add(g.Tab);
             foreach (PowersTab t in tabs)
@@ -256,12 +274,19 @@ namespace Civilizations
                 try
                 {
                     t.sortButtons();
+                    if (t.parentObj == null || PowerTabController.instance == null)
+                    {
+                        _pending = true;
+                        continue;
+                    }
+                    t._power_buttons.RemoveAll(b => b == null);
                     t.setNewWidth();
                     t.findNeighbours(true);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning("[Civilizations] tab layout: " + e.Message);
+                    _pending = true;
+                    if (_tries > 40) Debug.LogWarning("[Civilizations] tab layout: " + e.Message);
                 }
             }
         }

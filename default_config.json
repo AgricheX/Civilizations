@@ -217,9 +217,9 @@
       "BoolVal": true
     },
     {
-      "Id": "civ_gov_alliances",
+      "Id": "civ_gov_elections",
       "Type": "SWITCH",
-      "IconPath": "ui/Icons/civ/cfg/alliances",
+      "IconPath": "ui/Icons/civ/pol/cfg_elections",
       "BoolVal": true
     },
     {
@@ -252,6 +252,18 @@
       "Id": "civ_era_skins",
       "Type": "SWITCH",
       "IconPath": "ui/Icons/civ/cfg/era_skins",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_skin",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/btn/config",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_skin_era",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/btn/config",
       "BoolVal": true
     },
     {
@@ -395,6 +407,18 @@
       "Type": "SWITCH",
       "IconPath": "ui/Icons/civ/cfg/ending",
       "BoolVal": false
+    },
+    {
+      "Id": "civ_npc_planets",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cos/body_terran",
+      "BoolVal": true
+    },
+    {
+      "Id": "civ_npc_folk",
+      "Type": "SWITCH",
+      "IconPath": "ui/Icons/civ/cos/body_terran",
+      "BoolVal": true
     }
   ],
   "CivCities": [

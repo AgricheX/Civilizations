@@ -35,9 +35,13 @@ namespace Civilizations
             Open();
         }
 
+        private static float _zoom = 1f;
+
         protected override void Init()
         {
             UiKit.Setup(ContentTransform);
+            Vector2 size = WinSize.Set(BackgroundTransform, ContentTransform, 520f, 460f);
+            _zoom = Mathf.Max(1f, Mathf.Floor((size.x - 40f) / CosmosArt.W * 4f) / 4f);
         }
 
         public override void OnNormalEnable()
@@ -193,13 +197,13 @@ namespace Civilizations
             Release();
             CosView v = CosmosArt.Render(n);
             _last = v.Sprite;
-            RectTransform box = UiKit.Box(c, "View", CosmosArt.H + 4f);
-            UiKit.Img(box, v.Sprite, new Vector2(CosmosArt.W, CosmosArt.H), Vector2.zero);
+            RectTransform box = UiKit.Box(c, "View", CosmosArt.H * _zoom + 4f, CosmosArt.W * _zoom + 4f);
+            UiKit.Img(box, v.Sprite, new Vector2(CosmosArt.W * _zoom, CosmosArt.H * _zoom), Vector2.zero);
             foreach (var kv in v.Spots)
             {
                 CNode child = kv.Key;
-                float x = kv.Value.x - CosmosArt.W / 2f, y = CosmosArt.H / 2f - kv.Value.y;
-                SimpleButton b = UiKit.Btn(box, null, null, () => Go(child.Path), new Vector2(12f, 12f), new Vector2(x, y), child.Name, Tip(child));
+                float x = (kv.Value.x - CosmosArt.W / 2f) * _zoom, y = (CosmosArt.H / 2f - kv.Value.y) * _zoom;
+                SimpleButton b = UiKit.Btn(box, null, null, () => Go(child.Path), new Vector2(12f * _zoom, 12f * _zoom), new Vector2(x, y), child.Name, Tip(child));
                 b.Background.color = new Color(1f, 1f, 1f, 0f);
                 if (b.Icon != null) b.Icon.enabled = false;
                 if (b.Text != null) b.Text.enabled = false;
@@ -243,7 +247,7 @@ namespace Civilizations
             {
                 UiKit.Header(c, p.Name, UiKit.Hex(p.Color));
                 Kingdom k = p.King != 0 ? Cosmos.KingOf(p.King) : null;
-                UiKit.Stat(c, null, Txt.T("cos_kind"), Txt.T("cos_kind_" + p.Kind));
+                UiKit.Stat(c, null, Txt.T("cos_kind"), Txt.T(p.Kind == "alien" && CosmosLife.KindOf(p.Species) != null && CosmosLife.KindOf(p.Species).Folk ? "cos_kind_folk" : "cos_kind_" + p.Kind));
                 if (G.Ok(k)) UiKit.Stat(c, null, Txt.T("cos_parent"), G.Name(k), UiKit.Gold);
                 if (p.Species.Length > 0) UiKit.Stat(c, null, Txt.T("cos_species"), Txt.Has("cos_species_" + p.Species) ? Txt.T("cos_species_" + p.Species) : p.Species);
                 UiKit.Stat(c, null, Txt.T("cos_population"), Pop(p.Pop));

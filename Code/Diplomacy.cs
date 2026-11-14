@@ -330,7 +330,12 @@ namespace Civilizations
                 if (k == null || lord == null || k.capital == null || lord.capital == null) continue;
                 float share = d.Kind == "tributary" ? 0.12f : d.Kind == "colony" ? 0.15f : d.Kind == "vassal" ? 0.1f : d.Kind == "associated" ? 0.02f : 0.06f;
                 int gold = (int)(Economy.Amount(k.capital, "gold") * share * Vassals.TributeMult(lord));
-                if (gold > 0 && Economy.Take(k.capital, "gold", gold)) Economy.Give(lord.capital, "gold", gold);
+                Vassals.Tribute(k, 0);
+                if (gold > 0 && Economy.Take(k.capital, "gold", gold))
+                {
+                    Vassals.Tribute(k, gold);
+                    Treasury.Receive(lord, gold, "tribute");
+                }
             }
             foreach (Treaty t in _treaties)
             {

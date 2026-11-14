@@ -459,13 +459,8 @@ namespace Civilizations
         public static float Support(Kingdom k, string id)
         {
             PolicyDef p = Db.Policy(id);
-            LawDef l = p == null ? Laws.Law(id) : null;
-            string group = p != null ? p.Group : l != null ? l.Group : null;
-            if (group == null || !G.Ok(k)) return 1f;
-            if (Parliament.Active(k) && Parliament.Total(k) > 0) return Parliament.Support(k, group, id);
-            float target = Politics.Stability(k);
-            float[] pos = Laws.Pos(group, id), cur = Laws.Pos(group, Laws.Current(k, group));
-            return G.Clamp(0.5f + (target - 0.5f) * 0.4f - (Math.Abs(pos[0] - cur[0]) + Math.Abs(pos[1] - cur[1])) * 0.1f, 0f, 1f);
+            if (p == null || !G.Ok(k)) return 1f;
+            return Parl.Support(k, p.Group, id);
         }
 
         public static bool Blocked(Kingdom k)

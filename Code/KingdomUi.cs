@@ -190,8 +190,6 @@ namespace Civilizations
             if (rails > 0) Row(box, "civ_row_rails", rails.ToString(), "#C9A05A", "civ/world/rail", Txt.T("civ_row_rails"), Txt.T("civ_row_rails_d"));
         }
 
-        private static GameObject _btn;
-
         private static string PathTo(Transform root, Transform t)
         {
             var parts = new List<string>();
@@ -203,39 +201,43 @@ namespace Civilizations
             return string.Join("/", parts.ToArray());
         }
 
-        private static readonly string[][] TabDefs =
-        {
-            new[] { "CivTech", "ui/Icons/civ/btn/tech", "civ_tech Title", "civ_btn_tech_d" },
-            new[] { "CivState", "ui/Icons/civ/btn/state", "civ_state Title", "civ_btn_state_d" },
-            new[] { "CivParliament", "ui/Icons/civ/btn/parliament", "civ_parliament Title", "civ_btn_parliament_d" },
-            new[] { "CivElections", "ui/Icons/civ/btn/elections", "civ_elections Title", "civ_btn_elections_d" },
-            new[] { "CivTreasury", "ui/Icons/civ/btn/treasury", "civ_treasury Title", "civ_btn_treasury_d" },
-            new[] { "CivEcon", "ui/Icons/civ/btn/econ", "civ_econ Title", "civ_btn_econ_d" },
-            new[] { "CivNet", "ui/Icons/civ/btn/net", "civ_net Title", "civ_btn_net_d" },
-            new[] { "CivControl", "ui/Icons/civ/btn/control", "civ_control Title", "civ_btn_control_d" }
-        };
+        private static readonly List<KeyValuePair<string, GameObject>> _tabs = new List<KeyValuePair<string, GameObject>>();
+        private static readonly Dictionary<GameObject, GameObject> _spacer = new Dictionary<GameObject, GameObject>();
+        private static RectTransform _bar;
+        private static float _barTop;
+        private static float _barH;
+        private static bool _built;
 
-        private static UnityEngine.Events.UnityAction TabAction(string name)
+        private static string[] TabIds()
         {
-            switch (name)
-            {
-                case "CivTech": return () => WinTech.Open(SelectedMetas.selected_kingdom);
-                case "CivState": return () => WinState.Open(SelectedMetas.selected_kingdom);
-                case "CivParliament": return () => WinParliament.Open(SelectedMetas.selected_kingdom);
-                case "CivElections": return () => WinElections.Open(SelectedMetas.selected_kingdom);
-                case "CivTreasury": return () => WinTreasury.Open(SelectedMetas.selected_kingdom);
-                case "CivEcon": return WinEcon.Open;
-                case "CivNet": return WinNet.Open;
-                case "CivControl": return () => WinControl.Open(SelectedMetas.selected_kingdom);
-            }
-            return () => { };
+            var l = new List<string>(GovKit.TabIds);
+            l.Add("civ");
+            return l.ToArray();
+        }
+
+        private static bool Spacer(Transform t)
+        {
+            return t != null && t.gameObject.activeSelf && t.GetComponent<UnityEngine.UI.Button>() == null && t.name.StartsWith("space", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static float Top(RectTransform r)
+        {
+            var c = new Vector3[4];
+            r.GetWorldCorners(c);
+            return r.parent != null ? r.parent.InverseTransformPoint(c[1]).y : c[1].y;
+        }
+
+        private static float Extent(RectTransform r)
+        {
+            float h = UnityEngine.UI.LayoutUtility.GetPreferredHeight(r);
+            return h > 1f ? h : r.rect.height;
         }
 
         private static bool TabBar(KingdomWindow w)
         {
             Transform tabs = w.transform.Find("Background/Tabs");
             if (tabs == null) return false;
-            if (tabs.Find("CivTech") != null) return true;
+            if (tabs.Find("CivTab_civ") != null) return true;
             Transform template = tabs.Find("Villages");
             if (template == null)
             {
@@ -251,21 +253,68 @@ namespace Civilizations
             if (template == null) return false;
             UnityEngine.UI.Button src = template.GetComponent<UnityEngine.UI.Button>();
             if (src == null) return false;
+            _bar = (RectTransform)tabs;
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(_bar);
+            _barTop = Top(_bar);
+            _barH = Extent(_bar);
+            var gaps = new List<Transform>();
+            foreach (Transform t in tabs) if (Spacer(t)) gaps.Add(t);
+            bool layout = tabs.GetComponent<UnityEngine.UI.LayoutGroup>() != null;
             string iconPath = template.Find("Icon") != null ? "Icon" : "";
-            GameObject first = null;
-            foreach (string[] d in TabDefs)
+            int gi = 0;
+            foreach (string id in TabIds())
             {
-                GameObject go = Clone(src, tabs, iconPath, d[1], d[2], d[3], TabAction(d[0]));
-                go.name = d[0];
+                string tid = id;
+                GameObject go = Clone(src, tabs, iconPath, GovKit.Pol("tab_" + id), "civ_gov_tab_" + id, "civ_gov_tab_" + id + "_d", () => GovKit.Open(tid, SelectedMetas.selected_kingdom));
+                go.name = "CivTab_" + id;
                 UnityEngine.UI.Image bg = go.GetComponent<UnityEngine.UI.Image>();
                 Sprite vs = UiKit.S("ui/tab_button_vertical");
                 if (bg != null && vs != null) bg.sprite = vs;
-                go.transform.SetAsLastSibling();
-                if (first == null) first = go;
+                if (gi < gaps.Count)
+                {
+                    Transform gap = gaps[gi++];
+                    go.transform.SetSiblingIndex(gap.GetSiblingIndex());
+                    if (!layout) go.transform.localPosition = gap.localPosition;
+                    gap.gameObject.SetActive(false);
+                    _spacer[go] = gap.gameObject;
+                }
+                else go.transform.SetAsLastSibling();
+                Skin.Apply(go);
+                _tabs.Add(new KeyValuePair<string, GameObject>(id, go));
             }
-            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)tabs);
-            _btn = first;
+            _built = true;
             return true;
+        }
+
+        private static void Fit()
+        {
+            if (_bar == null) return;
+            _bar.localScale = Vector3.one;
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(_bar);
+            float h = Extent(_bar);
+            float f = h > _barH + 0.5f && h > 1f ? _barH / h : 1f;
+            _bar.localScale = new Vector3(f, f, 1f);
+            float shift = _barTop - Top(_bar);
+            _bar.localPosition += new Vector3(0f, shift, 0f);
+        }
+
+        private static void Refresh(Kingdom k)
+        {
+            if (!_built) return;
+            bool any = false;
+            foreach (var kv in _tabs)
+            {
+                if (kv.Value == null) continue;
+                bool show = G.Ok(k) && k.isCiv() && !Hidden(k) && (kv.Key == "civ" || GovKit.TabShown(kv.Key, k));
+                if (kv.Value.activeSelf != show)
+                {
+                    kv.Value.SetActive(show);
+                    GameObject gap;
+                    if (_spacer.TryGetValue(kv.Value, out gap) && gap != null) gap.SetActive(!show);
+                    any = true;
+                }
+            }
+            if (any || _bar != null) Fit();
         }
 
         private static bool CloneTabs(KingdomWindow w)
@@ -289,15 +338,18 @@ namespace Civilizations
             bool layout = parent.GetComponent<UnityEngine.UI.LayoutGroup>() != null;
             string iconPath = fav.transform == src.transform ? "" : PathTo(src.transform, fav.transform);
             int i = 1;
-            foreach (string[] d in TabDefs)
+            foreach (string id in TabIds())
             {
-                GameObject go = Clone(src, parent, iconPath, d[1], d[2], d[3], TabAction(d[0]));
-                go.name = d[0];
+                string tid = id;
+                GameObject go = Clone(src, parent, iconPath, GovKit.Pol("tab_" + id), "civ_gov_tab_" + id, "civ_gov_tab_" + id + "_d", () => GovKit.Open(tid, SelectedMetas.selected_kingdom));
+                go.name = "CivTab_" + id;
                 if (!layout) go.transform.localPosition = srt.localPosition - new Vector3(0f, step * i, 0f);
                 else go.transform.SetAsLastSibling();
-                if (_btn == null) _btn = go;
+                Skin.Apply(go);
+                _tabs.Add(new KeyValuePair<string, GameObject>(id, go));
                 i++;
             }
+            _built = true;
             return true;
         }
 
@@ -311,7 +363,7 @@ namespace Civilizations
             }
             UnityEngine.UI.Button b = go.GetComponent<UnityEngine.UI.Button>();
             b.onClick = new UnityEngine.UI.Button.ButtonClickedEvent();
-            b.onClick.AddListener(act);
+            b.onClick.AddListener(() => CivMod.Safe("kingdom-tab", () => act()));
             Transform it = string.IsNullOrEmpty(iconPath) ? go.transform : go.transform.Find(iconPath);
             UnityEngine.UI.Image img = it != null ? it.GetComponent<UnityEngine.UI.Image>() : null;
             if (img != null)
@@ -336,33 +388,50 @@ namespace Civilizations
 
         public static void Button(KingdomWindow w)
         {
-            if (_btn != null) return;
-            try
+            Kingdom k = SelectedMetas.selected_kingdom;
+            if (_built && (_tabs.Count == 0 || _tabs[0].Value == null))
             {
-                if (CloneTabs(w)) return;
+                _built = false;
+                _tabs.Clear();
+                _spacer.Clear();
+                _bar = null;
             }
-            catch (Exception e)
+            if (!_built)
             {
-                CivMod.Log("kingdom tabs: " + e.Message);
+                try
+                {
+                    CloneTabs(w);
+                }
+                catch (Exception e)
+                {
+                    CivMod.Log("kingdom tabs: " + e.Message);
+                }
             }
-            try
+            if (!_built)
             {
-                Transform bg = w.transform.Find("Background");
-                if (bg == null) return;
-                RectTransform r = bg.GetComponent<RectTransform>();
-                float x = r.rect.width / 2f + 13f;
-                float y = r.rect.height / 2f - 30f - 3f * 21f;
-                SimpleButton b = UiKit.IconBtn(bg, UiKit.Icon("ui/Icons/civ/btn/tech"), () => WinTech.Open(SelectedMetas.selected_kingdom), 18f, new Vector2(x, y), Txt.T("civ_tech Title"), Txt.T("civ_btn_tech_d"));
-                SimpleButton n = UiKit.IconBtn(bg, UiKit.Icon("ui/Icons/civ/btn/net"), WinNet.Open, 18f, new Vector2(x, y - 21f), Txt.T("civ_net Title"), Txt.T("civ_btn_net_d"));
-                SimpleButton st = UiKit.IconBtn(bg, UiKit.Icon("ui/Icons/civ/btn/state"), () => WinState.Open(SelectedMetas.selected_kingdom), 18f, new Vector2(x, y - 42f), Txt.T("civ_state Title"), Txt.T("civ_btn_state_d"));
-                UiKit.IconBtn(bg, UiKit.Icon("ui/Icons/civ/btn/control"), () => WinControl.Open(SelectedMetas.selected_kingdom), 18f, new Vector2(x, y - 63f), Txt.T("civ_control Title"), Txt.T("civ_btn_control_d"));
-                _btn = b.gameObject;
-                n.gameObject.name = "CivNet";
-                st.gameObject.name = "CivState";
+                try
+                {
+                    Transform bg = w.transform.Find("Background");
+                    if (bg == null) return;
+                    RectTransform r = bg.GetComponent<RectTransform>();
+                    float x = r.rect.width / 2f + 13f;
+                    float y = r.rect.height / 2f - 30f - 3f * 21f;
+                    foreach (string id in TabIds())
+                    {
+                        string tid = id;
+                        SimpleButton b = UiKit.IconBtn(bg, UiKit.Icon(GovKit.Pol("tab_" + id)), () => GovKit.Open(tid, SelectedMetas.selected_kingdom), 18f, new Vector2(x, y), Txt.T("civ_gov_tab_" + id), Txt.T("civ_gov_tab_" + id + "_d"));
+                        b.gameObject.name = "CivTab_" + id;
+                        Skin.Apply(b.gameObject);
+                        _tabs.Add(new KeyValuePair<string, GameObject>(id, b.gameObject));
+                        y -= 21f;
+                    }
+                    _built = true;
+                }
+                catch (Exception)
+                {
+                }
             }
-            catch (Exception)
-            {
-            }
+            CivMod.Safe("kingdom-tabs-refresh", () => Refresh(k));
         }
 
         [HarmonyPatch(typeof(KingdomWindow), nameof(KingdomWindow.showMetaRows))]

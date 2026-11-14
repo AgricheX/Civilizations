@@ -222,13 +222,33 @@ namespace Civilizations
             var land = World.world.tiles_list.Where(t => t != null && t.main_type != null && t.main_type.ground && !t.Type.liquid).ToList();
             if (land.Count == 0) return;
             var r = new Random(CosmosGen.Get(Active).Seed);
+            bool ready = CivMod.C == null || CivMod.C.NpcPlanets;
+            if (ready && here.Count == 0)
+            {
+                Polity native = Natives(r);
+                if (native != null) here.Add(native);
+            }
+            var used = new List<WorldTile>();
             foreach (Polity p in here)
             {
+                string sp = Species(p);
+                if (ready)
+                {
+                    bool ok = false;
+                    try
+                    {
+                        ok = Realms(p, sp, land, used, r);
+                    }
+                    catch (Exception e)
+                    {
+                        CivMod.Report("planet-realms", e);
+                    }
+                    if (ok) continue;
+                }
                 int groups = Math.Max(1, Math.Min(5, 1 + (int)Math.Log(1.0 + p.Pop)));
                 for (int g = 0; g < groups; g++)
                 {
                     WorldTile c = land[r.Next(0, land.Count)];
-                    string sp = Species(p);
                     for (int i = 0; i < 14; i++)
                     {
                         WorldTile t = c;
@@ -238,6 +258,159 @@ namespace Civilizations
                     }
                 }
             }
+        }
+
+        private static readonly Dictionary<string, string[]> NativeSpecies = new Dictionary<string, string[]>
+        {
+            { "terran", new[] { "human", "elf", "dwarf", "orc" } }, { "jungle", new[] { "elf", "human" } }, { "swamp", new[] { "orc", "human" } },
+            { "arid", new[] { "human", "orc" } }, { "barren", new[] { "dwarf" } }, { "volcanic", new[] { "orc", "dwarf" } }, { "crystal", new[] { "dwarf", "elf" } },
+            { "ice", new[] { "dwarf", "human" } }, { "fungal", new[] { "elf", "orc" } }, { "ocean", new[] { "human" } }, { "reef", new[] { "human", "elf" } }
+        };
+
+        private static Polity Natives(Random r)
+        {
+            CNode n = CosmosGen.Get(Active);
+            if (n == null || n.Level != 0 || Cosmos.OwnerExact(Active) != null) return null;
+            if (CivMod.C != null && !CivMod.C.NpcFolk) return null;
+            string[] opts;
+            if (!NativeSpecies.TryGetValue(n.Sub, out opts)) return null;
+            int fermi = Cosmos.St != null ? Cosmos.St.Fermi : 1;
+            double chance = n.Hab * (fermi == 0 ? 0.15 : fermi == 2 ? 0.75 : 0.45);
+            if (r.NextDouble() >= chance)
+            {
+                if (r.NextDouble() < 0.3 && !Cosmos.St.Ruins.Contains(Active)) Cosmos.St.Ruins.Add(Active);
+                return null;
+            }
+            string sp = opts[r.Next(0, opts.Length)];
+            ActorAsset a = AssetManager.actor_library.get(sp);
+            if (a == null || !a.civ) return null;
+            AlienKind kind = CosmosLife.KindOf(sp);
+            string name = kind != null ? Word(kind, r) : CosmosGen.Word(r);
+            Polity p = Cosmos.NewPolity(null, "independent", Active, name);
+            p.Species = sp;
+            p.Era = r.NextDouble() < 0.7 ? r.Next(0, 3) : r.Next(3, 6);
+            p.Gov = CosmosLife.EraGov(p.Era, r);
+            p.Econ = CosmosLife.EraEcon(p.Era, r);
+            p.Pop = 0.3f + (float)r.NextDouble() * 3f;
+            p.Stance = r.NextDouble() < (kind != null ? kind.Hostility : 0.3f) ? "wary" : "open";
+            p.Color = "#" + ((r.Next(0x40, 0xFF) << 16) | (r.Next(0x40, 0xFF) << 8) | r.Next(0x40, 0xFF)).ToString("X6");
+            Cosmos.Dirty();
+            Cosmos.Log(Txt.F("cos_log_natives", p.Name, n.Name.Length > 0 ? n.Name : CosmosGen.Describe(n)));
+            return p;
+        }
+
+        private static string Word(AlienKind k, Random r)
+        {
+            string s = k.SylA[r.Next(0, k.SylA.Length)] + k.SylB[r.Next(0, k.SylB.Length)];
+            return char.ToUpperInvariant(s[0]) + s.Substring(1);
+        }
+
+        private static WorldTile Spot(List<WorldTile> land, List<WorldTile> used, Random r, WorldTile near, int min, int max)
+        {
+            WorldTile best = null;
+            float bestScore = float.MinValue;
+            for (int i = 0; i < 40; i++)
+            {
+                WorldTile t;
+                if (near != null)
+                {
+                    double ang = r.NextDouble() * Math.PI * 2;
+                    int d = r.Next(min, max + 1);
+                    t = World.world.GetTile(near.x + (int)(Math.Cos(ang) * d), near.y + (int)(Math.Sin(ang) * d));
+                }
+                else t = land[r.Next(0, land.Count)];
+                if (t == null || t.zone == null || t.zone.city != null || t.Type == null || t.Type.liquid || t.main_type == null || !t.main_type.ground) continue;
+                float score = 0f;
+                foreach (WorldTile u in used) score = Math.Min(score == 0f ? float.MaxValue : score, G.Dist(u, t));
+                if (used.Count == 0) score = 1f;
+                if (near != null && used.Count > 0) score = Math.Min(score, 60f);
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    best = t;
+                }
+            }
+            if (best != null && near == null && used.Count > 0 && bestScore < 18f) return null;
+            return best;
+        }
+
+        private static void Villagers(City c, string sp, WorldTile at, int n, long pid)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                WorldTile t = at;
+                foreach (WorldTile x in at.getTilesAround(4)) if (x != null && x.main_type != null && x.main_type.ground && !x.Type.liquid && G.Chance(0.1f)) t = x;
+                Actor a = World.world.units.createNewUnit(sp, t);
+                if (a == null) continue;
+                Store.Put(a.data, KPolity, pid.ToString());
+                a.joinCity(c);
+                a.setMetasFromCity(c);
+            }
+        }
+
+        private static bool Realms(Polity p, string sp, List<WorldTile> land, List<WorldTile> used, Random r)
+        {
+            int nations = p.Pop >= 40f ? 3 : p.Pop >= 8f ? 2 : 1;
+            if (p.Era <= 2 && p.Pop >= 2f) nations = Math.Min(4, nations + 1);
+            int perCities = Math.Max(1, Math.Min(4, 1 + (int)Math.Log(1.0 + p.Pop / nations)));
+            int pop = Math.Max(8, Math.Min(30, 8 + p.Era));
+            var made = new List<Kingdom>();
+            for (int k = 0; k < nations; k++)
+            {
+                WorldTile seat = Spot(land, used, r, null, 0, 0);
+                if (seat == null) break;
+                Actor founder = World.world.units.createNewUnit(sp, seat);
+                if (founder == null) break;
+                Store.Put(founder.data, KPolity, p.Id.ToString());
+                if (!World.world.cities.canStartNewCityCivilizationHere(founder) || !founder.buildCityAndStartCivilization())
+                {
+                    founder.die(true);
+                    continue;
+                }
+                used.Add(seat);
+                Kingdom kd = founder.kingdom;
+                City first = founder.city;
+                if (!G.Ok(kd) || first == null) continue;
+                Villagers(first, sp, seat, pop, p.Id);
+                for (int c = 1; c < perCities; c++)
+                {
+                    WorldTile t = Spot(land, used, r, seat, 18, 34);
+                    if (t == null) continue;
+                    Actor f = World.world.units.createNewUnit(sp, t);
+                    if (f == null) continue;
+                    Store.Put(f.data, KPolity, p.Id.ToString());
+                    f.setKingdom(kd);
+                    City nc = World.world.cities.buildNewCity(f, t.zone);
+                    if (nc == null) continue;
+                    used.Add(t);
+                    Villagers(nc, sp, t, Math.Max(5, pop / 2), p.Id);
+                }
+                Setup(kd, p, r);
+                made.Add(kd);
+            }
+            if (made.Count == 0) return false;
+            for (int i = 0; i < made.Count; i++)
+            {
+                for (int j = i + 1; j < made.Count; j++)
+                {
+                    if (r.NextDouble() < (p.Stance == "wary" || p.Stance == "hunter" ? 0.4 : 0.15)) World.world.diplomacy.startWar(made[i], made[j], WarTypeLibrary.normal);
+                }
+            }
+            return true;
+        }
+
+        private static void Setup(Kingdom k, Polity p, Random r)
+        {
+            Store.Put(k.data, KPolity, p.Id.ToString());
+            int era = Math.Max(0, Math.Min(Db.LastEra, p.Era + r.Next(-1, 2)));
+            Research.SetupEra(k, era);
+            string gov = !string.IsNullOrEmpty(p.Gov) && Db.Policy(p.Gov) != null ? p.Gov : CosmosLife.EraGov(era, r);
+            if (Db.Policy(gov) != null) Policies.Set(k, "gov", gov, "planet");
+            if (!string.IsNullOrEmpty(p.Econ) && Db.Policy(p.Econ) != null) Policies.Set(k, "econ", p.Econ, "planet");
+            if (!string.IsNullOrEmpty(p.Ideo) && Db.Policy(p.Ideo) != null) Policies.Set(k, "ideo", p.Ideo, "planet");
+            if (Flags.On) Flags.Reform(k, "founded");
+            if (!_start.ContainsKey(p.Id)) _start[p.Id] = 0;
+            _start[p.Id] += Math.Max(1, G.Pop(k));
         }
 
         private static void Link()

@@ -150,6 +150,7 @@ namespace Civilizations
                 Player.Release();
                 Notify.Show(Txt.T("civ_hud_released"));
             });
+            Skin.Apply(_root);
         }
 
         private static SimpleButton Cmd(ref float x, float y, float size, float step, string icon, string key, Action a)

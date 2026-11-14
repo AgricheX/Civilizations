@@ -1,156 +1,177 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Civilizations
 {
     internal static class GovSandbox
     {
+        private const string Probe = "kingdom:gov_vote";
+        private static Kingdom _lordPick;
+        private static City _cityPick;
+
         public static readonly Dictionary<string, Func<Kingdom, bool>> Actions = new Dictionary<string, Func<Kingdom, bool>>
         {
-            { "dynasty_new", NewDynasty },
-            { "restoration", Restoration },
+            { "dynasty_new", k => { Mandate.NewDynasty(k, true); return true; } },
+            { "restoration", Restore },
             { "great_rebellion", Mandate.GreatRebellion },
             { "heir", Heir },
             { "revolution", Revolution },
-            { "coup", Mandate.GeneralCoup },
-            { "ally_new", k => Ally(k, null) },
-            { "ally_betray", Betray },
-            { "ally_bloc", k => Ally(k, "ideological_bloc") },
-            { "ally_trade", k => Ally(k, "trade_league") },
-            { "ally_nuclear", k => Ally(k, "nuclear_umbrella") },
-            { "ally_federation", k => Ally(k, "federation") },
-            { "ally_dissolve", GovApi.DissolveAlliance },
+            { "coup", Rulers.Coup },
             { "loyal", Loyal },
             { "gold", Gold },
             { "bankrupt", Bankrupt },
-            { "civil_war", CivilWar }
+            { "civil_war", k => G.Cities(k).Count >= 3 && Mandate.GreatRebellion(k) }
         };
 
         public static void Register()
         {
-            Type t = typeof(GovSandbox).Assembly.GetType("Civilizations.Sandbox");
-            if (t == null) return;
-            FieldInfo f = t.GetField("Hooks", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            var hooks = f != null ? f.GetValue(null) as Dictionary<string, Func<Kingdom, bool>> : null;
-            if (hooks == null) return;
-            foreach (var kv in Actions) hooks[kv.Key] = kv.Value;
+            foreach (var kv in Actions) Sandbox.Hooks[kv.Key] = kv.Value;
         }
 
-        private static bool NewDynasty(Kingdom k)
+        public static void Tools()
         {
-            if (!G.Ok(k)) return false;
-            Mandate.NewDynasty(k);
-            return true;
+            if (Sandbox.Tools.Count == 0 || Sandbox.ById.ContainsKey(Probe)) return;
+            K("gov_vote", "sb_vote", k =>
+            {
+                if (Parl.Current(k) == null) return false;
+                Parl.VoteNow(k);
+                return true;
+            });
+            K("gov_decree", "sb_decree", k =>
+            {
+                if (Parl.Current(k) == null) return false;
+                Parl.Decree(k);
+                return true;
+            });
+            K("gov_mandate", "sb_mandate", k =>
+            {
+                if (!Mandate.Applies(k)) return false;
+                Mandate.Push(k);
+                return true;
+            });
+            K("gov_election", "sb_election", k => Gov.Republic(k) && Rulers.Hold(k));
+            K("gov_empire", "sb_empire", Rulers.ProclaimEmpire);
+            K("gov_vassal", "sb_vassal", k =>
+            {
+                if (!G.Ok(_lordPick) || _lordPick == k)
+                {
+                    _lordPick = k;
+                    Notify.Show(Txt.F("civ_vas_sb_pick", G.Name(k)));
+                    return true;
+                }
+                Vassals.Make(k, _lordPick);
+                _lordPick = null;
+                return true;
+            });
+            K("gov_independence", "sb_independence", k =>
+            {
+                if (Diplomacy.Overlord(k) == null) return false;
+                Vassals.Independence(k, true);
+                return true;
+            });
+            Sandbox.Extra("city", "gov_transfer", Txt.T("civ_gov_sb_transfer"), Txt.T("civ_gov_sb_transfer_d"), "ui/Icons/civ/pol/sb_transfer", -1, t =>
+            {
+                City c = Sandbox.CityAt(t);
+                if (!G.Ok(_cityPick))
+                {
+                    if (!G.Ok(c)) return false;
+                    _cityPick = c;
+                    return true;
+                }
+                Kingdom to = Sandbox.Owner(t);
+                City from = _cityPick;
+                _cityPick = null;
+                if (!G.Ok(to) || from.kingdom == to) return false;
+                Vassals.Busy = true;
+                try
+                {
+                    from.joinAnotherKingdom(to, false, false);
+                }
+                finally
+                {
+                    Vassals.Busy = false;
+                }
+                return true;
+            });
+            Sandbox.Extra("city", "gov_release", Txt.T("civ_gov_sb_release"), Txt.T("civ_gov_sb_release_d"), "ui/Icons/civ/pol/sb_release", -1, t =>
+            {
+                City c = Sandbox.CityAt(t);
+                return G.Ok(c) && G.Ok(c.kingdom) && Vassals.ReleaseAsVassal(c, c.kingdom, null, "release") != null;
+            });
+            Sandbox.Extra("city", "gov_army", Txt.T("civ_gov_sb_army"), Txt.T("civ_gov_sb_army_d"), "ui/Icons/civ/pol/sb_army", -1, t =>
+            {
+                City c = Sandbox.CityAt(t);
+                if (!G.Ok(c) || c.kingdom == null) return false;
+                Kingdom att = Player.Active && Player.K != c.kingdom ? Player.K : G.Kingdoms().Where(x => G.Ok(x) && x != c.kingdom && World.world.wars.isInWarWith(x, c.kingdom)).OrderByDescending(x => x.countTotalWarriors()).FirstOrDefault();
+                return GovGuard.SendAll(att, c);
+            });
         }
 
-        private static bool Restoration(Kingdom k)
+        private static void K(string id, string icon, Func<Kingdom, bool> f)
         {
-            if (!G.Ok(k)) return false;
-            long id;
-            if (!long.TryParse(Store.Str(k.data, "civ_old_royal"), out id)) return false;
-            Clan c = Gov.ClanById(id);
-            if (c == null || !G.Ok(c.getChief()) || c.getChief().kingdom != k) return false;
-            Mandate.Crown(k, c.getChief());
-            Store.Put(k.data, "civ_old_royal", "");
-            Mandate.Set(k, 55f);
-            Mandate.SetPhase(k, 0, false);
-            Gov.Log("restoration", k, G.Name(k), c.data.name, c.getChief().getName());
-            return true;
+            Sandbox.Extra("kingdom", id, Txt.T("civ_gov_sb_" + id.Substring(4)), Txt.T("civ_gov_sb_" + id.Substring(4) + "_d"), "ui/Icons/civ/pol/" + icon, -1, t =>
+            {
+                Kingdom k = Sandbox.Owner(t);
+                if (!G.Ok(k) || !k.isCiv()) return false;
+                bool ok = false;
+                CivMod.Safe("gov-sb-" + id, () => ok = f(k));
+                if (ok)
+                {
+                    Bonus.Dirty(k);
+                    Profile.Invalidate(k);
+                }
+                return ok;
+            });
+        }
+
+        private static bool Restore(Kingdom k)
+        {
+            if (!Mandate.Applies(k)) return false;
+            if (Mandate.Phase(k) != 2) Mandate.SetPhase(k, 2, false);
+            return Mandate.StartRestoration(k);
         }
 
         private static bool Heir(Kingdom k)
         {
-            if (!G.Ok(k)) return false;
-            Actor h = WinElections.Succession(k).FirstOrDefault(a => a.isAdult());
+            Actor h = Rulers.Succession(k).FirstOrDefault(a => a.isAdult());
             if (h == null) return false;
-            Mandate.Crown(k, h);
+            Rulers.Crown(k, h);
             return true;
         }
 
         private static bool Revolution(Kingdom k)
         {
-            if (!G.Ok(k)) return false;
-            string cur = Policies.Id(k, "gov");
-            string alt = Politics.Alternative(k, "gov");
-            PolicyDef p = Db.Policy(alt);
-            if (p == null || alt == cur || !Policies.Unlocked(k, p))
-            {
-                p = Policies.Options(k, "gov").Where(x => x.Id != cur).OrderBy(x => UnityEngine.Random.value).FirstOrDefault();
-                if (p == null) return false;
-            }
-            Policies.Set(k, "gov", p.Id, "revolution");
-            Politics.AddStability(k, -0.12f);
-            Mandate.NewDynasty(k);
-            return Policies.Id(k, "gov") == p.Id;
-        }
-
-        private static Kingdom Partner(Kingdom k)
-        {
-            return G.Kingdoms().Where(o => G.Ok(o) && o != k && o.isCiv() && !World.world.wars.isInWarWith(k, o) && Fog.Knows(k, o)).OrderByDescending(o => World.world.diplomacy.getOpinion(k, o).total).FirstOrDefault();
-        }
-
-        private static bool Ally(Kingdom k, string type)
-        {
-            if (!G.Ok(k)) return false;
-            Alliance a = AllianceLife.Of(k);
-            if (a == null)
-            {
-                Kingdom o = Partner(k);
-                if (o == null) return false;
-                a = AllianceLife.Create(k, o, null);
-            }
-            if (a == null) return false;
-            if (type != null) AllianceLife.ForceType(a, type);
+            if (!GovEra.Has(k, GovEra.Republic)) return false;
+            Rulers.SetRegime(k, !Gov.Republic(k), "revolution");
+            Politics.AddStability(k, -0.1f);
+            if (Gov.Republic(k)) Rulers.Hold(k);
             return true;
-        }
-
-        private static bool Betray(Kingdom k)
-        {
-            Alliance a = AllianceLife.Of(k);
-            if (a == null) return false;
-            Kingdom o = a.kingdoms_list.Where(x => G.Ok(x) && x != k).OrderBy(x => Profile.Get(x).Strength).FirstOrDefault();
-            if (o == null) return false;
-            AllianceLife.Shift(a, -40f, "betrayal");
-            k.allianceLeave(a);
-            return Vassals.War(k, o, "conquest") != null;
         }
 
         private static bool Loyal(Kingdom k)
         {
-            if (!G.Ok(k)) return false;
             Mandate.Set(k, Math.Max(Mandate.Get(k), 85f));
             Politics.AddStability(k, 0.3f);
-            Legitimacy.Shock(k, 0.2f);
-            foreach (City c in G.Cities(k)) Store.Put(c.data, Parliament.KDecree, -999);
-            Bonus.Dirty(k);
+            foreach (City c in G.Cities(k)) Store.Put(c.data, Parl.KDecree, 0);
+            foreach (long f in Fam.Seats(k).Keys) Fam.Remember(f, Fam.Royal(k), 20f);
             return true;
         }
 
         private static bool Gold(Kingdom k)
         {
-            if (!G.Ok(k)) return false;
-            float v = 500f * (Gov.Band(k) + 1);
-            Treasury.AddReserve(k, v);
-            if (k.capital != null) Economy.Give(k.capital, "gold", (int)v);
+            float v = 300f + GovEra.Of(k) * 40f;
+            if (Treasury.Coin(k)) Treasury.Receive(k, v, "grant");
+            else if (k.capital != null) Economy.Give(k.capital, "gold", (int)v);
+            else return false;
             return true;
         }
 
         private static bool Bankrupt(Kingdom k)
         {
-            if (!G.Ok(k)) return false;
             Treasury.Bankrupt(k);
             if (k.capital != null) Economy.TakeUpTo(k.capital, "gold", Economy.Amount(k.capital, "gold"));
             return true;
-        }
-
-        private static bool CivilWar(Kingdom k)
-        {
-            if (!G.Ok(k) || Profile.Get(k).Cities < 2) return false;
-            int before = G.Cities(k).Count;
-            Legitimacy.CivilWar(k, Profile.Get(k));
-            return G.Cities(k).Count < before;
         }
     }
 }

@@ -58,6 +58,8 @@ namespace Civilizations
         public bool NightLights { get { return B("CivVisual", "civ_night_lights", true); } }
         public bool NewBiomes { get { return B("CivWorld", "civ_new_biomes", true); } }
         public bool EraSkins { get { return B("CivVisual", "civ_era_skins", true); } }
+        public bool CivSkin { get { return B("CivVisual", "civ_skin", true); } }
+        public bool SkinEra { get { return B("CivVisual", "civ_skin_era", true); } }
         public bool FogView { get { return B("CivVisual", "civ_fog_view", false); } }
         public bool Regression { get { return B("Civilizations", "civ_regression", true); } }
         public bool Apocalypse { get { return B("Civilizations", "civ_apocalypse", true); } }
@@ -86,6 +88,8 @@ namespace Civilizations
         public float CosmicTime { get { return Math.Max(0f, F("CivCosmos", "civ_cos_time", 1f)); } }
         public int Fermi { get { return Math.Max(0, Math.Min(2, I("CivCosmos", "civ_cos_fermi", 1))); } }
         public bool CosmicInvasions { get { return B("CivCosmos", "civ_cos_invasions", true); } }
+        public bool NpcPlanets { get { return B("CivCosmos", "civ_npc_planets", true); } }
+        public bool NpcFolk { get { return B("CivCosmos", "civ_npc_folk", true); } }
         public bool CosmicEnding { get { return B("CivCosmos", "civ_cos_ending", false); } }
         public string CosSeed
         {

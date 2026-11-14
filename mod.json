@@ -2,7 +2,7 @@
   "name": "Civilizations",
   "GUID": "AGRICHE_CIVILIZATIONS",
   "author": "Agriche",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Kingdoms evolve from the Paleolithic to the Omega Age, across 42 eras and over 6,000 technologies on six development paths (real-world, steam, Tesla-inspired, diesel, atomic and biological). Living politics with elections, parliaments, dynasties and revolutions; diplomacy with war goals, peace tables and coalitions; corporations, currencies, energy, trains, aircraft and an internet for NPCs; a round world with day and night. Then the Cosmos: a whole universe to colonize, alien civilizations, starship fleets, 84 megastructures and every scale playable as a map. Includes a sandbox catalog, a mode to rule one kingdom yourself, and sagas with choices.",
   "RepoUrl": null,
   "Dependencies": [],

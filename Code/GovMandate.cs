@@ -6,44 +6,71 @@ namespace Civilizations
 {
     internal static class Mandate
     {
-        private const string KMandate = "civ_mandate";
+        private const string KValue = Gov.P + "mandate";
+        private const string KDecay = Gov.P + "decay";
+        private const string KWounds = Gov.P + "wounds";
+        private const string KCap = Gov.P + "cap";
+        private const string KResto = Gov.P + "resto";
         private const string KDyn = "civ_dyn";
         private const string KDynY = "civ_dyn_y";
         private const string KDynN = "civ_dyn_n";
-        private const string KRoyal = "civ_royal";
-        private const string KOldRoyal = "civ_old_royal";
-        private const string KOldRoyalY = "civ_old_royal_y";
-        public const string KRebelUntil = "civ_gr_until";
-        public const string KRebelOf = "civ_gr_of";
+        public const string KRebelUntil = Gov.P + "rebel_until";
+        public const string KRebelOf = Gov.P + "rebel_of";
+        public static readonly string[] Phases = { "renewal", "prime", "decline", "collapse" };
+        public static readonly string[] Parts = { "loyal", "ruler", "vassals", "livelihood", "overextended", "treasury", "war", "decay", "wounds" };
 
         public static void Register()
         {
-            Hub.On(Hub.WarEnded, e =>
+            Hub.On(Hub.PeaceTerms, e =>
             {
-                if (e.Id == "draw" || e.Id == "Peace") return;
-                if (G.Ok(e.K)) Add(e.K, 4f);
-                if (G.Ok(e.O)) Add(e.O, -6f);
+                if (!G.Ok(e.K) || !G.Ok(e.O) || e.Id == null || e.Id == "white_peace") return;
+                bool small = e.Id == "reparations" || e.Id == "truce";
+                Add(e.K, small ? 2f : 5f);
+                Add(e.O, small ? -4f : -10f);
             });
+            Hub.On(Hub.CityCaptured, e =>
+            {
+                if (e.Id != "captured" || !G.Ok(e.K) || !G.Ok(e.O)) return;
+                Add(e.K, 1f);
+                Add(e.O, -2f);
+                if (e.C != null && Store.Str(e.O.data, KCap) == G.Id(e.C))
+                {
+                    Add(e.O, -15f);
+                    if (Phase(e.O) == 2 && Active(e.O)) Store.Put(e.O.data, Gov.P + "cap_lost", 1);
+                }
+            });
+        }
+
+        public static bool Applies(Kingdom k)
+        {
+            if (!G.Ok(k) || !k.isCiv() || !Gov.On("civ_gov_cycle") || !GovEra.Has(k, GovEra.Mandate)) return false;
+            if (Diplomacy.Overlord(k) != null) return false;
+            return G.Cities(k).Count >= 3 || Diplomacy.DependentsOf(k).Count > 0;
+        }
+
+        public static bool Active(Kingdom k)
+        {
+            return Applies(k) && Phase(k) >= 0;
         }
 
         public static float Get(Kingdom k)
         {
-            return G.Ok(k) ? Store.Flt(k.data, KMandate, 55f) : 0f;
+            return G.Ok(k) ? Store.Flt(k.data, KValue, 60f) : 0f;
         }
 
         public static void Set(Kingdom k, float v)
         {
-            if (G.Ok(k)) Store.Put(k.data, KMandate, G.Clamp(v, 0f, 100f));
+            if (G.Ok(k)) Store.Put(k.data, KValue, G.Clamp(v, 0f, 100f));
         }
 
         public static void Add(Kingdom k, float v)
         {
-            Set(k, Get(k) + v);
+            if (Active(k)) Set(k, Get(k) + v);
         }
 
         public static int Phase(Kingdom k)
         {
-            return Statecraft.Phase(k);
+            return G.Ok(k) ? Store.Int(k.data, KDyn, -1) : -1;
         }
 
         public static int Years(Kingdom k)
@@ -56,99 +83,56 @@ namespace Civilizations
             return G.Ok(k) ? Store.Int(k.data, KDynN, 1) : 1;
         }
 
+        public static float Decay(Kingdom k)
+        {
+            return G.Ok(k) ? Store.Flt(k.data, KDecay, 0f) : 0f;
+        }
+
         public static bool Rebelling(Kingdom k)
         {
             return G.Ok(k) && Store.Int(k.data, KRebelUntil, 0) > G.Year;
+        }
+
+        public static bool Restoring(Kingdom k)
+        {
+            return G.Ok(k) && Store.Int(k.data, KResto, 0) > 0;
+        }
+
+        public static string PhaseName(int ph)
+        {
+            return ph < 0 ? Txt.T("civ_mand_none") : Txt.T("civ_mand_phase_" + Phases[ph]);
         }
 
         public static Dictionary<string, float> Components(Kingdom k)
         {
             var c = new Dictionary<string, float>();
             if (!G.Ok(k)) return c;
-            KProfile p = Profile.Get(k);
-            c["base"] = 35f;
-            c["legitimacy"] = (Legitimacy.Get(k) - 0.5f) * 40f;
-            c["stability"] = (p.Stability - 0.5f) * 30f;
-            float loy = 0f;
-            int n = 0;
-            foreach (City ct in G.Cities(k))
-            {
-                loy += ct.getLoyalty(false);
-                n++;
-            }
-            c["loyalty"] = n > 0 ? G.Clamp(loy / n / 3f, -10f, 10f) : 0f;
+            List<City> cities = G.Cities(k);
+            int loyal = cities.Count(x => x.getLoyalty(false) >= 0);
+            c["loyal"] = cities.Count > 0 ? ((float)loyal / cities.Count - 0.7f) * 30f : 0f;
+            Actor r = k.king;
+            c["ruler"] = G.Ok(r) ? G.Clamp(((r.stewardship + r.intelligence) / 2f - 5f) * 2f, -10f, 10f) : -15f;
+            List<Kingdom> vs = Diplomacy.DependentsOf(k);
+            c["vassals"] = vs.Count > 0 ? (vs.Average(v => Vassals.Integration(v)) - 50f) / 5f : 0f;
+            c["livelihood"] = (Politics.Stability(k) - 0.5f) * 20f;
+            c["overextended"] = vs.Count > 0 && cities.Count < 6 ? -(6 - cities.Count) * 3f : 0f;
+            c["treasury"] = Gov.On("civ_gov_treasury") && Treasury.Owed(k) > 0f ? -8f : 0f;
             float war = 0f;
             foreach (global::War w in World.world.wars.getWars(k))
             {
                 if (w == null || w.hasEnded()) continue;
                 war += Statecraft.Score(k, w) / 10f;
             }
-            c["war"] = G.Clamp(war - Statecraft.Exhaustion(k) / 10f, -15f, 10f);
-            c["treasury"] = Gov.On("civ_gov_treasury") ? Treasury.MandateShare(k) : 0f;
-            c["parliament"] = Parliament.Active(k) && p.Era >= 3 ? (Parliament.RoyalShare(k) - 0.35f) * 20f : 0f;
-            int ph = Phase(k);
-            c["age"] = -Math.Min(25f, Years(k) * (ph == 1 ? 0.3f : 0.2f));
-            c["renewal"] = ph == 0 ? 12f : 0f;
-            c["rebellion"] = Rebelling(k) ? -15f : 0f;
-            c["works"] = Gov.On("civ_gov_treasury") ? Math.Min(6f, Treasury.Statues(k) * 1.5f) : 0f;
+            c["war"] = G.Clamp(war, -10f, 6f);
+            float d = Decay(k);
+            c["decay"] = -(d / 40f) * (d / 40f) * 20f;
+            c["wounds"] = -Store.Flt(k.data, KWounds, 0f);
             return c;
         }
 
-        public static float Target(Kingdom k)
+        public static float Deserved(Kingdom k)
         {
-            return G.Clamp(Components(k).Values.Sum(), 0f, 100f);
-        }
-
-        public static void Year(Kingdom k, KProfile p, int yrs)
-        {
-            if (!G.Ok(k) || !k.isCiv()) return;
-            CheckRoyal(k);
-            if (Phase(k) < 0) SetPhase(k, 0, false);
-            float m = Get(k), t = Target(k);
-            float f = Math.Min(1f, 0.2f * yrs);
-            m = m + (t - m) * f;
-            Set(k, m);
-            int ph = Phase(k), age = Years(k);
-            switch (ph)
-            {
-                case 0:
-                    if (age >= 10) SetPhase(k, m >= 55f ? 1 : 2, true);
-                    break;
-                case 1:
-                    if (m < 48f) SetPhase(k, 2, true);
-                    break;
-                case 2:
-                    if (m < 25f) SetPhase(k, 3, true);
-                    else if (m >= 66f && age >= 5) SetPhase(k, 1, true);
-                    break;
-                case 3:
-                    Collapse(k, p, m, age, yrs);
-                    break;
-            }
-            Spread(k);
-            MaybeRestoration(k, m);
-        }
-
-        private static void CheckRoyal(Kingdom k)
-        {
-            long r = Parliament.RoyalId(k);
-            string cur = r == 0L ? "" : r.ToString();
-            string old = Store.Str(k.data, KRoyal);
-            if (cur == old) return;
-            Store.Put(k.data, KRoyal, cur);
-            if (old.Length == 0 || cur.Length == 0) return;
-            Store.Put(k.data, KOldRoyal, old);
-            Store.Put(k.data, KOldRoyalY, G.Year);
-            NewDynasty(k);
-        }
-
-        public static void NewDynasty(Kingdom k)
-        {
-            Store.Put(k.data, KDynN, Dynasty(k) + 1);
-            Set(k, Math.Max(45f, Get(k)));
-            SetPhase(k, 0, false);
-            if (Statecraft.Dynastic(k)) Gov.Log("new_dynasty", k, G.Name(k), Gov.ClanName(Parliament.RoyalId(k)), Dynasty(k).ToString());
-            Hub.Raise(Hub.Legitimacy, k, null, k.capital, null, "new_dynasty");
+            return G.Clamp(50f + Components(k).Values.Sum(), 0f, 100f);
         }
 
         public static void SetPhase(Kingdom k, int ph, bool log)
@@ -156,53 +140,167 @@ namespace Civilizations
             Store.Put(k.data, KDyn, ph);
             Store.Put(k.data, KDynY, G.Year);
             Bonus.Dirty(k);
-            if (log) Gov.Log("mandate_phase", k, G.Name(k), Txt.T("civ_phase_" + Statecraft.Phases[ph]), ((int)Get(k)).ToString());
+            if (log && ph >= 0) Gov.Log("phase", k, G.Name(k), PhaseName(ph), ((int)Get(k)).ToString());
         }
 
-        private static void Collapse(Kingdom k, KProfile p, float m, int age, int yrs)
+        public static void NewDynasty(Kingdom k, bool reset)
         {
-            if (m >= 40f)
+            if (!G.Ok(k)) return;
+            Store.Put(k.data, KDynN, Dynasty(k) + 1);
+            if (reset || Phase(k) < 0)
             {
+                Store.Put(k.data, KDecay, 0f);
+                Store.Put(k.data, KWounds, 0f);
+                Set(k, 60f);
+                if (Applies(k)) SetPhase(k, 0, true);
+            }
+        }
+
+        public static void Year(Kingdom k, KProfile p, int yrs)
+        {
+            if (!Applies(k))
+            {
+                if (Phase(k) >= 0) SetPhase(k, -1, false);
+                return;
+            }
+            if (k.capital != null) Store.Put(k.data, KCap, G.Id(k.capital));
+            if (Phase(k) < 0)
+            {
+                Set(k, 60f);
                 SetPhase(k, 0, true);
                 return;
             }
-            if (!Rebelling(k) && p.Cities >= 4 && G.Chance(0.25f * yrs))
+            var comp = Components(k);
+            float gov = comp["loyal"] + comp["ruler"] + comp["vassals"] + comp["livelihood"];
+            Store.Put(k.data, KDecay, Decay(k) + yrs * (gov > 0f ? 0.8f : gov < -5f ? 1.3f : 1f));
+            float m = Get(k);
+            float t = G.Clamp(50f + comp.Values.Sum(), 0f, 100f);
+            m += (t - m) * Math.Min(1f, 0.15f * yrs);
+            Set(k, m);
+            m = Get(k);
+            int ph = Phase(k);
+            bool capLost = Store.Int(k.data, Gov.P + "cap_lost", 0) > 0;
+            Store.Put(k.data, Gov.P + "cap_lost", 0);
+            switch (ph)
             {
-                GreatRebellion(k);
+                case 0:
+                    if (m >= 70f) SetPhase(k, 1, true);
+                    else if (m < 40f) SetPhase(k, 2, true);
+                    break;
+                case 1:
+                    if (m < 50f) SetPhase(k, 2, true);
+                    break;
+                case 2:
+                    if (m >= 70f) SetPhase(k, 1, true);
+                    else if (m < 20f || capLost)
+                    {
+                        if (!GreatRebellion(k)) SetPhase(k, 3, true);
+                    }
+                    else if (m < 30f && G.Chance(0.2f * yrs)) Revolt(k);
+                    break;
+                case 3:
+                    if (!Rebelling(k) || !World.world.wars.getWars(k).Any(w => w != null && !w.hasEnded()))
+                    {
+                        if (G.Cities(k).Count >= 3)
+                        {
+                            Store.Put(k.data, KWounds, Store.Flt(k.data, KWounds, 0f) + 8f);
+                            Set(k, 45f);
+                            SetPhase(k, 2, false);
+                            Gov.Log("pacified", k, G.Name(k));
+                        }
+                        else SetPhase(k, -1, false);
+                    }
+                    break;
+            }
+            Restoration(k, yrs);
+        }
+
+        private static void Revolt(Kingdom k)
+        {
+            City c = G.Cities(k).Where(x => x != k.capital && x.getLoyalty(false) < 0).OrderBy(x => x.getLoyalty(false)).FirstOrDefault();
+            Actor lead = Gov.Somebody(c);
+            if (c == null || lead == null) return;
+            Kingdom nk = c.makeOwnKingdom(lead, true, false);
+            if (G.Ok(nk)) Store.Put(nk.data, KRebelOf, k.data.id.ToString());
+        }
+
+        private static void Restoration(Kingdom k, int yrs)
+        {
+            int due = Store.Int(k.data, KResto, 0);
+            Actor r = k.king;
+            if (due > 0)
+            {
+                if (G.Year < due) return;
+                Store.Put(k.data, KResto, 0);
+                float ch = 0.3f + (G.Ok(r) ? (r.stewardship + r.intelligence - 10) / 40f : -0.2f);
+                if (G.Chance(G.Clamp(ch, 0.05f, 0.85f)))
+                {
+                    Store.Put(k.data, KDecay, Decay(k) * 0.4f);
+                    Set(k, Math.Max(70f, Get(k)));
+                    SetPhase(k, 1, false);
+                    Gov.Log("restoration", k, G.Name(k), G.Ok(r) ? r.getName() : "-");
+                }
+                else
+                {
+                    Set(k, Get(k) - 10f);
+                    Gov.Log("restoration_fail", k, G.Name(k), G.Ok(r) ? r.getName() : "-");
+                }
                 return;
             }
-            if (G.Chance(0.12f * yrs) && GeneralCoup(k)) return;
-            if (age >= 10)
-            {
-                Store.Put(k.data, KDynN, Dynasty(k) + 1);
-                Set(k, 45f);
-                SetPhase(k, 0, true);
-            }
+            if (Phase(k) != 2 || !G.Ok(r) || r.level < 5 || Player.Is(k) && !Player.Auto(k, "politics")) return;
+            float want = r.stewardship / 10f * (70f - Get(k)) / 50f * 0.12f * yrs;
+            if (G.Chance(want)) StartRestoration(k);
+        }
+
+        public static bool StartRestoration(Kingdom k)
+        {
+            if (!Active(k) || Restoring(k)) return false;
+            Store.Put(k.data, KResto, G.Year + G.Range(1, 3));
+            return true;
         }
 
         public static bool GreatRebellion(Kingdom k)
         {
             if (!G.Ok(k)) return false;
-            var pool = G.Cities(k).Where(c => G.Ok(c) && c != k.capital).OrderBy(c => c.getLoyalty(false)).ToList();
-            int want = Math.Min(4, Math.Max(1, pool.Count / 4));
-            var picked = new List<City>();
-            foreach (City c in pool)
+            List<City> all = G.Cities(k).Where(c => G.Ok(c) && c != k.capital).ToList();
+            if (all.Count < 2) return false;
+            int want = Math.Min(6, Math.Max(1, all.Count / 4 + 1));
+            var seeds = new List<City>();
+            foreach (City c in all.OrderBy(c => c.getLoyalty(false)))
             {
-                if (picked.Count >= want) break;
-                if (picked.Any(x => x.neighbours_cities != null && x.neighbours_cities.Contains(c))) continue;
-                picked.Add(c);
+                if (seeds.Count >= want) break;
+                if (seeds.Any(x => x.neighbours_cities != null && x.neighbours_cities.Contains(c))) continue;
+                seeds.Add(c);
             }
-            if (picked.Count == 0) return false;
-            City head = picked[0];
-            Actor lead = Gov.Somebody(head);
-            if (lead == null) return false;
-            Kingdom nk = head.makeOwnKingdom(lead, true, false);
-            if (!G.Ok(nk)) return false;
-            Store.Put(nk.data, KRebelOf, k.data.id.ToString());
-            for (int i = 1; i < picked.Count; i++) if (G.Ok(picked[i]) && picked[i].kingdom == k) picked[i].joinAnotherKingdom(nk, false, true);
-            Store.Put(k.data, KRebelUntil, G.Year + 12);
-            if (!World.world.wars.isInWarWith(nk, k))
+            var rebels = new List<Kingdom>();
+            Vassals.Busy = true;
+            try
             {
+                foreach (City c in seeds)
+                {
+                    Actor lead = Gov.Somebody(c);
+                    if (lead == null || c.kingdom != k) continue;
+                    Kingdom nk = c.makeOwnKingdom(lead, true, false);
+                    if (!G.Ok(nk)) continue;
+                    Store.Put(nk.data, KRebelOf, k.data.id.ToString());
+                    rebels.Add(nk);
+                }
+                if (rebels.Count == 0) return false;
+                int target = (int)(all.Count * 0.6f) - rebels.Count;
+                foreach (City c in all.Where(x => G.Ok(x) && x.kingdom == k).OrderBy(x => x.getLoyalty(false)).ToList())
+                {
+                    if (target-- <= 0) break;
+                    Kingdom near = rebels.Where(G.Ok).OrderBy(r => r.capital != null ? G.Dist(r.capital, c) : 9999f).FirstOrDefault();
+                    if (near != null) c.joinAnotherKingdom(near, false, true);
+                }
+            }
+            finally
+            {
+                Vassals.Busy = false;
+            }
+            foreach (Kingdom nk in rebels)
+            {
+                if (!G.Ok(nk) || World.world.wars.isInWarWith(nk, k)) continue;
                 Statecraft.Escalating = true;
                 try
                 {
@@ -213,159 +311,83 @@ namespace Civilizations
                     Statecraft.Escalating = false;
                 }
             }
+            foreach (Kingdom v in Diplomacy.DependentsOf(k).ToList())
+            {
+                if (G.Chance(1f - Vassals.Integration(v) / 110f)) Vassals.Independence(v, false);
+            }
+            Store.Put(k.data, KRebelUntil, G.Year + 12);
+            SetPhase(k, 3, false);
+            Set(k, Math.Min(Get(k), 15f));
             Legitimacy.Shock(k, -0.1f);
-            Gov.Log("great_rebellion", k, G.Name(k), G.Name(nk), picked.Count.ToString(), nk, head);
-            Hub.Raise(Hub.CivilWar, k, nk, head, lead, "great_rebellion");
+            Gov.Log("rebellion", k, G.Name(k), rebels.Count.ToString(), null, rebels[0], seeds[0]);
+            Hub.Raise(Hub.CivilWar, k, rebels[0], seeds[0], null, "great_rebellion");
+            Fam.Invalidate(k);
             return true;
-        }
-
-        private static void Spread(Kingdom k)
-        {
-            if (!Rebelling(k)) return;
-            string id = k.data.id.ToString();
-            foreach (Kingdom nk in G.Kingdoms().ToList())
-            {
-                if (!G.Ok(nk) || nk == k || Store.Str(nk.data, KRebelOf) != id) continue;
-                if (!World.world.wars.isInWarWith(nk, k)) continue;
-                foreach (City rc in G.Cities(nk).ToList())
-                {
-                    if (rc.neighbours_cities == null) continue;
-                    City next = rc.neighbours_cities.Where(c => G.Ok(c) && c.kingdom == k && c != k.capital && c.getLoyalty(false) < 10).OrderBy(c => c.getLoyalty(false)).FirstOrDefault();
-                    if (next == null || !G.Chance(0.3f)) continue;
-                    next.joinAnotherKingdom(nk, false, true);
-                    Gov.Log("rebellion_spread", nk, G.Name(next), G.Name(nk), G.Name(k), k, next);
-                    return;
-                }
-            }
-        }
-
-        public static Actor BestGeneral(Kingdom k)
-        {
-            Actor best = null;
-            float bs = -1f;
-            foreach (Actor a in k.getUnits())
-            {
-                if (!G.Ok(a) || !a.isAdult() || a.isKing()) continue;
-                if (!a.is_army_captain && !a.isWarrior()) continue;
-                float s = a.renown + (a.is_army_captain ? 50f : 0f) + a.data.kills * 2f;
-                if (s > bs)
-                {
-                    bs = s;
-                    best = a;
-                }
-            }
-            return best;
-        }
-
-        public static bool GeneralCoup(Kingdom k)
-        {
-            if (!G.Ok(k)) return false;
-            Actor gen = BestGeneral(k);
-            if (gen == null) return false;
-            Crown(k, gen);
-            PolicyDef junta = Db.Policy("military_junta");
-            if (junta != null && Policies.Unlocked(k, junta)) Policies.Set(k, "gov", "military_junta", "coup");
-            Set(k, 40f);
-            SetPhase(k, 0, false);
-            Gov.Log("general_coup", k, G.Name(k), gen.getName(), null, null, gen.city);
-            Hub.Raise(Hub.Coup, k, null, k.capital, gen, "general");
-            return true;
-        }
-
-        public static void Crown(Kingdom k, Actor a)
-        {
-            Actor old = k.king;
-            if (G.Ok(old)) k.kingLeftEvent();
-            else k.removeKing();
-            if (a.city != null && a.isCityLeader()) a.city.removeLeader();
-            k.setKing(a);
-            Parliament.Invalidate(k);
-        }
-
-        private static void MaybeRestoration(Kingdom k, float m)
-        {
-            string old = Store.Str(k.data, KOldRoyal);
-            if (old.Length == 0) return;
-            long id;
-            if (!long.TryParse(old, out id)) return;
-            Clan c = Gov.ClanById(id);
-            if (c == null || G.Year - Store.Int(k.data, KOldRoyalY, G.Year) > 40)
-            {
-                Store.Put(k.data, KOldRoyal, "");
-                return;
-            }
-            if (m >= 40f || Plots.Has(k, "restoration", id)) return;
-            Actor chief = c.getChief();
-            if (!G.Ok(chief) || chief.kingdom != k || !chief.isAdult()) return;
-            if (G.Chance(0.2f)) Plots.Start(k, "restoration", id, k.data.id, G.Range(2, 4), "lost_crown");
-        }
-
-        public static void Restore(Kingdom k, long clan)
-        {
-            Clan c = Gov.ClanById(clan);
-            if (c == null || !G.Ok(k)) return;
-            Actor chief = c.getChief();
-            if (!G.Ok(chief) || chief.kingdom != k) return;
-            if (!G.Chance(G.Clamp(0.75f - Get(k) / 100f, 0.15f, 0.7f))) return;
-            Crown(k, chief);
-            Store.Put(k.data, KOldRoyal, "");
-            Set(k, 55f);
-            SetPhase(k, 0, false);
-            Gov.Log("restoration", k, G.Name(k), c.data.name, chief.getName());
         }
 
         public static void Push(Kingdom k)
         {
             if (!G.Ok(k)) return;
             int ph = Phase(k);
-            if (ph < 0) ph = 0;
-            int next = (ph + 1) % 4;
-            Set(k, next == 0 ? 50f : next == 1 ? 70f : next == 2 ? 40f : 15f);
-            SetPhase(k, next, true);
+            if (ph < 0)
+            {
+                Set(k, 60f);
+                SetPhase(k, 0, true);
+                return;
+            }
+            if (ph == 2)
+            {
+                Set(k, 15f);
+                if (!GreatRebellion(k)) SetPhase(k, 3, true);
+                return;
+            }
+            if (ph == 3)
+            {
+                Set(k, 60f);
+                NewDynasty(k, true);
+                return;
+            }
+            Set(k, ph == 0 ? 75f : 45f);
+            SetPhase(k, ph + 1, true);
+        }
+
+        public static float AttackPct(Kingdom k)
+        {
+            if (!Active(k)) return 0f;
+            float m = Get(k);
+            return m >= 50f ? (m - 50f) / 50f * 10f : (m - 50f) / 50f * 25f;
         }
 
         public static Dictionary<string, float> Effects(Kingdom k)
         {
             var fx = new Dictionary<string, float>();
-            if (!G.Ok(k)) return fx;
-            switch (Phase(k))
-            {
-                case 0:
-                    fx["prod"] = 0.03f;
-                    fx["loyalty"] = 0.02f;
-                    fx["attack"] = 0.03f;
-                    break;
-                case 1:
-                    fx["gold"] = 0.08f;
-                    fx["research"] = 0.05f;
-                    fx["prod"] = 0.05f;
-                    fx["attack"] = 0.05f;
-                    break;
-                case 2:
-                    fx["gold"] = -0.05f;
-                    fx["prod"] = -0.03f;
-                    fx["attack"] = -0.05f;
-                    break;
-                case 3:
-                    fx["gold"] = -0.12f;
-                    fx["defense"] = -0.08f;
-                    fx["attack"] = -0.15f;
-                    break;
-            }
+            if (!Active(k)) return fx;
+            float a = (float)Math.Round(AttackPct(k));
+            if (a != 0f) fx["attack"] = a;
             return fx;
         }
 
         public static int Loyalty(City c)
         {
-            if (!G.Ok(c) || c.kingdom == null || !c.kingdom.isCiv() || !Gov.On("civ_gov_cycle")) return 0;
+            if (!G.Ok(c) || c.kingdom == null || !Active(c.kingdom)) return 0;
             switch (Phase(c.kingdom))
             {
-                case 0: return 5;
-                case 1: return 8;
-                case 2: return -6;
-                case 3: return -18;
+                case 1: return 6;
+                case 2: return -(int)G.Clamp((70f - Get(c.kingdom)) / 6f, 0f, 10f);
+                case 3: return -12;
             }
             return 0;
+        }
+
+        public static int VassalOpinion(Kingdom lord)
+        {
+            if (!Active(lord)) return 0;
+            switch (Phase(lord))
+            {
+                case 0: return 5;
+                case 1: return 15;
+                default: return -(int)G.Clamp((70f - Get(lord)) / 2f, 0f, 30f);
+            }
         }
     }
 }

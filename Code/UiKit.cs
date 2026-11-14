@@ -24,10 +24,10 @@ namespace Civilizations
         {
             if (string.IsNullOrEmpty(path)) return null;
             Sprite s;
-            if (_cache.TryGetValue(path, out s) && s != null) return s;
+            if (_cache.TryGetValue(path, out s) && s != null) return Skin.Of(s);
             s = SpriteTextureLoader.getSprite(path);
             if (s != null) _cache[path] = s;
-            return s;
+            return Skin.Of(s);
         }
 
         public static Sprite Icon(string path, string fallback = "ui/Icons/civ/unknown")
