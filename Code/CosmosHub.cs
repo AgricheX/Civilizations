@@ -28,6 +28,8 @@ namespace Civilizations
             Hub.Raise(Colonized, k, null, k != null ? k.capital : null, null, p.Id.ToString(), p.Seat);
             if (!G.Ok(k)) return;
             int spread = Cosmos.Spread(Cosmos.St.Home, p.Seat);
+            if (spread >= 2) Space.Mark(k, "interstellar", 60f);
+            else foreach (City c in G.Cities(k)) Moods.Apply(c, "civ_star_wonder", 0.1f);
             string first = "colony_" + spread;
             if (Cosmos.First(first, k))
             {
@@ -68,6 +70,7 @@ namespace Civilizations
             Cosmos.Log(Txt.F("cos_log_scale", G.Name(k), Txt.T("cos_scale_" + scale)));
             Hub.Raise(Scaled, k, null, k.capital, null, scale.ToString(), "", scale);
             if (Cosmos.First("scale_" + scale, k)) Chronicle.Log("cos_first", k, G.Name(k), Txt.T("cos_scale_" + scale), "");
+            if (scale >= 5) Space.Mark(k, "galactic", 150f);
             Kardashev.Check(k);
         }
 
@@ -77,6 +80,8 @@ namespace Civilizations
             Hub.Raise(Met, k, null, null, null, alien.Id.ToString(), kind);
             if (!G.Ok(k)) return;
             Chronicle.Log("cos_contact", k, G.Name(k), alien.Name, Txt.T("cos_contact_" + kind));
+            foreach (City c in G.Cities(k)) Moods.Apply(c, "civ_first_contact", 0.35f);
+            Space.Mark(k, "contact", 80f);
             Internet.Official(k, "world", Txt.F("cos_news_contact", G.Name(k), alien.Name, Txt.T("cos_species_" + alien.Species)), true);
             Festivals.Mark(k, "first_contact");
         }
@@ -93,6 +98,7 @@ namespace Civilizations
             Hub.Raise(Built, k, null, null, null, id, place);
             if (!G.Ok(k)) return;
             Chronicle.Log("cos_mega", k, G.Name(k), Txt.T("cos_mega_" + id), place);
+            if (id == "dyson_swarm" || id == "dyson_sphere") Space.Mark(k, "dyson", 100f);
             Internet.Official(k, "space", Txt.F("cos_news_mega", G.Name(k), Txt.T("cos_mega_" + id), place), true);
             if (Cosmos.First("mega_" + id, k)) Chronicle.Log("cos_first", k, G.Name(k), Txt.T("cos_mega_" + id), place);
         }
@@ -102,6 +108,7 @@ namespace Civilizations
             Cosmos.Log(Txt.F(start ? "cos_log_invasion" : "cos_log_repelled", invader, target));
             Hub.Raise(Invaded, k, null, null, null, invader, target, start ? 1f : 0f);
             if (G.Ok(k)) Chronicle.Log(start ? "cos_invasion" : "cos_victory", k, invader, target, G.Name(k));
+            if (G.Ok(k)) foreach (City c in G.Cities(k)) Moods.Apply(c, start ? "civ_alien_fear" : "civ_victory", start ? 0.4f : 0.3f);
         }
     }
 
@@ -126,6 +133,7 @@ namespace Civilizations
             Store.Put(k.data, "civ_kardashev", t);
             Hub.Raise(CosmosHub.KardashevUp, k, null, k.capital, null, t.ToString(), "", t);
             if (Cosmos.First("kardashev_" + t, k)) Chronicle.Log("cos_kardashev", k, G.Name(k), Txt.T("cos_kardashev_" + t), "");
+            if (t >= 3) Space.Mark(k, "kardashev", 200f);
         }
     }
 }

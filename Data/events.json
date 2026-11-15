@@ -1634,7 +1634,7 @@
    "Cond": [],
    "Fx": {
     "stability": -0.02,
-    "mood": "civ_discovery",
+    "mood": "civ_first_contact",
     "share": 0.2,
     "bonus": {
      "research": 6,
@@ -2001,7 +2001,7 @@
    "Not": [],
    "Cond": [],
    "Fx": {
-    "mood": "civ_disaster",
+    "mood": "civ_cosmic_dread",
     "share": 0.15,
     "stability": -0.05,
     "bonus": {
@@ -2074,7 +2074,7 @@
    "Not": [],
    "Cond": [],
    "Fx": {
-    "mood": "civ_mourning",
+    "mood": "civ_cosmic_dread",
     "share": 0.2,
     "stability": -0.06,
     "bonus": {
@@ -2103,7 +2103,7 @@
    ],
    "Fx": {
     "stability": 0.08,
-    "mood": "civ_golden_age",
+    "mood": "civ_star_wonder",
     "share": 0.4,
     "bonus": {
      "culture": 14,

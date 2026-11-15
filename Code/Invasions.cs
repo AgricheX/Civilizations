@@ -101,6 +101,7 @@ namespace Civilizations
             if (!t.Warned && G.Year >= t.Warn - Math.Max(0, Research.Level(k, "cos:detect:") - Need(t.Kind)) * 4)
             {
                 t.Warned = true;
+                foreach (City c in G.Cities(k)) Moods.Apply(c, "civ_alien_fear", 0.2f);
                 if (Research.Level(k, "cos:detect:") >= Need(t.Kind) - 1 || t.Kind == "landing")
                 {
                     Internet.Official(k, "war", Txt.F("cos_news_warning", G.Name(k), name, place), true);

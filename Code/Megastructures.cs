@@ -93,6 +93,7 @@ namespace Civilizations
             "galactic_archive|5|29|180|3|1|research:40 culture:40|neutronium",
             "galactic_dyson|5|34|400|5|1|prod:300 research:60|neutronium",
             "penrose_ring|5|30|220|4|1|prod:150|neutronium",
+            "birch_planet|5|33|480|5|1|growth:150 health:25 stability:20 prod:40|neutronium,dark_matter",
             "star_crucible|5|30|200|4|1|prod:80|neutronium",
             "galactic_barrier|5|31|240|4|1|defense:60|neutronium|120",
             "ancient_lock|5|31|200|3|1|stability:20 defense:30|exotic_matter|60",

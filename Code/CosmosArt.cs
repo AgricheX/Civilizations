@@ -378,6 +378,14 @@ namespace Civilizations
                     if (m.Id == "dyson_swarm") for (int i = 0; i < 18; i++) Blend((int)(W / 2f + Math.Cos(i * 0.35) * r), (int)(H / 2f + Math.Sin(i * 0.35) * r), c, a);
                     continue;
                 }
+                if (n.Level == 5 && m.Id == "birch_planet" && m.Node == n.Path)
+                {
+                    Ring(W / 2f, H / 2f, 15, 15, c, a);
+                    Ring(W / 2f, H / 2f, 13, 13, new Color32(90, 170, 110, 255), a * 0.8f);
+                    Ring(W / 2f, H / 2f, 24, 6, c, a * 0.8f);
+                    Ring(W / 2f, H / 2f, 6, 24, c, a * 0.6f);
+                    continue;
+                }
                 if (n.Level == 0 && m.Id == "orbital_ring" && m.Node == n.Path)
                 {
                     Ring(W / 2f, H / 2f, 50, 8, c, a);

@@ -9,7 +9,19 @@ namespace Civilizations
         public const string KLaunches = "civ_launches";
         public const string KPrestige = "civ_space_prestige";
         public const string KFirsts = "civ_space_firsts";
-        public static readonly string[] Milestones = { "satellite", "crewed", "moon", "station", "mars", "elevator" };
+        public static readonly string[] Milestones = { "satellite", "crewed", "moon", "station", "mars", "elevator", "interstellar", "contact", "dyson", "galactic", "kardashev" };
+
+        public static void Mark(Kingdom k, string id, float prestige)
+        {
+            if (!G.Ok(k)) return;
+            Dictionary<string, string> firsts = Firsts();
+            if (firsts.ContainsKey(id)) return;
+            firsts[id] = G.Id(k);
+            SaveFirsts(firsts);
+            Store.Put(k.data, KPrestige, Prestige(k) + prestige);
+            foreach (City c in G.Cities(k)) Moods.Apply(c, "civ_star_wonder", 0.3f);
+            Chronicle.Log("launch", k, G.Name(k), Txt.T("world_mission_" + id));
+        }
 
         public static int Satellites(Kingdom k)
         {
@@ -72,6 +84,7 @@ namespace Civilizations
             List<Company> launchers = Companies.SpaceLaunchers(k);
             rate += launchers.Count * 0.15f;
             if (Research.Has(k, "reusable_rockets")) rate *= 2f;
+            rate += Math.Min(0.5f, Roles.Count(pad, Roles.Astronaut) * 0.08f);
             if (!EraGoods.HasFuel(pad, k, 10) && !Economy.Has(pad, "civ_uranium", 2) && Research.Route(k) != "tesla" && Research.Route(k) != "steam") return;
             int n = 0;
             while (n < 3 && G.Chance(Math.Min(0.9f, rate * yrs)))
@@ -82,8 +95,15 @@ namespace Civilizations
                 Company by = launchers.Count > 0 && G.Chance(0.6f) ? G.Pick(launchers) : null;
                 EraGoods.TakeFuel(pad, k, 10);
                 Kingdom kk = k;
-                Transit.Rocket(G.Tile(pad), Research.Route(k), () => Complete(kk, mission, by));
+                Transit.Rocket(G.Tile(pad), RocketKind(k), () => Complete(kk, mission, by));
             }
+        }
+
+        private static string RocketKind(Kingdom k)
+        {
+            if (Research.Has(k, "dark_matter_engines")) return "dark";
+            if (Research.Has(k, "fusion_torches")) return "fusion";
+            return Research.Route(k);
         }
 
         private static string Mission(Kingdom k)

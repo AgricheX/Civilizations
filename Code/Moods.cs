@@ -41,7 +41,11 @@ namespace Civilizations
             { "civ_plague", -12 },
             { "civ_disaster", -10 },
             { "civ_divine_wrath", -10 },
-            { "civ_divine_gift", 8 }
+            { "civ_divine_gift", 8 },
+            { "civ_first_contact", 10 },
+            { "civ_alien_fear", -12 },
+            { "civ_cosmic_dread", -10 },
+            { "civ_star_wonder", 8 }
         };
 
         public static void InitAssets()

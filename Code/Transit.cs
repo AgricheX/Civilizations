@@ -628,6 +628,9 @@ namespace Civilizations
 
         private static string PlaneSprite(Kingdom k)
         {
+            if (Research.Has(k, "dark_transit")) return "plane_darkglider";
+            if (Research.Has(k, "exotic_orbital_ferries")) return "plane_ferry";
+            if (Research.Has(k, "suborbital_airliners")) return "plane_spaceplane";
             switch (Research.Route(k))
             {
                 case "steam": return "plane_airship";

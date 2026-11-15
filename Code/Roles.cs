@@ -23,8 +23,10 @@ namespace Civilizations
         public const string Sapper = "sapper";
         public const string Servant = "servant";
         public const string Ambassador = "ambassador";
+        public const string Astronaut = "astronaut";
+        public const string Xenologist = "xenologist";
 
-        public static readonly string[] All = { Sage, Scientist, Merchant, Worker, Engineer, Driver, Pilot, Artillery, Aviator, Sapper, Servant, Ambassador };
+        public static readonly string[] All = { Sage, Scientist, Merchant, Worker, Engineer, Driver, Pilot, Artillery, Aviator, Sapper, Servant, Ambassador, Astronaut, Xenologist };
         public static readonly string[] Military = { Artillery, Aviator, Sapper };
         public static readonly string[] Specialties = { "mil", "build", "med", "agri", "sci", "energy", "ind", "comp", "space", "metal", "trans", "comm", "xeno", "mega" };
 
@@ -91,6 +93,14 @@ namespace Civilizations
                     case Driver:
                     case Pilot:
                         t.base_stats["speed"] = 3f;
+                        break;
+                    case Astronaut:
+                        t.base_stats["stamina"] = 15f;
+                        t.base_stats["intelligence"] = 2f;
+                        break;
+                    case Xenologist:
+                        t.base_stats["intelligence"] = 3f;
+                        t.base_stats["diplomacy"] = 3f;
                         break;
                 }
                 AssetManager.traits.add(t);
@@ -233,6 +243,10 @@ namespace Civilizations
                     return Research.Has(k, "bureaucracy") && c.hasBuildingType("type_hall") ? Math.Min(5, 1 + pop / 50) : 0;
                 case Ambassador:
                     return Research.Has(k, "resident_embassies") && c.isCapitalCity() ? Math.Min(3, Research.Contacts(k).Count) : 0;
+                case Astronaut:
+                    return Research.Has(k, "crewed_spaceflight") ? Math.Min(6, c.countBuildingsType("type_civ_launchpad") * 2 + (era >= 15 && c.isCapitalCity() ? 1 : 0)) : 0;
+                case Xenologist:
+                    return Research.Has(k, "astrobiology_labs") ? Math.Min(3, labs + unis / 2) : 0;
             }
             return 0;
         }
@@ -309,9 +323,11 @@ namespace Civilizations
             float power = byRole[Sage].Count;
             float sciW = 2f + (c.hasBuildingType("type_civ_university") ? 1f : 0f) + (c.hasBuildingType("type_civ_lab") ? 1.5f : 0f);
             power += byRole[Scientist].Count * sciW;
+            power += byRole[Xenologist].Count * 1.5f;
             Store.Put(c.data, KPower, power);
             var specs = new Dictionary<string, float>();
             foreach (Actor s in byRole[Scientist]) Store.Add(specs, Spec(s), 1f);
+            if (byRole[Xenologist].Count > 0) Store.Add(specs, "xeno", byRole[Xenologist].Count * 1.5f);
             Store.Map(c.data, "civ_specs", specs);
             if (c.isCapitalCity()) PlanAmbassadors(c, byRole[Ambassador]);
         }

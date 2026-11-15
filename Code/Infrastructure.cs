@@ -15,13 +15,16 @@ namespace Civilizations
         {
             TopTileType road = TopTileLibrary.road ?? AssetManager.top_tiles.get("road");
             if (road == null) return;
-            _levels = new TopTileType[6];
+            _levels = new TopTileType[9];
             _levels[0] = road;
             _levels[1] = Make("civ_road_packed", "#A98A6B", 1.6f, road);
             _levels[2] = Make("civ_road_stone", "#9C9488", 1.75f, road);
             _levels[3] = Make("civ_road_macadam", "#7E7872", 1.9f, road);
             _levels[4] = Make("civ_road_asphalt", "#3E3E44", 2.2f, road);
             _levels[5] = Make("civ_road_highway", "#2E2F35", 2.5f, road);
+            _levels[6] = Make("civ_road_maglane", "#B8C4CC", 2.9f, road);
+            _levels[7] = Make("civ_road_gravlane", "#4A3A6A", 3.3f, road);
+            _levels[8] = Make("civ_road_lightway", "#2A2418", 3.8f, road);
             RailBed = Make("civ_rail_bed", "#5B4E45", 1.3f, road);
             Walls.InitAssets();
         }
@@ -63,7 +66,7 @@ namespace Civilizations
         {
             if (t == null || t.top_type == null || !t.Type.road) return -1;
             if (_levels == null) return 0;
-            for (int i = 5; i >= 1; i--) if (t.top_type == _levels[i]) return i;
+            for (int i = _levels.Length - 1; i >= 1; i--) if (t.top_type == _levels[i]) return i;
             if (t.top_type == RailBed) return 0;
             return 0;
         }
@@ -156,7 +159,7 @@ namespace Civilizations
             bool bridges = Research.HasFeature(a.kingdom, "bridges");
             List<WorldTile> path = Paths.Find(ta, tb, t => Cost(t, bridges), 9000);
             if (path.Count == 0) return budget;
-            TopTileType type = _levels != null ? _levels[Math.Min(level, 5)] : TopTileLibrary.road;
+            TopTileType type = _levels != null ? _levels[Math.Min(level, _levels.Length - 1)] : TopTileLibrary.road;
             foreach (WorldTile t in path)
             {
                 if (budget <= 0) break;
