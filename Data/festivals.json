@@ -444,5 +444,273 @@
   "Big": false,
   "Fireworks": true,
   "W": 1.0
+ },
+ {
+  "Id": "zero_g_games",
+  "Tech": "zero_g_arts",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.25,
+   "culture": 4,
+   "prestige": 2
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "colonial_fair",
+  "Tech": "colonial_festivals",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.2,
+   "loyalty": 5,
+   "trade": 3
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.3
+ },
+ {
+  "Id": "vacuum_ballet",
+  "Tech": "vacuum_ballet",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.25,
+   "culture": 6
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "antimatter_lights",
+  "Tech": "antimatter_sculpture",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.3,
+   "prestige": 4,
+   "gold": -30
+  },
+  "Big": false,
+  "Fireworks": true,
+  "W": 1.0
+ },
+ {
+  "Id": "warp_opera",
+  "Tech": "warp_light_opera",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.25,
+   "culture": 7
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "star_feast",
+  "Tech": "fusion_cuisine",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.3,
+   "trade": 4,
+   "food": -15
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "gate_carnival",
+  "Tech": "gate_festival_culture",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.35,
+   "trade": 5,
+   "prod": -4
+  },
+  "Big": true,
+  "Fireworks": false,
+  "W": 1.2
+ },
+ {
+  "Id": "remnant_vigil",
+  "Tech": "stellar_remnant_rites",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "stability": 0.04,
+   "loyalty": 4
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "domain_theater",
+  "Tech": "stellar_domain_theater",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "culture": 8,
+   "prestige": 3
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "horizon_pilgrimage",
+  "Tech": "black_hole_pilgrimage",
+  "Need": [
+   "religious"
+  ],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "stability": 0.04,
+   "legit": 0.04,
+   "mood": 0.15
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "spiral_festival",
+  "Tech": "spiral_festivals",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "stability": 0.04,
+   "mood": 0.3,
+   "culture": 6
+  },
+  "Big": true,
+  "Fireworks": true,
+  "W": 1.0
+ },
+ {
+  "Id": "wanderer_night",
+  "Tech": "wanderer_festivals",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.2,
+   "loyalty": 4,
+   "research": 3
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "merging_festival",
+  "Tech": "merging_culture_festivals",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.25,
+   "trade": 6,
+   "culture": 6
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "quasar_banquet",
+  "Tech": "quasar_light_cuisine",
+  "Need": [],
+  "Any": [],
+  "Cond": [
+   "rich"
+  ],
+  "Fx": {
+   "mood": 0.3,
+   "trade": 5,
+   "food": -20
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "infall_festival",
+  "Tech": "infall_festivals",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.3,
+   "prod": 4
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "unity_arts",
+  "Tech": "unity_arts_festival",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "stability": 0.03,
+   "culture": 9
+  },
+  "Big": true,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "vacuum_games",
+  "Tech": "vacuum_sports",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "mood": 0.3,
+   "prestige": 6
+  },
+  "Big": false,
+  "Fireworks": false,
+  "W": 1.0
+ },
+ {
+  "Id": "final_symphony",
+  "Tech": "the_final_symphony",
+  "Need": [],
+  "Any": [],
+  "Cond": [],
+  "Fx": {
+   "stability": 0.05,
+   "legit": 0.04,
+   "mood": 0.35,
+   "culture": 10
+  },
+  "Big": true,
+  "Fireworks": true,
+  "W": 1.2
  }
 ]

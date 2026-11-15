@@ -164,6 +164,7 @@ namespace Civilizations
                 {
                     string id = src + "__" + t;
                     if (AssetManager.world_log_library.get(id) != null) continue;
+                    WorldLogTextFormatter inner = a.text_replacer;
                     AssetManager.world_log_library.add(new WorldLogAsset
                     {
                         id = id,
@@ -171,7 +172,12 @@ namespace Civilizations
                         path_icon = a.path_icon,
                         color = a.color,
                         locale_id = "civ_wl_" + src + "_" + t,
-                        text_replacer = a.text_replacer
+                        text_replacer = (WorldLogMessage m, ref string text) =>
+                        {
+                            text = text.Replace("$kingdom$", "$name$");
+                            if (inner != null) inner(m, ref text);
+                            if (text.Contains("$name$")) text = text.Replace("$name$", m.special1 ?? "");
+                        }
                     });
                 }
             }

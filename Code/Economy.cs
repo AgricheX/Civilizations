@@ -33,7 +33,12 @@ namespace Civilizations
             { "civ_steel", "common_metals" }, { "civ_bricks", "stone" }, { "civ_concrete", "stone" }, { "civ_glass", "gems" }, { "civ_paper", "wood" },
             { "civ_tools", "common_metals" }, { "civ_machinery", "common_metals" }, { "civ_electronics", "gems" }, { "civ_plastics", "bag_default" },
             { "civ_chemicals", "bag_default" }, { "civ_medicine", "bag_default" }, { "civ_ammo", "common_metals" }, { "civ_uranium", "gems" },
-            { "civ_powder", "bag_default" }, { "civ_canned", "bag_food" }, { "civ_frozen", "bag_food" }, { "civ_biomass", "wood" }
+            { "civ_powder", "bag_default" }, { "civ_canned", "bag_food" }, { "civ_frozen", "bag_food" }, { "civ_biomass", "wood" },
+            { "civ_helium3", "bag_default" }, { "civ_asteroid_metals", "common_metals" }, { "civ_comet_ice", "gems" }, { "civ_antimatter", "gems" },
+            { "civ_exotic_matter", "gems" }, { "civ_neutronium", "common_metals" }, { "civ_dark_matter", "gems" }, { "civ_alloys", "common_metals" },
+            { "civ_fusion_cells", "gems" }, { "civ_superconductors", "common_metals" }, { "civ_nanomaterials", "gems" }, { "civ_nanomeds", "bag_default" },
+            { "civ_antimatter_cells", "gems" }, { "civ_metamaterials", "gems" }, { "civ_neutronium_plate", "common_metals" }, { "civ_smart_matter", "gems" },
+            { "civ_dark_cells", "gems" }, { "civ_vacuum_cells", "gems" }, { "civ_charge_packs", "common_metals" }, { "civ_vat_meals", "bag_food" }, { "civ_star_rations", "bag_food" }
         };
 
         public static void InitAssets()
@@ -42,12 +47,12 @@ namespace Civilizations
             foreach (string id in Db.Resources)
             {
                 if (lib.get(id) != null) continue;
-                bool food = id == "civ_canned" || id == "civ_frozen";
+                bool food = EraGoods.Foods.Contains(id);
                 ResourceAsset r;
                 if (food)
                 {
                     r = lib.clone(id, "$TEMPLATE_FOOD$");
-                    r.restore_nutrition = id == "civ_canned" ? 60 : 70;
+                    r.restore_nutrition = id == "civ_canned" ? 60 : id == "civ_frozen" ? 70 : id == "civ_vat_meals" ? 80 : 95;
                     r.restore_health = 0.1f;
                     r.restore_happiness = 4;
                     r.tastiness = 0.4f;
@@ -128,6 +133,21 @@ namespace Civilizations
             Rc("civ_canned", 2, "canning", "type_civ_factory", 8, true, In("@food", 3));
             Rc("civ_frozen", 3, "refrigeration", "type_civ_factory", 8, true, In("@food", 3));
             Rc("civ_biomass", 3, "synthetic_crops", "type_civ_factory,type_civ_lab", 6, true, In("@food", 2));
+            Rc("civ_alloys", 2, "lunar_regolith_alloys", "type_civ_smelter,type_civ_factory", 4, true, In("civ_steel", 2), In("civ_asteroid_metals,common_metals", 1));
+            Rc("civ_fusion_cells", 2, "helium3_refineries", "type_civ_factory,type_civ_lab", 6, true, In("civ_helium3,civ_comet_ice", 1));
+            Rc("civ_superconductors", 2, "mercury_foundries", "type_civ_factory,type_civ_lab", 4, true, In("civ_alloys", 1), In("civ_electronics", 1));
+            Rc("civ_vat_meals", 3, "vat_grown_foods", "type_civ_factory,type_civ_lab", 8, true, In("civ_biomass,@food", 1), In("civ_comet_ice,wheat", 1));
+            Rc("civ_nanomaterials", 2, "orbital_foundries_s2", "type_civ_factory,type_civ_lab", 4, true, In("civ_alloys", 1), In("civ_superconductors", 1));
+            Rc("civ_nanomeds", 3, "radiation_medicine_s2", "type_civ_hospital,type_civ_lab", 4, true, In("civ_nanomaterials", 1), In("civ_chemicals,civ_medicine", 1));
+            Rc("civ_antimatter", 1, "antimatter_factories", "type_civ_lab", 2, true, In("civ_superconductors", 1));
+            Rc("civ_charge_packs", 4, "antimatter_munitions", "type_civ_smelter,type_civ_factory", 6, true, In("civ_superconductors", 1), In("civ_fusion_cells,civ_antimatter", 1));
+            Rc("civ_antimatter_cells", 2, "antimatter_depots", "type_civ_factory,type_civ_lab", 6, true, In("civ_antimatter", 1), In("civ_superconductors", 1));
+            Rc("civ_metamaterials", 2, "exotic_matter_forges", "type_civ_factory,type_civ_lab", 4, true, In("civ_exotic_matter", 1), In("civ_nanomaterials", 1));
+            Rc("civ_neutronium_plate", 2, "heavy_element_refineries", "type_civ_smelter,type_civ_factory", 4, true, In("civ_neutronium", 1), In("civ_alloys", 2));
+            Rc("civ_star_rations", 4, "core_synthetic_foods", "type_civ_factory,type_civ_lab", 8, true, In("civ_comet_ice", 1), In("civ_vat_meals,@food", 1));
+            Rc("civ_smart_matter", 2, "smart_matter_alloys", "type_civ_factory,type_civ_lab", 4, true, In("civ_metamaterials", 1), In("civ_nanomaterials", 1));
+            Rc("civ_dark_cells", 2, "dark_matter_reactors", "type_civ_factory,type_civ_lab", 6, true, In("civ_dark_matter", 1), In("civ_metamaterials", 1));
+            Rc("civ_vacuum_cells", 3, "vacuum_fabrication", "type_civ_lab,type_civ_factory", 6, true, In("civ_smart_matter", 1));
         }
 
         private static KeyValuePair<string[], int> In(string ids, int amount)
@@ -316,6 +336,7 @@ namespace Civilizations
             if (Research.Has(k, "petroleum") || Research.Has(k, "diesel_engine")) Produce(c, "civ_oil", wells * 8f, yrs, rep);
             if (Research.Has(k, "nuclear_fission")) Produce(c, "civ_uranium", mines * 0.6f * tools, yrs, rep);
             if (Research.Has(k, "gas_lighting") && !Research.Has(k, "coal_mining")) Produce(c, "civ_coal", mines * 1f, yrs, rep);
+            EraGoods.Extract(c, k, tools, yrs, rep, Produce);
         }
 
         private static void Food(City c, Kingdom k, int adults, int yrs, Dictionary<string, float> rep)
@@ -367,21 +388,22 @@ namespace Civilizations
 
         private static void Consume(City c, Kingdom k, int adults, int yrs, Dictionary<string, float> rep)
         {
-            int fuelNeed = Vehicles.FuelNeed(c, "fuel") * yrs;
-            int coalNeed = Vehicles.FuelNeed(c, "coal") * yrs;
-            int uraniumNeed = Vehicles.FuelNeed(c, "uranium") * yrs;
-            int bioNeed = Vehicles.FuelNeed(c, "bio") * yrs;
             float ok = 1f;
-            if (fuelNeed > 0) ok = Math.Min(ok, (float)TakeUpTo(c, "civ_fuel", fuelNeed) / fuelNeed);
-            if (coalNeed > 0) ok = Math.Min(ok, (float)TakeUpTo(c, "civ_coal", coalNeed) / coalNeed);
-            if (uraniumNeed > 0) ok = Math.Min(ok, (float)TakeUpTo(c, "civ_uranium", uraniumNeed) / uraniumNeed);
-            if (bioNeed > 0) ok = Math.Min(ok, (float)TakeUpTo(c, "civ_biomass", bioNeed) / bioNeed);
+            foreach (string kind in EraGoods.FuelKinds)
+            {
+                int need = Vehicles.FuelNeed(c, kind) * yrs;
+                if (need <= 0) continue;
+                ok = Math.Min(ok, (float)TakeUpTo(c, EraGoods.FuelRes(kind), need) / need);
+            }
             if (Vehicles.FuelNeed(c, "electric") > 0) ok = Math.Min(ok, Energy.Ratio(c));
             Store.Put(c.data, "civ_fuel_ok", ok);
             if (Research.Has(k, "apothecaries"))
             {
                 int need = Math.Max(1, adults / 30) * yrs;
-                int had = TakeUpTo(c, "civ_medicine", need);
+                int had = 0;
+                if (Research.Has(k, "radiation_medicine_s2")) had += TakeUpTo(c, "civ_nanomeds", need) * 2;
+                if (had < need) had += TakeUpTo(c, "civ_medicine", need - had);
+                had = Math.Min(had, need);
                 Store.Put(c.data, "civ_med_ok", (float)had / need);
             }
         }

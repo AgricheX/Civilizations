@@ -36,9 +36,9 @@ namespace Civilizations
         private static List<WorldOrder> _list = new List<WorldOrder>();
         private static bool _loaded;
 
-        private static readonly HashSet<string> Governance = new HashSet<string> { "universal_empire", "hegemonic_peace", "world_federation", "technocratic_directorate", "corporate_consortium", "revolutionary_commune" };
-        private static readonly HashSet<string> Councils = new HashSet<string> { "concert_of_powers", "league_of_kingdoms", "united_council" };
-        private static readonly HashSet<string> Harsh = new HashSet<string> { "universal_empire", "tributary_order", "religious_arbitration", "hegemonic_peace", "revolutionary_commune" };
+        private static readonly HashSet<string> Governance = new HashSet<string> { "universal_empire", "hegemonic_peace", "world_federation", "technocratic_directorate", "corporate_consortium", "revolutionary_commune", "hive_unity" };
+        private static readonly HashSet<string> Councils = new HashSet<string> { "concert_of_powers", "league_of_kingdoms", "united_council", "solar_concord" };
+        private static readonly HashSet<string> Harsh = new HashSet<string> { "universal_empire", "tributary_order", "religious_arbitration", "hegemonic_peace", "revolutionary_commune", "celestial_synod" };
 
         public static IEnumerable<WorldOrder> Active
         {
@@ -166,6 +166,21 @@ namespace Civilizations
                         Store.Add(m, "prod", 5f);
                         Store.Add(m, "loyalty", 3f);
                         break;
+                    case "solar_concord":
+                        Store.Add(m, "stability", 4f);
+                        Store.Add(m, "trade", 4f);
+                        Store.Add(m, "research", 2f);
+                        break;
+                    case "hive_unity":
+                        Store.Add(m, "prod", 6f);
+                        Store.Add(m, "loyalty", 4f);
+                        if (o.Leader == k.data.id) Store.Add(m, "prestige", 8f);
+                        break;
+                    case "celestial_synod":
+                        Store.Add(m, "stability", 4f);
+                        Store.Add(m, "loyalty", 4f);
+                        if (o.Leader == k.data.id) Store.Add(m, "prestige", 8f);
+                        break;
                 }
             }
             return m;
@@ -252,7 +267,8 @@ namespace Civilizations
             public Kingdom Top, Second;
             public float TopShare, SecondShare;
             public int TopEra;
-            public float DemShare, RevShare, TechShare;
+            public float DemShare, RevShare, TechShare, HiveShare;
+            public int Spacefaring;
             public string MainReligion = "";
             public float ReligionShare;
             public bool WorldWar, NukeUsed;
@@ -271,6 +287,8 @@ namespace Civilizations
                 if (p.Fam.Contains("democratic")) w.DemShare += s;
                 if (p.Fam.Contains("revolutionary")) w.RevShare += s;
                 if (p.Fam.Contains("technocratic")) w.TechShare += s;
+                if (p.Fam.Contains("collective")) w.HiveShare += s;
+                if (p.Era >= 15) w.Spacefaring++;
                 if (p.Religion.Length > 0) Store.Add(rel, p.Religion, 1f);
             }
             if (w.Total <= 0f) return w;
@@ -289,6 +307,7 @@ namespace Civilizations
             w.DemShare /= w.Total;
             w.RevShare /= w.Total;
             w.TechShare /= w.Total;
+            w.HiveShare /= w.Total;
             if (rel.Count > 0)
             {
                 var best = rel.OrderByDescending(kv => kv.Value).First();
@@ -327,6 +346,9 @@ namespace Civilizations
                     KProfile sp = Profile.Get(w.Second);
                     return (tp.Fam.Contains("democratic") && (sp.Fam.Contains("authoritarian") || sp.Fam.Contains("revolutionary"))) || (sp.Fam.Contains("democratic") && (tp.Fam.Contains("authoritarian") || tp.Fam.Contains("revolutionary")));
                 case "revolutionary_commune": return w.RevShare >= 0.4f * slack;
+                case "solar_concord": return w.WorldWar || w.NukeUsed || existing != null || w.Spacefaring >= 3;
+                case "hive_unity": return w.HiveShare >= 0.4f * slack;
+                case "celestial_synod": return w.ReligionShare >= 0.5f * slack && w.Ks.Count >= 3 && tp.Fam.Contains("theocratic") && tp.Religion == w.MainReligion;
             }
             return false;
         }
@@ -364,7 +386,7 @@ namespace Civilizations
                 o.Failing = Holds(o.Type, w, o) ? 0 : o.Failing + 1;
                 if (o.Failing >= 10 || o.Legit < 0.12f)
                 {
-                    string next = o.Type == "league_of_kingdoms" && w.TopEra >= 12 ? "united_council" : o.Type == "universal_empire" ? "concert_of_powers" : "";
+                    string next = (o.Type == "united_council" || o.Type == "league_of_kingdoms") && w.TopEra >= 15 ? "solar_concord" : o.Type == "league_of_kingdoms" && w.TopEra >= 12 ? "united_council" : o.Type == "universal_empire" ? "concert_of_powers" : "";
                     Fall(o, o.Legit < 0.12f ? "illegitimate" : "conditions");
                     if (next.Length > 0 && Holds(next, w, null)) Rise(next, w);
                     continue;
@@ -387,8 +409,8 @@ namespace Civilizations
         {
             var o = new WorldOrder { Type = id, Leader = w.Top.data.id, Since = G.Year };
             if (id == "bipolar_blocs" && w.Second != null) o.Second = w.Second.data.id;
-            if (id == "religious_arbitration") o.Key = w.MainReligion;
-            if (id == "league_of_kingdoms" || id == "united_council" || id == "concert_of_powers")
+            if (id == "religious_arbitration" || id == "celestial_synod") o.Key = w.MainReligion;
+            if (id == "league_of_kingdoms" || id == "united_council" || id == "concert_of_powers" || id == "solar_concord")
             {
                 Kingdom founder = w.Ks.Where(k => Profile.Get(k).Fam.Contains("democratic")).OrderByDescending(k => Profile.Get(k).Strength).FirstOrDefault();
                 if (founder != null) o.Leader = founder.data.id;
@@ -439,6 +461,9 @@ namespace Civilizations
                     case "corporate_consortium": join = p.Fam.Contains("corporate") || Companies.Of(k).Count >= 3; break;
                     case "bipolar_blocs": join = p.Era >= 10 && Diplomacy.DepOf(k) == null || Diplomacy.Overlord(k) != null; break;
                     case "revolutionary_commune": join = p.Fam.Contains("revolutionary") || p.Fam.Contains("leftist"); break;
+                    case "solar_concord": join = p.Era >= 14; break;
+                    case "hive_unity": join = p.Fam.Contains("collective") || p.Fam.Contains("machine"); break;
+                    case "celestial_synod": join = p.Religion == o.Key; break;
                 }
                 if (join) keep.Add(k.data.id);
             }
@@ -500,7 +525,7 @@ namespace Civilizations
                 if (kv.Value >= 4 && G.Chance(0.25f)) Intervene(o, lead, t, members);
                 if (kv.Value >= 6) Erasure(o, lead, t, members);
             }
-            if (o.Type == "united_council" || o.Type == "world_federation" || o.Type == "technocratic_directorate")
+            if (o.Type == "united_council" || o.Type == "world_federation" || o.Type == "technocratic_directorate" || o.Type == "solar_concord")
             {
                 if (!o.Bans.Contains("atomic_bomb") && G.Chance(0.05f))
                 {
@@ -508,7 +533,7 @@ namespace Civilizations
                     Hub.Raise(Hub.OrgVote, lead, null, lead.capital, null, "tech_ban", "order:" + o.Type, 1f);
                 }
             }
-            if (o.Type == "religious_arbitration" && G.Chance(0.05f))
+            if ((o.Type == "religious_arbitration" || o.Type == "celestial_synod") && G.Chance(0.05f))
             {
                 Kingdom heretic = w.Ks.FirstOrDefault(k => Profile.Get(k).Religion != o.Key && Profile.Get(k).Religion.Length > 0 && Fog.Knows(lead, k));
                 if (heretic != null) Strike(o, heretic, 1);

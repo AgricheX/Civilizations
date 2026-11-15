@@ -33,6 +33,7 @@ namespace Civilizations
                 case "civ_missile_destroyer": return "ship_escort";
             }
             if (d.Cls == "soldier") return "sol_" + d.Role;
+            if (d.Cls == "mount") return "cavalry";
             if (d.Cls == "air") return "air_" + d.Role;
             if (d.Cls == "space") return "space_" + d.Role;
             if (d.Cls == "ship") return d.Role == "trade" ? "ship_trade" : d.Role == "fish" ? "ship_fish" : "ship_surface";

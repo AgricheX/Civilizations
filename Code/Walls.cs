@@ -288,7 +288,7 @@ namespace Civilizations
             if (Diplomacy.Overlord(k) == o || Diplomacy.Overlord(o) == k) return true;
             foreach (Treaty t in Diplomacy.Between(k, o))
             {
-                if (t.Type == "non_aggression" || t.Type == "trade_treaty" || t.Type == "embassy" || t.Type == "defense_pact" || t.Type == "entente" || t.Type == "nuclear_umbrella" || t.Type == "royal_marriage") return true;
+                if (t.Type == "non_aggression" || t.Type == "trade_treaty" || t.Type == "embassy" || t.Type == "defense_pact" || t.Type == "entente" || t.Type == "nuclear_umbrella" || t.Type == "royal_marriage" || t.Type == "colony_compact" || t.Type == "lane_access" || t.Type == "stellar_defense" || t.Type == "tech_exchange") return true;
             }
             if (Orgs.Shares(k, o, x => true)) return true;
             try

@@ -7,7 +7,8 @@ namespace Civilizations
 {
     internal static class EraBuildingVisuals
     {
-        private const int EraCount = 15;
+        private const int EraCount = 18;
+        private const int ClassicEras = 15;
         private static readonly string[] Families = { "mine", "mill", "barracks", "bonfire", "stockpile", "market", "well", "watchtower" };
         private static readonly int[] FirstEras = { 3, 2, 4, 0, 0, 5, 5, 1 };
         private static readonly Sprite[][] Frames = new Sprite[Families.Length * EraCount][];
@@ -65,7 +66,7 @@ namespace Civilizations
 
         private static int Stage(int family, Kingdom kingdom)
         {
-            int era = Math.Max(0, Math.Min(EraCount - 1, Research.Era(kingdom)));
+            int era = Slot(Research.Era(kingdom));
             if (era < FirstEras[family]) return -1;
             if (family == 0 && (era < 3 || !Research.Has(kingdom, "copper_smelting"))) return -1;
             if (family == 2 && (era < 4 || !Research.Has(kingdom, "standing_army"))) return -1;
@@ -82,6 +83,19 @@ namespace Civilizations
             return era;
         }
 
+        private static int Slot(int era)
+        {
+            if (era < ClassicEras) return Math.Max(0, era);
+            if (era <= 23) return ClassicEras;
+            if (era <= 32) return ClassicEras + 1;
+            return ClassicEras + 2;
+        }
+
+        private static string Folder(int slot)
+        {
+            return slot < ClassicEras ? slot.ToString() : (ClassicEras + (slot - ClassicEras) * 9).ToString();
+        }
+
         private static Sprite[] GetFrames(int family, int era)
         {
             int slot = family * EraCount + era;
@@ -89,7 +103,7 @@ namespace Civilizations
             Loaded[slot] = true;
             int count = 1;
             var sprites = new Sprite[count];
-            string path = "buildings/civ/era_visuals/" + Families[family] + "/" + era + "/main_";
+            string path = "buildings/civ/era_visuals/" + Families[family] + "/" + Folder(era) + "/main_";
             for (int i = 0; i < count; i++)
             {
                 Sprite source = SpriteTextureLoader.getSprite(path + i);

@@ -4,7 +4,7 @@ namespace Civilizations
 {
     internal static class Docks
     {
-        public const int Tiers = 5;
+        public const int Tiers = 8;
 
         public static string Id(int tier)
         {
@@ -43,6 +43,9 @@ namespace Civilizations
 
         public static int TierFor(int era)
         {
+            if (era >= 33) return 8;
+            if (era >= 24) return 7;
+            if (era >= 15) return 6;
             if (era >= 14) return 5;
             if (era >= 12) return 4;
             if (era >= 10) return 3;

@@ -14,7 +14,9 @@ namespace Civilizations
         {
             { "fodder", new[] { "wood" } }, { "powder", new[] { "common_metals", "civ_powder" } }, { "coal", new[] { "civ_steel", "civ_machinery" } },
             { "fuel", new[] { "civ_steel", "civ_machinery" } }, { "electric", new[] { "civ_steel", "civ_electronics" } }, { "uranium", new[] { "civ_steel", "civ_electronics" } },
-            { "bio", new[] { "civ_biomass" } }, { "", new[] { "wood" } }
+            { "bio", new[] { "civ_biomass" } }, { "", new[] { "wood" } },
+            { "fusion", new[] { "civ_alloys", "civ_superconductors" } }, { "antimatter", new[] { "civ_superconductors", "civ_nanomaterials" } },
+            { "dark", new[] { "civ_metamaterials", "civ_neutronium_plate" } }, { "vacuum", new[] { "civ_smart_matter", "civ_neutronium_plate" } }
         };
 
         public static bool On
@@ -192,7 +194,8 @@ namespace Civilizations
             Produce(c, have, "passenger", drivers / 2, Roles.Driver, false);
             int era = Research.Era(c.kingdom);
             bool bioMounts = Research.Route(c.kingdom) == "bio" && Research.Has(c.kingdom, "bio_mounts");
-            float cav = era >= 12 && !bioMounts ? 0f : era >= 11 ? 1f : 3f;
+            bool cosmicMounts = era >= 15 && (Research.Has(c.kingdom, "vacuum_infantry_doctrine") || Research.Has(c.kingdom, "dark_infantry_doctrine"));
+            float cav = cosmicMounts ? 1.5f : era >= 12 && !bioMounts ? 0f : era >= 11 ? 1f : 3f;
             bool air = Aircraft.EnemyAir(c.kingdom);
             float eleph = era >= 4 && era <= 7 ? 1.2f : 0f;
             Fill(c, have, new[] { "cavalry", "siege", "tank", "apc", "aa", "elephant" }, new[] { cav, 2f, 3f, 1.5f, air ? 1.5f : 0f, eleph }, Cap(30, war), PerYear(war, yrs), x => x == "cavalry" || x == "elephant" ? "" : Roles.Artillery, war);

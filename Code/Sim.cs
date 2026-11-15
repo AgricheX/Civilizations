@@ -91,6 +91,7 @@ namespace Civilizations
                 CivMod.Safe("research", () => Research.Year(k, yrs));
                 CivMod.Safe("politics", () => Politics.Year(k, yrs));
                 CivMod.Safe("depot", () => Economy.KingdomYear(k, yrs));
+                CivMod.Safe("era-goods", () => EraGoods.Imports(k, yrs));
                 CivMod.Safe("energy", () => Energy.KingdomYear(k, yrs));
                 CivMod.Safe("currency", () => Currency.Year(k, yrs));
                 CivMod.Safe("space", () =>

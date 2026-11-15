@@ -75,8 +75,7 @@ namespace Civilizations
                     if (!G.Ok(actor)) continue;
                     UnitDef unit = Vehicles.Def(actor);
                     if (unit == null) continue;
-                    string resource = unit.Fuel == "coal" ? "civ_coal" : unit.Fuel == "fuel" ? "civ_fuel" :
-                        unit.Fuel == "uranium" ? "civ_uranium" : unit.Fuel == "bio" ? "civ_biomass" : null;
+                    string resource = EraGoods.FuelRes(unit.Fuel);
                     if (resource != null) Add(demand.Fuel, resource, 1);
                 }
             }

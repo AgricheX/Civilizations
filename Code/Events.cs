@@ -326,6 +326,15 @@ namespace Civilizations
                 if (cur == null) break;
                 Research.Learn(k, cur, "event");
             }
+            int sleep = (int)F(d, "sleep");
+            if (sleep > 0)
+            {
+                string cats = S(d, "sleep_cat");
+                HashSet<string> only = cats.Length > 0 ? new HashSet<string>(cats.Split(',')) : null;
+                Regression.Sleep(k, d.Id, sleep, only != null ? (Func<TechDef, bool>)(t => only.Contains(t.Cat)) : null);
+            }
+            int wake = (int)F(d, "wake");
+            if (wake > 0) Regression.Wake(k, wake, d.Id);
             string great = S(d, "great");
             if (great.Length > 0) Great(k, great, city);
             if (F(d, "crisis") > 0f) Legitimacy.Crisis(k, p, Legitimacy.Get(k));

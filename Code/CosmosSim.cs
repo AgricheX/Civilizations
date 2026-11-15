@@ -134,7 +134,7 @@ namespace Civilizations
             int gold = 30 + scope * 40;
             if (Economy.Amount(cap, "gold") < gold) return G.Chance(0.3f);
             Economy.Take(cap, "gold", gold);
-            Economy.TakeUpTo(cap, "civ_fuel", 10);
+            EraGoods.TakeFuel(cap, k, 10);
             return true;
         }
 

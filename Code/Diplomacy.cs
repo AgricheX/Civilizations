@@ -33,13 +33,14 @@ namespace Civilizations
         private static Dictionary<long, Dep> _deps = new Dictionary<long, Dep>();
         private static bool _loaded;
 
-        public static readonly string[] TreatyTypes = { "truce", "tribute", "royal_marriage", "hostages", "non_aggression", "trade_treaty", "embassy", "defense_pact", "entente", "nuclear_umbrella", "armistice" };
-        public static readonly string[] DepKinds = { "tributary", "vassal", "protectorate", "colony", "dominion", "satellite", "associated" };
+        public static readonly string[] TreatyTypes = { "truce", "tribute", "royal_marriage", "hostages", "non_aggression", "trade_treaty", "embassy", "defense_pact", "entente", "nuclear_umbrella", "armistice", "colony_compact", "tech_exchange", "lane_access", "stellar_defense" };
+        public static readonly string[] DepKinds = { "tributary", "vassal", "protectorate", "colony", "dominion", "satellite", "associated", "client_world", "member_world" };
 
         private static readonly Dictionary<string, int> TreatyEra = new Dictionary<string, int>
         {
             { "truce", 0 }, { "tribute", 3 }, { "royal_marriage", 3 }, { "hostages", 5 }, { "non_aggression", 6 }, { "trade_treaty", 8 },
-            { "embassy", 8 }, { "defense_pact", 6 }, { "entente", 10 }, { "nuclear_umbrella", 12 }, { "armistice", 12 }
+            { "embassy", 8 }, { "defense_pact", 6 }, { "entente", 10 }, { "nuclear_umbrella", 12 }, { "armistice", 12 },
+            { "colony_compact", 15 }, { "tech_exchange", 18 }, { "lane_access", 20 }, { "stellar_defense", 23 }
         };
 
         public static IEnumerable<Treaty> Treaties
@@ -200,6 +201,7 @@ namespace Civilizations
             if (era <= 7) return overseas && era >= 7 ? "colony" : "vassal";
             if (era <= 11) return overseas ? "colony" : (p.Fam.Contains("feudal") || p.Fam.Contains("monarchy") && era <= 8 ? "vassal" : "protectorate");
             if (p.Fam.Contains("authoritarian") || p.Fam.Contains("revolutionary")) return "satellite";
+            if (era >= 15) return p.Fam.Contains("democratic") ? "member_world" : "client_world";
             if (era >= 13 && p.Fam.Contains("democratic")) return "associated";
             return overseas && era <= 12 ? "colony" : "dominion";
         }
@@ -239,7 +241,7 @@ namespace Civilizations
             if (la != null && la == lb) return true;
             foreach (Treaty t in Between(a, b))
             {
-                if (t.Type == "truce" || t.Type == "non_aggression" || t.Type == "defense_pact" || t.Type == "entente" || t.Type == "armistice" || t.Type == "hostages" || t.Type == "nuclear_umbrella") return true;
+                if (t.Type == "truce" || t.Type == "non_aggression" || t.Type == "defense_pact" || t.Type == "entente" || t.Type == "armistice" || t.Type == "hostages" || t.Type == "nuclear_umbrella" || t.Type == "colony_compact" || t.Type == "stellar_defense") return true;
             }
             return false;
         }
@@ -251,7 +253,7 @@ namespace Civilizations
             if (lord != null) l.Add(lord);
             foreach (Treaty t in Of(k))
             {
-                if (t.Type != "defense_pact" && t.Type != "entente" && t.Type != "nuclear_umbrella") continue;
+                if (t.Type != "defense_pact" && t.Type != "entente" && t.Type != "nuclear_umbrella" && t.Type != "stellar_defense") continue;
                 Kingdom o = K(t.A == k.data.id ? t.B : t.A);
                 if (o != null && !l.Contains(o)) l.Add(o);
             }
@@ -347,8 +349,25 @@ namespace Civilizations
             }
         }
 
+        private static void Exchange(Kingdom k, int yrs)
+        {
+            int era = Research.Era(k);
+            if (era < 18) return;
+            foreach (Treaty t in Of(k).ToList())
+            {
+                if (t.Type != "tech_exchange") continue;
+                Kingdom o = K(t.A == k.data.id ? t.B : t.A);
+                if (!G.Ok(o) || !G.Chance(Math.Min(0.6f, 0.15f * yrs))) continue;
+                int top = Math.Min(era, Research.Era(o));
+                var pool = new List<TechDef>();
+                foreach (TechDef d in Db.Eras[Math.Max(0, Math.Min(Db.LastEra, top))].Techs) if (!d.Rare && Research.Has(o, d.Id) && !Research.Has(k, d.Id)) pool.Add(d);
+                if (pool.Count > 0) Research.Learn(k, G.Pick(pool), "tech_exchange");
+            }
+        }
+
         public static void KingdomYear(Kingdom k, int yrs)
         {
+            Exchange(k, yrs);
             Ensure();
             KProfile p = Profile.Get(k);
             if (DepOf(k) != null) return;
@@ -398,7 +417,9 @@ namespace Civilizations
                 if (t == "nuclear_umbrella" && !(War.Nukes(k) > 0 || War.Nukes(o) > 0)) continue;
                 if (t == "entente" && op < 40) continue;
                 if (t == "defense_pact" && op < 30) continue;
-                if (t == "trade_treaty" && Economy.TradeOpinion(k, o) <= 0) continue;
+                if ((t == "trade_treaty" || t == "lane_access") && Economy.TradeOpinion(k, o) <= 0) continue;
+                if (t == "stellar_defense" && op < 35) continue;
+                if (t == "tech_exchange" && op < 20) continue;
                 if (t == "hostages" && op > 30) continue;
                 options.Add(t);
             }
@@ -456,6 +477,10 @@ namespace Civilizations
                             case "embassy": v += 8; break;
                             case "non_aggression": v += 8; break;
                             case "nuclear_umbrella": v += 25; break;
+                            case "colony_compact": v += 12; break;
+                            case "tech_exchange": v += 10; break;
+                            case "lane_access": v += 8; break;
+                            case "stellar_defense": v += 28; break;
                             case "tribute": v += t.A == a.data.id ? -15 : 10; break;
                             case "truce": v += 5; break;
                             case "armistice": v -= 10; break;

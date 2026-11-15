@@ -33,16 +33,21 @@ namespace Civilizations
             if (era <= 8) return 2;
             if (era == 9) return 3;
             if (era <= 11) return 4;
-            return 5;
+            if (era <= 14) return 5;
+            if (era <= 23) return 6;
+            if (era <= 32) return 7;
+            return 8;
         }
 
         public static string Family(Kingdom k)
         {
             switch (Policies.Id(k, "gov"))
             {
-                case "theocracy": return "theocracy";
+                case "theocracy":
+                case "cosmic_theocracy": return "theocracy";
                 case "military_junta": return "military";
-                case "single_party_state": return "party";
+                case "single_party_state":
+                case "hive_mind": return "party";
                 case "tribal_council":
                 case "republic":
                 case "democracy":
@@ -50,7 +55,14 @@ namespace Civilizations
                 case "presidential_republic":
                 case "parliamentary_republic":
                 case "technocracy":
-                case "corporatocracy": return "republic";
+                case "corporatocracy":
+                case "planetary_federation":
+                case "interstellar_republic":
+                case "distributed_consciousness":
+                case "ai_technocracy":
+                case "galactic_corporation":
+                case "web_assembly":
+                case "omega_conclave": return "republic";
                 default: return "monarchy";
             }
         }

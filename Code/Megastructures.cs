@@ -310,12 +310,13 @@ namespace Civilizations
             if (cap != null)
             {
                 int need = 2 + d.Level;
-                bool steel = Economy.Has(cap, "civ_steel", need), elec = Economy.Has(cap, "civ_electronics", need);
-                if (steel) Economy.Take(cap, "civ_steel", need);
-                if (elec) Economy.Take(cap, "civ_electronics", need);
-                if (!steel || !elec) rate *= 0.7f;
+                int era = Math.Max(d.Era, 15);
+                bool ok = EraGoods.HasMats(cap, era, need);
+                if (ok) EraGoods.TakeMats(cap, era, need);
+                else rate *= 0.7f;
             }
             if (Has(k, "mega_shipyard")) rate *= 1.1f;
+            rate *= 1f + Math.Min(3, Companies.Builders(k)) * 0.1f;
             float tf = Math.Min(30f, Cosmos.TimeFactor(Math.Max(1, d.Level)));
             int before = Stage(m, d);
             m.Progress = Math.Min(1f, m.Progress + yrs * rate * tf / d.Years);

@@ -202,7 +202,7 @@ namespace Civilizations
 
         public static string TrainFuel(TrainDef t)
         {
-            return t.Fuel == "coal" ? "civ_coal" : t.Fuel == "fuel" ? "civ_fuel" : t.Fuel == "uranium" ? "civ_uranium" : "";
+            return EraGoods.FuelRes(t.Fuel) ?? "";
         }
 
         public static void Invest(City c, float budget)

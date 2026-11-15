@@ -28,7 +28,7 @@
    "Id": "famine",
    "Cat": "nature",
    "Min": 2,
-   "Max": 14,
+   "Max": 24,
    "W": 2.5,
    "Cd": 15,
    "Scope": "kingdom",
@@ -237,7 +237,7 @@
    "Id": "bubble_crash",
    "Cat": "econ",
    "Min": 9,
-   "Max": 14,
+   "Max": 41,
    "W": 1,
    "Cd": 40,
    "Scope": "kingdom",
@@ -285,7 +285,7 @@
    "Id": "economic_miracle",
    "Cat": "econ",
    "Min": 10,
-   "Max": 14,
+   "Max": 41,
    "W": 0.8,
    "Cd": 60,
    "Scope": "kingdom",
@@ -309,7 +309,7 @@
    "Id": "general_strike",
    "Cat": "econ",
    "Min": 10,
-   "Max": 14,
+   "Max": 41,
    "W": 0.8,
    "Cd": 30,
    "Scope": "kingdom",
@@ -337,7 +337,7 @@
    "Id": "trust_busting",
    "Cat": "econ",
    "Min": 11,
-   "Max": 14,
+   "Max": 41,
    "W": 0.6,
    "Cd": 50,
    "Scope": "kingdom",
@@ -362,7 +362,7 @@
    "Id": "golden_age",
    "Cat": "soc",
    "Min": 4,
-   "Max": 14,
+   "Max": 41,
    "W": 1,
    "Cd": 80,
    "Scope": "kingdom",
@@ -390,7 +390,7 @@
    "Id": "great_migration",
    "Cat": "soc",
    "Min": 1,
-   "Max": 14,
+   "Max": 41,
    "W": 1,
    "Cd": 50,
    "Scope": "kingdom",
@@ -437,7 +437,7 @@
    "Id": "civil_rights",
    "Cat": "soc",
    "Min": 11,
-   "Max": 14,
+   "Max": 41,
    "W": 0.7,
    "Cd": 80,
    "Scope": "kingdom",
@@ -461,7 +461,7 @@
    "Id": "independence_movement",
    "Cat": "soc",
    "Min": 10,
-   "Max": 14,
+   "Max": 41,
    "W": 0.6,
    "Cd": 50,
    "Scope": "kingdom",
@@ -483,7 +483,7 @@
    "Id": "royal_scandal",
    "Cat": "soc",
    "Min": 4,
-   "Max": 14,
+   "Max": 41,
    "W": 1,
    "Cd": 30,
    "Scope": "kingdom",
@@ -506,7 +506,7 @@
    "Id": "assassination",
    "Cat": "soc",
    "Min": 4,
-   "Max": 14,
+   "Max": 41,
    "W": 0.5,
    "Cd": 60,
    "Scope": "kingdom",
@@ -575,7 +575,7 @@
    "Id": "eureka",
    "Cat": "sci",
    "Min": 3,
-   "Max": 14,
+   "Max": 41,
    "W": 2,
    "Cd": 15,
    "Scope": "kingdom",
@@ -594,7 +594,7 @@
    "Id": "genius",
    "Cat": "sci",
    "Min": 5,
-   "Max": 14,
+   "Max": 41,
    "W": 1,
    "Cd": 40,
    "Scope": "kingdom",
@@ -665,7 +665,7 @@
    "Id": "world_wonder",
    "Cat": "sci",
    "Min": 4,
-   "Max": 14,
+   "Max": 41,
    "W": 0.3,
    "Cd": 200,
    "Scope": "kingdom",
@@ -738,7 +738,7 @@
    "Id": "brain_drain",
    "Cat": "sci",
    "Min": 10,
-   "Max": 14,
+   "Max": 41,
    "W": 0.8,
    "Cd": 40,
    "Scope": "kingdom",
@@ -762,7 +762,7 @@
    "Id": "legendary_general",
    "Cat": "mil",
    "Min": 3,
-   "Max": 14,
+   "Max": 41,
    "W": 1,
    "Cd": 40,
    "Scope": "kingdom",
@@ -783,7 +783,7 @@
    "Id": "mutiny",
    "Cat": "mil",
    "Min": 8,
-   "Max": 14,
+   "Max": 41,
    "W": 0.8,
    "Cd": 30,
    "Scope": "kingdom",
@@ -808,7 +808,7 @@
    "Id": "arms_race",
    "Cat": "mil",
    "Min": 11,
-   "Max": 14,
+   "Max": 41,
    "W": 0.7,
    "Cd": 40,
    "Scope": "kingdom",
@@ -832,7 +832,7 @@
    "Id": "last_stand",
    "Cat": "mil",
    "Min": 3,
-   "Max": 14,
+   "Max": 41,
    "W": 0.6,
    "Cd": 30,
    "Scope": "kingdom",
@@ -855,7 +855,7 @@
    "Id": "military_coup",
    "Cat": "mil",
    "Min": 9,
-   "Max": 14,
+   "Max": 41,
    "W": 0.6,
    "Cd": 50,
    "Scope": "kingdom",
@@ -880,7 +880,7 @@
    "Id": "schism",
    "Cat": "rel",
    "Min": 6,
-   "Max": 14,
+   "Max": 41,
    "W": 0.6,
    "Cd": 100,
    "Scope": "kingdom",
@@ -995,7 +995,7 @@
    "Id": "viral_trend",
    "Cat": "info",
    "Min": 14,
-   "Max": 14,
+   "Max": 41,
    "W": 2,
    "Cd": 5,
    "Scope": "kingdom",
@@ -1018,7 +1018,7 @@
    "Id": "cyberattack",
    "Cat": "info",
    "Min": 14,
-   "Max": 14,
+   "Max": 41,
    "W": 1,
    "Cd": 20,
    "Scope": "kingdom",
@@ -1042,7 +1042,7 @@
    "Id": "data_leak",
    "Cat": "info",
    "Min": 14,
-   "Max": 14,
+   "Max": 41,
    "W": 0.8,
    "Cd": 30,
    "Scope": "kingdom",
@@ -1125,7 +1125,7 @@
    "Id": "tycoon",
    "Cat": "econ",
    "Min": 10,
-   "Max": 14,
+   "Max": 41,
    "W": 0.8,
    "Cd": 40,
    "Scope": "kingdom",
@@ -1146,7 +1146,7 @@
    "Id": "artist",
    "Cat": "soc",
    "Min": 4,
-   "Max": 14,
+   "Max": 41,
    "W": 1,
    "Cd": 40,
    "Scope": "kingdom",
@@ -1388,6 +1388,729 @@
     }
    },
    "Years": 6,
+   "Big": true
+  },
+  {
+   "Id": "orbital_debris_cascade",
+   "Cat": "nature",
+   "Min": 15,
+   "Max": 23,
+   "W": 1.0,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:low_orbit_logistics"
+   ],
+   "Fx": {
+    "bonus": {
+     "research": -5,
+     "prod": -6
+    },
+    "sleep": 1,
+    "sleep_cat": "space,comm"
+   },
+   "Years": 4,
+   "Big": false
+  },
+  {
+   "Id": "comet_capture",
+   "Cat": "econ",
+   "Min": 15,
+   "Max": 25,
+   "W": 1.0,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "res": "civ_comet_ice",
+    "amount": 120,
+    "bonus": {
+     "food": 4,
+     "growth": 2
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "star_pathfinder",
+   "Cat": "soc",
+   "Min": 15,
+   "Max": 41,
+   "W": 0.9,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "great": "explorer"
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "helium3_strike",
+   "Cat": "econ",
+   "Min": 16,
+   "Max": 24,
+   "W": 1.0,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:helium3_mining"
+   ],
+   "Fx": {
+    "res": "civ_helium3",
+    "amount": 140,
+    "bonus": {
+     "prod": 5
+    }
+   },
+   "Years": 6,
+   "Big": false
+  },
+  {
+   "Id": "asteroid_bonanza",
+   "Cat": "econ",
+   "Min": 16,
+   "Max": 27,
+   "W": 1.0,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:asteroid_mining"
+   ],
+   "Fx": {
+    "gold": 150,
+    "res": "civ_asteroid_metals",
+    "amount": 150,
+    "bonus": {
+     "gold": 4
+    }
+   },
+   "Years": 4,
+   "Big": false
+  },
+  {
+   "Id": "fusion_containment_breach",
+   "Cat": "sci",
+   "Min": 16,
+   "Max": 23,
+   "W": 0.7,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:fusion_power_plants"
+   ],
+   "Fx": {
+    "kill": 0.01,
+    "mood": "civ_disaster",
+    "share": 0.2,
+    "bonus": {
+     "prod": -8
+    },
+    "sleep": 1,
+    "sleep_cat": "energy"
+   },
+   "Years": 3,
+   "Big": false
+  },
+  {
+   "Id": "terraforming_setback",
+   "Cat": "nature",
+   "Min": 16,
+   "Max": 26,
+   "W": 0.8,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:terraforming"
+   ],
+   "Fx": {
+    "bonus": {
+     "food": -8,
+     "growth": -3
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "colony_revolt",
+   "Cat": "soc",
+   "Min": 16,
+   "Max": 41,
+   "W": 0.9,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [
+    "fam:collective"
+   ],
+   "Cond": [
+    "big",
+    "unstable"
+   ],
+   "Fx": {
+    "stability": -0.08,
+    "legit": -0.06,
+    "bonus": {
+     "loyalty": -8
+    },
+    "secession": 1
+   },
+   "Years": 6,
+   "Big": false
+  },
+  {
+   "Id": "ai_awakening",
+   "Cat": "sci",
+   "Min": 17,
+   "Max": 28,
+   "W": 0.7,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [
+    "fam:machine",
+    "fam:collective"
+   ],
+   "Cond": [
+    "tech:machine_learning_colonies"
+   ],
+   "Fx": {
+    "stability": -0.06,
+    "bonus": {
+     "research": 8,
+     "loyalty": -5
+    }
+   },
+   "Years": 6,
+   "Big": true
+  },
+  {
+   "Id": "first_contact_rumours",
+   "Cat": "sci",
+   "Min": 17,
+   "Max": 24,
+   "W": 0.8,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "stability": -0.02,
+    "mood": "civ_discovery",
+    "share": 0.2,
+    "bonus": {
+     "research": 6,
+     "culture": 5
+    }
+   },
+   "Years": 4,
+   "Big": false
+  },
+  {
+   "Id": "dyson_swarm_failure",
+   "Cat": "sci",
+   "Min": 17,
+   "Max": 30,
+   "W": 0.6,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:dyson_swarms"
+   ],
+   "Fx": {
+    "bonus": {
+     "prod": -14,
+     "research": -4
+    },
+    "sleep": 1,
+    "sleep_cat": "energy,mega"
+   },
+   "Years": 4,
+   "Big": true
+  },
+  {
+   "Id": "xeno_plague",
+   "Cat": "nature",
+   "Min": 18,
+   "Max": 34,
+   "W": 0.8,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "big"
+   ],
+   "Fx": {
+    "kill": 0.06,
+    "mood": "civ_plague",
+    "share": 0.35,
+    "stability": -0.05,
+    "bonus": {
+     "health": -6
+    }
+   },
+   "Years": 3,
+   "Big": true
+  },
+  {
+   "Id": "relativistic_homecoming",
+   "Cat": "soc",
+   "Min": 19,
+   "Max": 30,
+   "W": 0.6,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:generation_ships"
+   ],
+   "Fx": {
+    "mood": "civ_festival",
+    "share": 0.25,
+    "bonus": {
+     "growth": 6,
+     "culture": 5
+    },
+    "wake": 1
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "antimatter_accident",
+   "Cat": "sci",
+   "Min": 19,
+   "Max": 30,
+   "W": 0.7,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:antimatter_factories"
+   ],
+   "Fx": {
+    "kill": 0.03,
+    "mood": "civ_disaster",
+    "share": 0.3,
+    "stability": -0.06,
+    "bonus": {
+     "prod": -10
+    }
+   },
+   "Years": 3,
+   "Big": true
+  },
+  {
+   "Id": "warp_lane_piracy",
+   "Cat": "mil",
+   "Min": 20,
+   "Max": 34,
+   "W": 1.0,
+   "Cd": 30,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "trade": -10,
+     "gold": -5
+    }
+   },
+   "Years": 4,
+   "Big": false
+  },
+  {
+   "Id": "lane_patrol_triumph",
+   "Cat": "mil",
+   "Min": 20,
+   "Max": 41,
+   "W": 0.7,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "trade": 6,
+     "naval": 6,
+     "prestige": 4
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "galactic_market_crash",
+   "Cat": "econ",
+   "Min": 21,
+   "Max": 41,
+   "W": 0.35,
+   "Cd": 100,
+   "Scope": "world",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "bonus": {
+     "trade": -12,
+     "gold": -8
+    },
+    "stability": -0.04
+   },
+   "Years": 5,
+   "Big": true
+  },
+  {
+   "Id": "precursor_vault",
+   "Cat": "sci",
+   "Min": 21,
+   "Max": 41,
+   "W": 0.5,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:precursor_ruin_surveys"
+   ],
+   "Fx": {
+    "free_tech": 1,
+    "bonus": {
+     "research": 6
+    }
+   },
+   "Years": 4,
+   "Big": true
+  },
+  {
+   "Id": "exotic_matter_vein",
+   "Cat": "econ",
+   "Min": 22,
+   "Max": 34,
+   "W": 0.9,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:exotic_matter_forges"
+   ],
+   "Fx": {
+    "res": "civ_exotic_matter",
+    "amount": 90,
+    "bonus": {
+     "prod": 4
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "synthetic_uprising",
+   "Cat": "mil",
+   "Min": 24,
+   "Max": 41,
+   "W": 0.4,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [
+    "fam:machine",
+    "fam:collective"
+   ],
+   "Cond": [
+    "big",
+    "unstable"
+   ],
+   "Fx": {
+    "civil_war": 1,
+    "stability": -0.06
+   },
+   "Years": 0,
+   "Big": true
+  },
+  {
+   "Id": "neutron_starquake",
+   "Cat": "nature",
+   "Min": 25,
+   "Max": 33,
+   "W": 0.7,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "mood": "civ_disaster",
+    "share": 0.15,
+    "bonus": {
+     "prod": -8,
+     "health": -4
+    }
+   },
+   "Years": 2,
+   "Big": false
+  },
+  {
+   "Id": "black_hole_oracle",
+   "Cat": "rel",
+   "Min": 27,
+   "Max": 41,
+   "W": 0.6,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [
+    "religious"
+   ],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "great": "prophet",
+    "legit": 0.05
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "dark_matter_anomaly",
+   "Cat": "sci",
+   "Min": 27,
+   "Max": 41,
+   "W": 0.7,
+   "Cd": 60,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "stability": -0.02,
+    "bonus": {
+     "research": 12,
+     "culture": 3
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "mind_upload_schism",
+   "Cat": "rel",
+   "Min": 28,
+   "Max": 36,
+   "W": 0.6,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [
+    "religious"
+   ],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "big"
+   ],
+   "Fx": {
+    "stability": -0.08,
+    "legit": -0.05
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "false_vacuum_scare",
+   "Cat": "soc",
+   "Min": 30,
+   "Max": 41,
+   "W": 0.3,
+   "Cd": 150,
+   "Scope": "world",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "mood": "civ_disaster",
+    "share": 0.15,
+    "stability": -0.05,
+    "bonus": {
+     "research": 6,
+     "prod": -5
+    }
+   },
+   "Years": 3,
+   "Big": true
+  },
+  {
+   "Id": "quasar_flare",
+   "Cat": "nature",
+   "Min": 33,
+   "Max": 41,
+   "W": 0.35,
+   "Cd": 120,
+   "Scope": "world",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "mood": "civ_disaster",
+    "share": 0.12,
+    "bonus": {
+     "health": -6,
+     "prod": -6
+    }
+   },
+   "Years": 3,
+   "Big": true
+  },
+  {
+   "Id": "dark_sector_whisper",
+   "Cat": "sci",
+   "Min": 35,
+   "Max": 41,
+   "W": 0.6,
+   "Cd": 70,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "tech:dark_sector_contact"
+   ],
+   "Fx": {
+    "bonus": {
+     "research": 10,
+     "culture": 6
+    }
+   },
+   "Years": 6,
+   "Big": false
+  },
+  {
+   "Id": "heat_death_dread",
+   "Cat": "soc",
+   "Min": 39,
+   "Max": 41,
+   "W": 0.6,
+   "Cd": 80,
+   "Scope": "kingdom",
+   "Good": false,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "mood": "civ_mourning",
+    "share": 0.2,
+    "stability": -0.06,
+    "bonus": {
+     "prod": -6,
+     "culture": 5
+    }
+   },
+   "Years": 5,
+   "Big": false
+  },
+  {
+   "Id": "omega_chorus",
+   "Cat": "soc",
+   "Min": 39,
+   "Max": 41,
+   "W": 0.5,
+   "Cd": 100,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [
+    "peace",
+    "stable"
+   ],
+   "Fx": {
+    "stability": 0.08,
+    "mood": "civ_golden_age",
+    "share": 0.4,
+    "bonus": {
+     "culture": 14,
+     "research": 6
+    }
+   },
+   "Years": 8,
    "Big": true
   }
  ],

@@ -123,6 +123,31 @@ namespace Civilizations
                         Store.Put(lose.data, KDemil, G.Year + 20);
                         terms.Add("demilitarization");
                     }
+                    if (era >= 15 && dom > 1.5f)
+                    {
+                        var pool = new List<TechDef>();
+                        int top = Math.Min(Research.Era(lose), Db.LastEra);
+                        foreach (TechDef t in Db.Eras[Math.Max(0, top)].Techs) if (!t.Rare && Research.Has(lose, t.Id) && !Research.Has(win, t.Id)) pool.Add(t);
+                        if (pool.Count > 0)
+                        {
+                            Research.Learn(win, G.Pick(pool), "peace");
+                            terms.Add("tech_transfer");
+                        }
+                    }
+                    if (era >= 15 && dom > 2f && lose.capital != null && win.capital != null)
+                    {
+                        int moved = 0;
+                        foreach (string r in EraGoods.Raw)
+                        {
+                            int n = Economy.Amount(lose.capital, r) / 2;
+                            if (n > 0 && Economy.Take(lose.capital, r, n))
+                            {
+                                Economy.Give(win.capital, r, n);
+                                moved += n;
+                            }
+                        }
+                        if (moved > 0) terms.Add("resource_cession");
+                    }
                     if (era >= 12 && dom > 3f && pw.Fam.Contains("authoritarian") && Diplomacy.DepOf(win) == null)
                     {
                         Diplomacy.MakeDependent(lose, win, "puppet");

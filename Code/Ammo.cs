@@ -150,6 +150,11 @@ namespace Civilizations
             int step = Math.Max(1, m.Max / 4);
             City c = a.city;
             string res = m.Kind == "arrows" ? "wood" : m.Kind == "stones" ? "stone" : m.Kind == "battery" ? "civ_electronics" : "civ_ammo";
+            if (c != null && res != "wood" && res != "stone" && c.kingdom != null && Research.Has(c.kingdom, "antimatter_munitions") && Economy.Has(c, "civ_charge_packs", 1))
+            {
+                Economy.Take(c, "civ_charge_packs", 1);
+                return m.Max;
+            }
             if (c != null && Economy.Has(c, res, 1))
             {
                 Economy.Take(c, res, 1);

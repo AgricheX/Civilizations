@@ -16,7 +16,9 @@ namespace Civilizations
             { "civ_electronics", "civ_machinery" }, { "civ_machinery", "civ_steel" }, { "civ_steel", "common_metals" },
             { "civ_concrete", "civ_bricks" }, { "civ_bricks", "stone" }, { "civ_glass", "stone" },
             { "civ_plastics", "civ_chemicals" }, { "civ_chemicals", "civ_coal" }, { "civ_tools", "common_metals" },
-            { "civ_textiles", "leather" }, { "civ_paper", "wood" }
+            { "civ_textiles", "leather" }, { "civ_paper", "wood" },
+            { "civ_alloys", "civ_steel" }, { "civ_superconductors", "civ_electronics" }, { "civ_nanomaterials", "civ_alloys" },
+            { "civ_neutronium_plate", "civ_alloys" }, { "civ_metamaterials", "civ_nanomaterials" }, { "civ_smart_matter", "civ_metamaterials" }
         };
 
         public static void Clear()

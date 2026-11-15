@@ -26,7 +26,7 @@ namespace Civilizations
 
         public static readonly string[] All = { Sage, Scientist, Merchant, Worker, Engineer, Driver, Pilot, Artillery, Aviator, Sapper, Servant, Ambassador };
         public static readonly string[] Military = { Artillery, Aviator, Sapper };
-        public static readonly string[] Specialties = { "mil", "build", "med", "agri", "sci", "energy", "ind", "comp", "space", "metal", "trans", "comm" };
+        public static readonly string[] Specialties = { "mil", "build", "med", "agri", "sci", "energy", "ind", "comp", "space", "metal", "trans", "comm", "xeno", "mega" };
 
         public static void InitAssets()
         {
@@ -137,6 +137,8 @@ namespace Civilizations
                 if (sp == "space" && era < 12) continue;
                 if (sp == "energy" && era < 9) continue;
                 if (sp == "ind" && era < 9) continue;
+                if (sp == "xeno" && era < 15) continue;
+                if (sp == "mega" && era < 16) continue;
                 opts.Add(sp);
             }
             return G.Pick(opts) ?? "sci";

@@ -72,7 +72,7 @@ namespace Civilizations
             List<Company> launchers = Companies.SpaceLaunchers(k);
             rate += launchers.Count * 0.15f;
             if (Research.Has(k, "reusable_rockets")) rate *= 2f;
-            if (!Economy.Has(pad, "civ_fuel", 10) && !Economy.Has(pad, "civ_uranium", 2) && Research.Route(k) != "tesla" && Research.Route(k) != "steam") return;
+            if (!EraGoods.HasFuel(pad, k, 10) && !Economy.Has(pad, "civ_uranium", 2) && Research.Route(k) != "tesla" && Research.Route(k) != "steam") return;
             int n = 0;
             while (n < 3 && G.Chance(Math.Min(0.9f, rate * yrs)))
             {
@@ -80,7 +80,7 @@ namespace Civilizations
                 rate *= 0.5f;
                 string mission = Mission(k);
                 Company by = launchers.Count > 0 && G.Chance(0.6f) ? G.Pick(launchers) : null;
-                Economy.TakeUpTo(pad, "civ_fuel", 10);
+                EraGoods.TakeFuel(pad, k, 10);
                 Kingdom kk = k;
                 Transit.Rocket(G.Tile(pad), Research.Route(k), () => Complete(kk, mission, by));
             }

@@ -66,6 +66,13 @@ namespace Civilizations
             return id;
         }
 
+        private static void Cosmic(BuildDef d, int era, int lv)
+        {
+            string[] mats = EraGoods.Mats(era);
+            d.Mats = mats;
+            d.MatAmounts = mats.Select((m, i) => i == 0 ? Math.Max(4, lv) : Math.Max(2, lv / 2)).ToArray();
+        }
+
         public static void InitAssets()
         {
             Infrastructure.InitAssets();
@@ -93,6 +100,8 @@ namespace Civilizations
                     Cost = new ConstructionCost(lv <= 4 ? 4 : 0, 4 + lv * 2, lv >= 6 ? lv - 4 : 0, lv * 4), Housing = hHousing[Math.Min(lv, hHousing.Length - 1)], Health = hHealth[Math.Min(lv, hHealth.Length - 1)],
                     UpgradeTo = up, Mats = hMats[Math.Min(lv, hMats.Length - 1)], MatAmounts = hAmt[Math.Min(lv, hAmt.Length - 1)], Pop = h.MinPop, Variants = lv >= 6 && lv <= 13, Tier = lv, Burnable = lv <= 4
                 };
+                int hEra = Db.EraOf(h.Tech);
+                if (hEra >= 15) Cosmic(d, hEra, lv);
                 Defs[d.Id] = d;
             }
             foreach (LevelDef h in Db.Halls)
@@ -105,6 +114,8 @@ namespace Civilizations
                     Mats = lv >= 5 ? new[] { "civ_concrete", "civ_steel" } : new[] { "civ_bricks" }, MatAmounts = lv >= 5 ? new[] { 10, 4 } : new[] { 8 }, Storage = true, Books = 6,
                     Scale = 0.2f, Variants = lv >= 5 && lv <= 7, Tier = lv
                 };
+                int aEra = Db.EraOf(h.Tech);
+                if (aEra >= 15) Cosmic(Defs["civ_hall_" + lv], aEra, lv + 6);
             }
             N("civ_kiln", "type_civ_kiln", 1, 12, 4, F(1, 1, 1), new ConstructionCost(2, 6), smoke: true, burnable: true);
             N("civ_smelter", "type_civ_smelter", 1, 20, 6, F(1, 1, 2), new ConstructionCost(2, 10, 1), smoke: true);
@@ -142,6 +153,8 @@ namespace Civilizations
                 if (Defs.ContainsKey(p.Id)) continue;
                 bool big = p.Output >= 40f;
                 N(p.Id, "type_civ_power", 0, 0, 0, big ? F(2, 2, 2) : F(1, 1, 2), new ConstructionCost(2, 12, 6, (int)(p.Output * 2)), smoke: p.Pollution > 0f, mats: new[] { "civ_steel" }, amounts: new[] { Math.Max(1, (int)(p.Output / 10f)) });
+                int pEra = Db.EraOf(p.Tech);
+                if (pEra >= 15 && Defs.ContainsKey(p.Id)) Cosmic(Defs[p.Id], pEra, Math.Min(40, Math.Max(6, (int)(p.Output / 200f))));
             }
             foreach (BuildingDef bd in Db.Buildings)
             {

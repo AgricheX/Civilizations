@@ -58,11 +58,12 @@ namespace Civilizations
             foreach (City c in G.Cities(k))
             {
                 if (!c.hasBuildingType("type_civ_factory")) continue;
-                if (!Economy.Has(c, "civ_steel", 2 * scale) || !Economy.Has(c, "civ_electronics", 2 * scale) || !Economy.Has(c, "civ_ammo", 4 * scale) || !Economy.Has(c, "civ_fuel", scale) || !Economy.Has(c, "gold", 20 * scale)) continue;
-                Economy.Take(c, "civ_steel", 2 * scale);
-                Economy.Take(c, "civ_electronics", 2 * scale);
-                Economy.Take(c, "civ_ammo", 4 * scale);
-                Economy.Take(c, "civ_fuel", scale);
+                int era = Research.Era(k);
+                string ammo = Research.Has(k, "antimatter_munitions") && Economy.Has(c, "civ_charge_packs", 4 * scale) ? "civ_charge_packs" : "civ_ammo";
+                if (!EraGoods.HasMats(c, era, 2 * scale) || !Economy.Has(c, ammo, 4 * scale) || !EraGoods.HasFuel(c, k, scale) || !Economy.Has(c, "gold", 20 * scale)) continue;
+                EraGoods.TakeMats(c, era, 2 * scale);
+                Economy.Take(c, ammo, 4 * scale);
+                EraGoods.TakeFuel(c, k, scale);
                 Economy.Take(c, "gold", 20 * scale);
                 Store.Put(k.data, key, stock + 1);
                 return;

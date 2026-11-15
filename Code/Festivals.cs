@@ -165,8 +165,14 @@ namespace Civilizations
                 FestivalDef d;
                 if (ById.TryGetValue(id, out d) && Fits(d, k, p, climate)) keep.Add(id);
             }
-            int max = p.Era < 4 ? 2 : p.Era < 9 ? 3 : 4;
+            int max = p.Era < 4 ? 2 : p.Era < 9 ? 3 : p.Era < 20 ? 4 : 5;
             var cands = Defs.Where(d => !keep.Contains(d.Id) && Fits(d, k, p, climate)).ToList();
+            int newest = cands.Count > 0 ? cands.Max(d => HomeEra(d)) : -1;
+            if (keep.Count >= max && newest >= 15)
+            {
+                string old = keep.Where(id => !Situational(ById[id])).OrderBy(id => HomeEra(ById[id])).FirstOrDefault();
+                if (old != null && HomeEra(ById[old]) < newest - 3 && G.Chance(0.6f)) keep.Remove(old);
+            }
             var foreign = new HashSet<string>();
             foreach (Kingdom o in Economy.TradePartners(k)) if (G.Ok(o)) foreach (string id in Store.Set(o.data, KAdopted)) foreign.Add(id);
             while (keep.Count < max && cands.Count > 0)
@@ -179,6 +185,17 @@ namespace Civilizations
             }
             Store.Set(k.data, KAdopted, keep);
             Store.Put(k.data, KPicked, G.Year);
+        }
+
+        private static int HomeEra(FestivalDef d)
+        {
+            TechDef t = Db.Tech(d.Tech);
+            return t != null ? t.Era : 0;
+        }
+
+        private static bool Situational(FestivalDef d)
+        {
+            return d.Cond.Any(c => c == "victory" || c == "jubilee" || c == "after_world_war" || c.StartsWith("mark:"));
         }
 
         public static void Register()

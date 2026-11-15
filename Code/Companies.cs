@@ -66,8 +66,28 @@ namespace Civilizations
         {
             { "agro", "agri" }, { "mining", "metal" }, { "textile", "craft" }, { "trade", "econ" }, { "shipping", "naval" }, { "finance", "econ" },
             { "steel", "metal" }, { "rail", "trans" }, { "energy", "energy" }, { "oil", "energy" }, { "auto", "trans" }, { "arms", "mil" },
-            { "media", "comm" }, { "pharma", "med" }, { "aero", "air" }, { "space", "space" }, { "tech", "comp" }, { "biotech", "med" }
+            { "media", "comm" }, { "pharma", "med" }, { "aero", "air" }, { "space", "space" }, { "tech", "comp" }, { "biotech", "med" },
+            { "asteroid_mining", "metal" }, { "fusion", "energy" }, { "orbital", "econ" }, { "terraforming", "mega" }, { "antimatter", "energy" },
+            { "nanotech", "ind" }, { "exotic", "sci" }, { "megaworks", "mega" }, { "dark", "energy" }
         };
+
+        private static readonly Dictionary<string, string> SectorGoods = new Dictionary<string, string>
+        {
+            { "asteroid_mining", "civ_asteroid_metals" }, { "fusion", "civ_fusion_cells" }, { "antimatter", "civ_antimatter" }, { "nanotech", "civ_nanomaterials" },
+            { "exotic", "civ_exotic_matter" }, { "dark", "civ_dark_matter" }, { "terraforming", "civ_comet_ice" }
+        };
+
+        private static readonly HashSet<string> Inventive = new HashSet<string>
+        {
+            "tech", "space", "biotech", "pharma", "aero", "energy", "auto", "arms", "fusion", "antimatter", "nanotech", "exotic", "dark", "terraforming", "megaworks", "asteroid_mining"
+        };
+
+        public static int Builders(Kingdom k)
+        {
+            int n = 0;
+            foreach (Company c in Of(k)) if ((c.Sector == "megaworks" || c.Sector == "terraforming") && c.Status != "bankrupt") n++;
+            return n;
+        }
 
         public static IEnumerable<Company> All()
         {
@@ -180,7 +200,7 @@ namespace Civilizations
             float b = 0f;
             foreach (Company c in Of(k))
             {
-                if (c.Sector == "tech" || c.Sector == "space" || c.Sector == "biotech" || c.Sector == "energy" || c.Sector == "aero") b += Tier(c);
+                if (c.Sector == "tech" || c.Sector == "space" || c.Sector == "biotech" || c.Sector == "energy" || c.Sector == "aero" || c.Sector == "exotic" || c.Sector == "dark") b += Tier(c);
             }
             return b;
         }
@@ -195,7 +215,7 @@ namespace Civilizations
         public static List<Company> SpaceLaunchers(Kingdom k)
         {
             var l = new List<Company>();
-            foreach (Company c in Of(k)) if (c.Sector == "space" && c.Status != "bankrupt") l.Add(c);
+            foreach (Company c in Of(k)) if ((c.Sector == "space" || c.Sector == "orbital") && c.Status != "bankrupt") l.Add(c);
             return l;
         }
 
@@ -383,7 +403,13 @@ namespace Civilizations
             c.Value *= 0.97f;
             c.Cash += profit;
             float rd = 0f;
-            if (c.Sector == "tech" || c.Sector == "space" || c.Sector == "biotech" || c.Sector == "pharma" || c.Sector == "aero" || c.Sector == "energy" || c.Sector == "auto" || c.Sector == "arms")
+            string goods;
+            if (SectorGoods.TryGetValue(c.Sector, out goods) && profit > 0f)
+            {
+                City hq = G.CityById(c.Hq) ?? k.capital;
+                if (G.Ok(hq)) Economy.Give(hq, goods, Math.Max(1, Math.Min(40, (int)(Tier(c) * 4f))));
+            }
+            if (Inventive.Contains(c.Sector))
             {
                 rd = Math.Max(0f, c.Cash * 0.15f);
                 c.Cash -= rd;
