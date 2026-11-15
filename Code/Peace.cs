@@ -123,31 +123,8 @@ namespace Civilizations
                         Store.Put(lose.data, KDemil, G.Year + 20);
                         terms.Add("demilitarization");
                     }
-                    if (era >= 15 && dom > 1.5f)
-                    {
-                        var pool = new List<TechDef>();
-                        int top = Math.Min(Research.Era(lose), Db.LastEra);
-                        foreach (TechDef t in Db.Eras[Math.Max(0, top)].Techs) if (!t.Rare && Research.Has(lose, t.Id) && !Research.Has(win, t.Id)) pool.Add(t);
-                        if (pool.Count > 0)
-                        {
-                            Research.Learn(win, G.Pick(pool), "peace");
-                            terms.Add("tech_transfer");
-                        }
-                    }
-                    if (era >= 15 && dom > 2f && lose.capital != null && win.capital != null)
-                    {
-                        int moved = 0;
-                        foreach (string r in EraGoods.Raw)
-                        {
-                            int n = Economy.Amount(lose.capital, r) / 2;
-                            if (n > 0 && Economy.Take(lose.capital, r, n))
-                            {
-                                Economy.Give(win.capital, r, n);
-                                moved += n;
-                            }
-                        }
-                        if (moved > 0) terms.Add("resource_cession");
-                    }
+                    if (era >= 15 && dom > 1.5f && TechTransfer(win, lose)) terms.Add("tech_transfer");
+                    if (era >= 15 && dom > 2f && ResourceCession(win, lose)) terms.Add("resource_cession");
                     if (era >= 12 && dom > 3f && pw.Fam.Contains("authoritarian") && Diplomacy.DepOf(win) == null)
                     {
                         Diplomacy.MakeDependent(lose, win, "puppet");
@@ -158,6 +135,32 @@ namespace Civilizations
             Diplomacy.Sign(win, lose, era >= 12 ? "armistice" : "truce", era <= 3 ? 8 : 15);
             if (terms.Count == 0) terms.Add("truce");
             Hub.Raise(Hub.PeaceTerms, win, lose, lose.capital, null, string.Join(",", terms), goal, dom);
+        }
+
+        public static bool TechTransfer(Kingdom win, Kingdom lose)
+        {
+            var pool = new List<TechDef>();
+            int top = Math.Min(Research.Era(lose), Db.LastEra);
+            foreach (TechDef t in Db.Eras[Math.Max(0, top)].Techs) if (!t.Rare && Research.Has(lose, t.Id) && !Research.Has(win, t.Id)) pool.Add(t);
+            if (pool.Count == 0) return false;
+            Research.Learn(win, G.Pick(pool), "peace");
+            return true;
+        }
+
+        public static bool ResourceCession(Kingdom win, Kingdom lose)
+        {
+            if (lose.capital == null || win.capital == null) return false;
+            int moved = 0;
+            foreach (string r in EraGoods.Raw)
+            {
+                int n = Economy.Amount(lose.capital, r) / 2;
+                if (n > 0 && Economy.Take(lose.capital, r, n))
+                {
+                    Economy.Give(win.capital, r, n);
+                    moved += n;
+                }
+            }
+            return moved > 0;
         }
 
         public static bool Demilitarized(Kingdom k)

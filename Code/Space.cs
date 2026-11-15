@@ -21,6 +21,7 @@ namespace Civilizations
             Store.Put(k.data, KPrestige, Prestige(k) + prestige);
             foreach (City c in G.Cities(k)) Moods.Apply(c, "civ_star_wonder", 0.3f);
             Chronicle.Log("launch", k, G.Name(k), Txt.T("world_mission_" + id));
+            Mandate.Milestone(k);
         }
 
         public static int Satellites(Kingdom k)

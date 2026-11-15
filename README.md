@@ -4,13 +4,13 @@
 
 > Kingdoms evolve from the Paleolithic to the Omega Age, across 42 eras and over 6,000 technologies, and then spread across the Cosmos.
 
-**[Download Civilizations 0.0.9](https://github.com/AgricheX/Civilizations/releases/latest/download/Civilizations.zip)**
+**[Download Civilizations 0.1.0](https://github.com/AgricheX/Civilizations/releases/latest/download/Civilizations.zip)**
 
 | | |
 | --- | --- |
 | Game | WorldBox (current version) |
 | Mod loader | NML |
-| Version | 0.0.9 |
+| Version | 0.1.0 |
 | Author | Agriche |
 
 English first, português do Brasil logo abaixo.

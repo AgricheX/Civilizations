@@ -146,6 +146,8 @@ namespace Civilizations
             else
             {
                 if (era >= GovEra.Reparations) Reparations(win, lose, mag >= 50f ? 0.25f : 0.2f, terms);
+                if (era >= GovEra.Future && mag >= 35f && Peace.TechTransfer(win, lose)) terms.Add("tech_transfer");
+                if (era >= GovEra.Future && mag >= 50f && Peace.ResourceCession(win, lose)) terms.Add("resource_cession");
                 if (mag >= 50f) CedeVassals(win, lose, terms);
                 if (mag >= 80f)
                 {

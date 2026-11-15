@@ -14,10 +14,11 @@ namespace Civilizations
         private const string KDyn = "civ_dyn";
         private const string KDynY = "civ_dyn_y";
         private const string KDynN = "civ_dyn_n";
+        private const string KMarks = Gov.P + "marks";
         public const string KRebelUntil = Gov.P + "rebel_until";
         public const string KRebelOf = Gov.P + "rebel_of";
         public static readonly string[] Phases = { "renewal", "prime", "decline", "collapse" };
-        public static readonly string[] Parts = { "loyal", "ruler", "vassals", "livelihood", "overextended", "treasury", "war", "decay", "wounds" };
+        public static readonly string[] Parts = { "loyal", "ruler", "vassals", "livelihood", "overextended", "treasury", "war", "wonders", "decay", "wounds" };
 
         public static void Register()
         {
@@ -103,6 +104,22 @@ namespace Civilizations
             return ph < 0 ? Txt.T("civ_mand_none") : Txt.T("civ_mand_phase_" + Phases[ph]);
         }
 
+        public static float Institutions(Kingdom k)
+        {
+            int era = GovEra.Of(k);
+            if (era >= GovEra.Intergalactic) return 0.6f;
+            if (era >= GovEra.Future) return 0.7f;
+            if (era >= 10) return 0.85f;
+            return 1f;
+        }
+
+        public static void Milestone(Kingdom k)
+        {
+            if (!G.Ok(k)) return;
+            Store.Put(k.data, KMarks, Store.Int(k.data, KMarks, 0) + 1);
+            Add(k, 5f);
+        }
+
         public static Dictionary<string, float> Components(Kingdom k)
         {
             var c = new Dictionary<string, float>();
@@ -124,6 +141,7 @@ namespace Civilizations
                 war += Statecraft.Score(k, w) / 10f;
             }
             c["war"] = G.Clamp(war, -10f, 6f);
+            c["wonders"] = GovEra.Has(k, GovEra.Future) ? Math.Min(12f, Megastructures.Of(k).Count(x => x.Done) * 2f + Store.Int(k.data, KMarks, 0) * 1.5f) : 0f;
             float d = Decay(k);
             c["decay"] = -(d / 40f) * (d / 40f) * 20f;
             c["wounds"] = -Store.Flt(k.data, KWounds, 0f);
@@ -172,7 +190,7 @@ namespace Civilizations
             }
             var comp = Components(k);
             float gov = comp["loyal"] + comp["ruler"] + comp["vassals"] + comp["livelihood"];
-            Store.Put(k.data, KDecay, Decay(k) + yrs * (gov > 0f ? 0.8f : gov < -5f ? 1.3f : 1f));
+            Store.Put(k.data, KDecay, Decay(k) + yrs * (gov > 0f ? 0.8f : gov < -5f ? 1.3f : 1f) * Institutions(k));
             float m = Get(k);
             float t = G.Clamp(50f + comp.Values.Sum(), 0f, 100f);
             m += (t - m) * Math.Min(1f, 0.15f * yrs);

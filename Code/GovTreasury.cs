@@ -191,7 +191,7 @@ namespace Civilizations
                 int last = Store.Int(c.data, KLast, g);
                 float gain = Math.Max(0, g - last);
                 int markets = Built(c, "market") + WorkCount(c, "market");
-                float mult = 1f + Math.Min(0.6f, markets * 0.15f);
+                float mult = 1f + Math.Min(0.6f * Grand(k), markets * 0.15f * Grand(k));
                 int amt = (int)((gain * share + c.getPopulationPeople() * 0.02f * share * yrs) * mult);
                 amt = Economy.TakeUpTo(c, "gold", amt);
                 income += amt;
@@ -268,10 +268,20 @@ namespace Civilizations
             Dictionary<string, float> w = Works(c);
             Store.Add(w, type, 1f);
             Store.Map(c.data, KWorks, w);
-            Note(k, Txt.F("civ_treas_note_works", Txt.T("civ_treas_work_" + type), G.Name(c)));
+            Note(k, Txt.F("civ_treas_note_works", WorkName(k, type), G.Name(c)));
             long fam = Fam.Holder(c, k);
             if (fam != 0L && c != k.capital) Fam.Remember(fam, Fam.Royal(k), 10f);
-            if (G.Chance(0.3f)) Gov.Log("works", k, G.Name(k), Txt.T("civ_treas_work_" + type), G.Name(c), null, c);
+            if (G.Chance(0.3f)) Gov.Log("works", k, G.Name(k), WorkName(k, type), G.Name(c), null, c);
+        }
+
+        public static string WorkName(Kingdom k, string type)
+        {
+            return Txt.T("civ_treas_work_" + type + GovEra.Suffix(k));
+        }
+
+        private static float Grand(Kingdom k)
+        {
+            return 1f + GovEra.Cosmic(k) * 0.5f;
         }
 
         private static float FundWorks(Kingdom k, float budget, Dictionary<string, float> flow)
@@ -311,7 +321,7 @@ namespace Civilizations
 
         public static int MaxTier(Kingdom k)
         {
-            return GovEra.Has(k, GovEra.Guard) ? Math.Min(6, 1 + (GovEra.Of(k) - GovEra.Guard) / 3) : 0;
+            return GovEra.Has(k, GovEra.Guard) ? Math.Min(12, 1 + (GovEra.Of(k) - GovEra.Guard) / 3) : 0;
         }
 
         private static float Arm(Kingdom k, float budget, Dictionary<string, float> flow)
@@ -360,15 +370,16 @@ namespace Civilizations
                 barracks += WorkCount(c, "barracks");
                 statues += WorkCount(c, "statue");
             }
-            if (barracks > 0) Store.Add(fx, "attack", Math.Min(6f, barracks));
-            if (statues > 0) Store.Add(fx, "stability", Math.Min(4f, statues));
+            float grand = Grand(k);
+            if (barracks > 0) Store.Add(fx, "attack", Math.Min(6f, barracks) * grand);
+            if (statues > 0) Store.Add(fx, "stability", Math.Min(4f, statues) * grand);
             return fx;
         }
 
         public static int CityLoyalty(City c)
         {
             if (!G.Ok(c) || c.kingdom == null || !Gov.On("civ_gov_treasury")) return 0;
-            int v = Math.Min(8, WorkCount(c, "temple") * 4);
+            int v = Math.Min(8 + GovEra.Cosmic(c.kingdom) * 2, WorkCount(c, "temple") * (4 + GovEra.Cosmic(c.kingdom)));
             if (LocalUnpaid(c)) v -= 6;
             return v;
         }

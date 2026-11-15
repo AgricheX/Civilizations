@@ -8,15 +8,12 @@ namespace Civilizations
 {
     internal static class GovGuard
     {
-        private static float _next;
-        private static float _flush;
         private static int _cursor;
         private static Vector3 _down;
         private static bool _held;
 
         public static void Clear()
         {
-            _next = 0f;
             _cursor = 0;
         }
 
@@ -51,11 +48,16 @@ namespace Civilizations
             return G.Chance(0.2f) ? Patrol(c) : null;
         }
 
+        public static void Year()
+        {
+            CivMod.Safe("gov-guard", Drive);
+        }
+
         private static void Drive()
         {
             List<City> all = G.Cities();
             if (all.Count == 0) return;
-            int n = Math.Min(6, all.Count);
+            int n = Math.Min(300, all.Count);
             for (int i = 0; i < n; i++)
             {
                 _cursor = (_cursor + 1) % all.Count;
@@ -121,14 +123,6 @@ namespace Civilizations
             if (!G.Loaded || World.world == null) return;
             CivMod.Safe("gov-order", Order);
             CivMod.Safe("gov-sandbox-tools", GovSandbox.Tools);
-            if (Time.unscaledTime >= _flush)
-            {
-                _flush = Time.unscaledTime + 2f;
-                if (Gov.On("civ_gov_vassals")) CivMod.Safe("gov-vassals-flush", Vassals.Flush);
-            }
-            if (Time.unscaledTime < _next) return;
-            _next = Time.unscaledTime + 1.5f;
-            CivMod.Safe("gov-guard", Drive);
         }
 
         [HarmonyPatch(typeof(MapBox), nameof(MapBox.Update))]

@@ -2112,6 +2112,63 @@
    },
    "Years": 8,
    "Big": true
+  },
+  {
+   "Id": "star_voyager",
+   "Cat": "sci",
+   "Min": 15,
+   "Max": 41,
+   "W": 0.9,
+   "Cd": 40,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "great": "astronaut"
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "xeno_scholar",
+   "Cat": "sci",
+   "Min": 20,
+   "Max": 41,
+   "W": 0.7,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "great": "xenologist"
+   },
+   "Years": 0,
+   "Big": false
+  },
+  {
+   "Id": "master_architect",
+   "Cat": "soc",
+   "Min": 17,
+   "Max": 41,
+   "W": 0.7,
+   "Cd": 50,
+   "Scope": "kingdom",
+   "Good": true,
+   "Need": [],
+   "Any": [],
+   "Not": [],
+   "Cond": [],
+   "Fx": {
+    "great": "architect"
+   },
+   "Years": 0,
+   "Big": false
   }
  ],
  "greats": {
@@ -2137,6 +2194,20 @@
   "tycoon": {
    "gold": 8,
    "trade": 5
+  },
+  "astronaut": {
+   "speed": 4,
+   "research": 4,
+   "prestige": 4
+  },
+  "xenologist": {
+   "research": 6,
+   "culture": 4,
+   "stability": 2
+  },
+  "architect": {
+   "build": 10,
+   "prod": 5
   }
  }
 }

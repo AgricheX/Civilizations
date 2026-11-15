@@ -446,6 +446,10 @@ namespace Civilizations
                 case "duchy":
                 case "dominion":
                 case "province":
+                case "colony":
+                case "satellite":
+                case "client_world":
+                case "member_world":
                 case "hereditary_province": id = "provincial_assembly"; break;
                 default:
                     if (Get(k, "lands") == 0 && GovEra.Has(k, GovEra.Fiefs)) id = "estates";
@@ -453,7 +457,7 @@ namespace Civilizations
                     else id = GovEra.Has(k, GovEra.MassVote) ? "parliament" : "royal_diet";
                     break;
             }
-            if (GovEra.Tier(k) >= 2 && GovEra.Has(k, GovEra.Future)) id += "_fut";
+            if (GovEra.Tier(k) >= 2) id += GovEra.Suffix(k);
             return id;
         }
 
@@ -476,7 +480,7 @@ namespace Civilizations
             else if (Get(k, "offices") == 2 && Get(k, "tax") == 2) id = "bureaucracy";
             else if (Get(k, "culture") == 0 && Get(k, "lands") == 1) id = "commonwealth";
             else id = rep ? "republic" : "crown";
-            if (GovEra.Has(k, GovEra.Future)) id += "_fut";
+            id += GovEra.Suffix(k);
             return id;
         }
 

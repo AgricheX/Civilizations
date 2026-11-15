@@ -32,6 +32,11 @@ namespace Civilizations
         public const int MassVote = 10;
         public const int Junta = 10;
         public const int Future = 15;
+        public const int Galactic = 20;
+        public const int Intergalactic = 29;
+        public const int Web = 36;
+        public const int Omega = 40;
+        private static readonly string[] Sfx = { "", "_fut", "_gal", "_ix", "_web", "_omega" };
 
         public static int Of(Kingdom k)
         {
@@ -46,6 +51,22 @@ namespace Civilizations
         public static string Note(int era)
         {
             return Txt.F("civ_gov_locked", Db.EraName(Math.Max(0, Math.Min(Db.LastEra, era))));
+        }
+
+        public static int Cosmic(Kingdom k)
+        {
+            int e = Of(k);
+            if (e >= Omega) return 5;
+            if (e >= Web) return 4;
+            if (e >= Intergalactic) return 3;
+            if (e >= Galactic) return 2;
+            if (e >= Future) return 1;
+            return 0;
+        }
+
+        public static string Suffix(Kingdom k)
+        {
+            return Sfx[Cosmic(k)];
         }
 
         public static int Tier(Kingdom k)
@@ -172,6 +193,7 @@ namespace Civilizations
         {
             if (On("civ_gov_vassals")) CivMod.Safe("gov-vassals-flush", Vassals.Flush);
             CivMod.Safe("gov-greats-year", GovGreats.Year);
+            GovGuard.Year();
         }
 
         public static void KingdomYear(Kingdom k, int yrs)
@@ -257,6 +279,8 @@ namespace Civilizations
             {
                 string st = Vassals.Status(k);
                 if (st == "hereditary_province" || st == "province") return st;
+                Dep dep = Diplomacy.DepOf(k);
+                if (dep != null && DepForms.Contains(dep.Kind)) return dep.Kind;
                 return Republic(k) ? "dominion" : "duchy";
             }
             bool rep = Republic(k);
@@ -273,21 +297,24 @@ namespace Civilizations
             return "kingdom";
         }
 
-        private static string Future(Kingdom k)
+        private static readonly HashSet<string> DepForms = new HashSet<string> { "colony", "satellite", "client_world", "member_world" };
+
+        private static string Future(Kingdom k, string form)
         {
-            return GovEra.Has(k, GovEra.Future) ? "_fut" : "";
+            return DepForms.Contains(form) ? "" : GovEra.Suffix(k);
         }
 
         public static string FormName(Kingdom k)
         {
-            return Txt.T("civ_gov_form_" + Form(k) + Future(k));
+            string f = Form(k);
+            return Txt.T("civ_gov_form_" + f + Future(k, f));
         }
 
         public static string Title(Kingdom k)
         {
             string f = Form(k);
             if (f == "republic" && GovEra.Has(k, GovEra.MassVote) && !GovEra.Has(k, GovEra.Future)) return Txt.T("civ_gov_title_president");
-            return Txt.T("civ_gov_title_" + f + Future(k));
+            return Txt.T("civ_gov_title_" + f + Future(k, f));
         }
 
         public static string RulerName(Kingdom k)
